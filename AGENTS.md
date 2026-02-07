@@ -1,0 +1,2 @@
+- We're going to be using slash command from `.github\prompts\`
+- All conversations MUST be conducted in Traditional Chinese (zh-TW)
