@@ -10,7 +10,8 @@
 ## 文件結構導覽
 
 ### Constitution
-- `docs/constitution/constitution.md`
+- **主要文件**: `.specify/memory/constitution.md`
+- **文件副本**: `docs/constitution/constitution.md`（唯讀副本，供文件瀏覽）
 - Forge 的最高治理文件  
 - 定義不可退讓的原則與裁決  
 - 任何結構、技術或流程文件皆不得違反本文件
@@ -57,7 +58,7 @@
 
 ## 建議閱讀順序
 
-1. `docs/constitution/constitution.md`
+1. `.specify/memory/constitution.md`（或 `docs/constitution/constitution.md`）
 2. `docs/policy/project-structure.md`
 3. 視需求閱讀：
    - `docs/policy/security-baseline.md`

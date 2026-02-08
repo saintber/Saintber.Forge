@@ -31,7 +31,16 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+檢視本功能是否符合 `.specify/memory/constitution.md` 定義的治理原則：
+
+- [ ] **Principle 3**: 若涉及新 Tool，確認其可被獨立建置、驗證與移除
+- [ ] **Principle 4**: 不得形成工具間的實作耦合（Tool.BLL 或 Tool.DAL 互相引用）
+- [ ] **Principle 5**: 跨 Tool 互動僅透過 `Tools.Abstractions` 中定義的契約
+- [ ] **Principle 6**: 業務能力設計保持可替換性（不綁定同行程假設）
+- [ ] **Principle 7**: 使用依賴注入取得跨 Tool 能力，不直接建立具體實作
+- [ ] **Principle 8**: Presentation 邏輯集中於 BlazorServer/BlazorWasm，Tool 不包含 UI
+
+若任一項無法滿足，需在 Phase 0 Research 中說明理由與替代方案。
 
 ## Project Structure
 

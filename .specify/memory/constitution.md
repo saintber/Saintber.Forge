@@ -1,9 +1,36 @@
-# Constitution — Saintber.Forge
+<!--
+Sync Impact Report — Constitution v1.0.0
 
-> **⚠️ 文件遷移通知**  
-> 本憲章的主要版本已遷移至 `.specify/memory/constitution.md`  
-> 以下內容為該文件的副本，供文件瀏覽使用。  
-> **正式治理文件位置**: `.specify/memory/constitution.md`
+Version Change: (Initial) → v1.0.0
+Ratification Date: 2026-02-07
+Last Amended: 2026-02-08
+
+Modified Principles: N/A (Initial establishment)
+Added Sections: All core governance principles
+Removed Sections: None
+
+Templates Consistency Status:
+✅ plan-template.md — Constitution Check section references governance principles
+✅ spec-template.md — User scenarios align with tool independence principle
+✅ tasks-template.md — Task structure compatible with tool isolation requirements
+⚠️ commands/*.md — Requires verification for agent-agnostic guidance
+
+Dependency Artifacts:
+✅ project-structure.md — Aligns with Tool isolation and DI principles
+✅ security-baseline.md — Security capabilities align with non-mandatory principle
+✅ tech-baseline.md — Technology choices support tool replaceability
+✅ testing-governance.md — Testing approach supports tool independence
+✅ implementation-definition-of-done.md — Verification gates enforce quality principles
+✅ README.md — Documentation structure supports constitution hierarchy
+
+Follow-up TODOs:
+- None (all placeholders resolved)
+
+Deferred Items:
+- None
+-->
+
+# Constitution — Saintber.Forge
 
 > **Governance Document Version**: v1.0.0  
 > **Ratification Date**: 2026-02-07  
@@ -290,5 +317,6 @@ Implementation (實際程式碼)
 ---
 
 **Document Control**  
-- Authoritative Source: `.specify/memory/constitution.md`  
-- This Document: `docs/constitution/constitution.md` (read-only copy)
+- Location: `.specify/memory/constitution.md`  
+- Authoritative Source: This document  
+- Related Documents: See `docs/README.md` for complete documentation structure
