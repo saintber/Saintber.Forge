@@ -137,7 +137,7 @@
   - 測試 800px（平板）：驗證 2 欄佈局
   - 測試 375px（手機）：驗證單欄佈局
   - 確認無水平捲軸
-- [ ] T041 [US3] （可選）建立 Playwright RWD 自動化測試於 tests/Saintber.Forge.BlazorServer.IntegrationTests/E2E/PortalHomeRwdTests.cs（參照 research.md R5 測試範例）
+- [X] T041 [US3] （可選）建立 Playwright RWD 自動化測試於 tests/Saintber.Forge.BlazorServer.IntegrationTests/E2E/PortalHomeRwdTests.cs（參照 research.md R5 測試範例）
 
 **Completion Criteria**: 首頁在三種螢幕寬度下佈局正確，無水平捲軸，卡片可正常點擊。
 
