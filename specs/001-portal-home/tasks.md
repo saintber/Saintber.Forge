@@ -24,18 +24,18 @@
 
 **Tasks**:
 
-- [ ] T001 建立 Blazor Server 專案於 src/Frontend/Saintber.Forge.BlazorServer/（若尚未存在）
-- [ ] T002 [P] 建立 Persistence 專案於 src/Persistence/Saintber.Forge.Persistence.EF.Postgres/（若尚未存在）
-- [ ] T003 [P] 建立單元測試專案於 tests/Saintber.Forge.BlazorServer.UnitTests/
-- [ ] T004 [P] 建立整合測試專案於 tests/Saintber.Forge.BlazorServer.IntegrationTests/
-- [ ] T005 [P] 安裝 Microsoft.Identity.Web (v2.16.0) 至 BlazorServer 專案
-- [ ] T006 [P] 安裝 Microsoft.Identity.Web.UI (v2.16.0) 至 BlazorServer 專案
-- [ ] T007 [P] 安裝 Microsoft.EntityFrameworkCore (v8.0) 至 Persistence 專案
-- [ ] T008 [P] 安裝 Npgsql.EntityFrameworkCore.PostgreSQL (v8.0) 至 Persistence 專案
-- [ ] T009 [P] 安裝 bUnit (最新穩定版) 至 UnitTests 專案
-- [ ] T010 [P] 安裝 Microsoft.Playwright.NUnit (v1.40.0) 至 IntegrationTests 專案
-- [ ] T011 設定 BlazorServer 專案參考 Persistence 專案
-- [ ] T012 設定 appsettings.json 結構（AzureAd、ConnectionStrings 區段）於 src/Frontend/Saintber.Forge.BlazorServer/appsettings.json
+- [X] T001 建立 Blazor Server 專案於 src/Frontend/Saintber.Forge.BlazorServer/（若尚未存在）
+- [X] T002 [P] 建立 Persistence 專案於 src/Persistence/Saintber.Forge.Persistence.EF.Postgres/（若尚未存在）
+- [X] T003 [P] 建立單元測試專案於 tests/Saintber.Forge.BlazorServer.UnitTests/
+- [X] T004 [P] 建立整合測試專案於 tests/Saintber.Forge.BlazorServer.IntegrationTests/
+- [X] T005 [P] 安裝 Microsoft.Identity.Web (v2.16.0) 至 BlazorServer 專案
+- [X] T006 [P] 安裝 Microsoft.Identity.Web.UI (v2.16.0) 至 BlazorServer 專案
+- [X] T007 [P] 安裝 Microsoft.EntityFrameworkCore (v8.0) 至 Persistence 專案
+- [X] T008 [P] 安裝 Npgsql.EntityFrameworkCore.PostgreSQL (v8.0) 至 Persistence 專案
+- [X] T009 [P] 安裝 bUnit (最新穩定版) 至 UnitTests 專案
+- [X] T010 [P] 安裝 Microsoft.Playwright.NUnit (v1.40.0) 至 IntegrationTests 專案
+- [X] T011 設定 BlazorServer 專案參考 Persistence 專案
+- [X] T012 設定 appsettings.json 結構（AzureAd、ConnectionStrings 區段）於 src/Frontend/Saintber.Forge.BlazorServer/appsettings.json
 
 **Completion Criteria**: 專案結構建立完成，套件已安裝，dotnet restore 與 dotnet build 成功。
 
@@ -47,17 +47,17 @@
 
 **Tasks**:
 
-- [ ] T013 建立 ToolRegistration Entity 於 src/Persistence/Saintber.Forge.Persistence.EF.Postgres/Entities/ToolRegistration.cs（參照 data-model.md）
-- [ ] T014 [P] 建立 UserIdentity Entity 於 src/Persistence/Saintber.Forge.Persistence.EF.Postgres/Entities/UserIdentity.cs（參照 data-model.md）
-- [ ] T015 建立 PortalDbContext 於 src/Persistence/Saintber.Forge.Persistence.EF.Postgres/PortalDbContext.cs（包含 DbSet、OnModelCreating、Indexes）
-- [ ] T016 於 PortalDbContext.OnModelCreating 加入 ToolRegistration Seed Data（2 筆範例：公開 Tool A、受保護 Tool B）
-- [ ] T017 建立 InitialCreate Migration：dotnet ef migrations add InitialCreate --project src/Persistence/Saintber.Forge.Persistence.EF.Postgres --startup-project src/Frontend/Saintber.Forge.BlazorServer
-- [ ] T018 於 Program.cs 註冊 DbContext：builder.Services.AddDbContext<PortalDbContext>
-- [ ] T019 於 Program.cs 註冊 Microsoft Identity：builder.Services.AddMicrosoftIdentityWebAppAuthentication
-- [ ] T020 於 Program.cs 加入 Middleware 順序：UseAuthentication → UseAuthorization（在 UseRouting 之後）
-- [ ] T021 建立 IToolRegistrationService 介面於 src/Frontend/Saintber.Forge.BlazorServer/Services/IToolRegistrationService.cs（包含 GetAllToolsAsync、GetPublicToolsAsync）
-- [ ] T022 建立 ToolRegistrationService 實作於 src/Frontend/Saintber.Forge.BlazorServer/Services/ToolRegistrationService.cs（注入 PortalDbContext）
-- [ ] T023 於 Program.cs 註冊 ToolRegistrationService：builder.Services.AddScoped<IToolRegistrationService, ToolRegistrationService>
+- [X] T013 建立 ToolRegistration Entity 於 src/Persistence/Saintber.Forge.Persistence.EF.Postgres/Entities/ToolRegistration.cs（參照 data-model.md）
+- [X] T014 [P] 建立 UserIdentity Entity 於 src/Persistence/Saintber.Forge.Persistence.EF.Postgres/Entities/UserIdentity.cs（參照 data-model.md）
+- [X] T015 建立 PortalDbContext 於 src/Persistence/Saintber.Forge.Persistence.EF.Postgres/PortalDbContext.cs（包含 DbSet、OnModelCreating、Indexes）
+- [X] T016 於 PortalDbContext.OnModelCreating 加入 ToolRegistration Seed Data（2 筆範例：公開 Tool A、受保護 Tool B）
+- [X] T017 建立 InitialCreate Migration：dotnet ef migrations add InitialCreate --project src/Persistence/Saintber.Forge.Persistence.EF.Postgres --startup-project src/Frontend/Saintber.Forge.BlazorServer
+- [X] T018 於 Program.cs 註冊 DbContext：builder.Services.AddDbContext<PortalDbContext>
+- [X] T019 於 Program.cs 註冊 Microsoft Identity：builder.Services.AddMicrosoftIdentityWebAppAuthentication
+- [X] T020 於 Program.cs 加入 Middleware 順序：UseAuthentication → UseAuthorization（在 UseRouting 之後）
+- [X] T021 建立 IToolRegistrationService 介面於 src/Frontend/Saintber.Forge.BlazorServer/Services/IToolRegistrationService.cs（包含 GetAllToolsAsync、GetPublicToolsAsync）
+- [X] T022 建立 ToolRegistrationService 實作於 src/Frontend/Saintber.Forge.BlazorServer/Services/ToolRegistrationService.cs（注入 PortalDbContext）
+- [X] T023 於 Program.cs 註冊 ToolRegistrationService：builder.Services.AddScoped<IToolRegistrationService, ToolRegistrationService>
 
 **Completion Criteria**: Migration 可成功套用至資料庫，Seed Data 正確寫入，DI 註冊完成。
 
@@ -71,15 +71,15 @@
 
 **Tasks**:
 
-- [ ] T024 [US1] 建立 ToolCard.razor 元件於 src/Frontend/Saintber.Forge.BlazorServer/Components/ToolCard.razor（接受 ToolRegistration 參數，顯示標題、描述、導覽連結）
-- [ ] T025 [US1] 建立 ToolCard.razor.css 於 src/Frontend/Saintber.Forge.BlazorServer/Components/ToolCard.razor.css（基本卡片樣式：border、padding、hover 效果）
-- [ ] T026 [US1] 修改 Pages/Index.razor 於 src/Frontend/Saintber.Forge.BlazorServer/Pages/Index.razor：
+- [X] T024 [US1] 建立 ToolCard.razor 元件於 src/Frontend/Saintber.Forge.BlazorServer/Components/ToolCard.razor（接受 ToolRegistration 參數，顯示標題、描述、導覽連結）
+- [X] T025 [US1] 建立 ToolCard.razor.css 於 src/Frontend/Saintber.Forge.BlazorServer/Components/ToolCard.razor.css（基本卡片樣式：border、padding、hover 效果）
+- [X] T026 [US1] 修改 Pages/Index.razor 於 src/Frontend/Saintber.Forge.BlazorServer/Pages/Index.razor：
   - 注入 AuthenticationStateProvider 與 IToolRegistrationService
   - OnInitializedAsync：檢查 isAuthenticated，若 false 呼叫 GetPublicToolsAsync
   - 以 `<div class="tool-grid">` 包裝 ToolCard 元件迴圈
   - 無 Tool 時顯示「目前無可用功能」訊息
-- [ ] T027 [US1] 建立基本 CSS Grid 樣式於 src/Frontend/Saintber.Forge.BlazorServer/wwwroot/css/app.css（預設單欄佈局，稍後 US3 擴充 RWD）
-- [ ] T028 [US1] 執行本地開發環境 Migration：dotnet ef database update --project src/Persistence/Saintber.Forge.Persistence.EF.Postgres --startup-project src/Frontend/Saintber.Forge.BlazorServer
+- [X] T027 [US1] 建立基本 CSS Grid 樣式於 src/Frontend/Saintber.Forge.BlazorServer/wwwroot/css/app.css（預設單欄佈局，稍後 US3 擴充 RWD）
+- [X] T028 [US1] 執行本地開發環境 Migration：dotnet ef database update --project src/Persistence/Saintber.Forge.Persistence.EF.Postgres --startup-project src/Frontend/Saintber.Forge.BlazorServer
 - [ ] T029 [US1] 手動驗證：啟動 Blazor Server（dotnet run），開啟瀏覽器訪問 https://localhost:5001，確認顯示 2 張公開 Tool 卡片（範例 Tool A）
 
 **Completion Criteria**: 未登入狀態下首頁顯示公開 Tool 卡片，點擊卡片可導覽至 Tool URL（即使 Tool 尚未實作，URL 導覽行為正確）。
@@ -94,19 +94,19 @@
 
 **Tasks**:
 
-- [ ] T030 [US2] 修改 Pages/Index.razor 於 src/Frontend/Saintber.Forge.BlazorServer/Pages/Index.razor：
+- [X] T030 [US2] 修改 Pages/Index.razor 於 src/Frontend/Saintber.Forge.BlazorServer/Pages/Index.razor：
   - OnInitializedAsync：若 isAuthenticated = true，呼叫 GetAllToolsAsync（而非 GetPublicToolsAsync）
   - 顯示使用者 DisplayName（若已登入）於頁面頂端或導覽列
-- [ ] T031 [US2] 建立 IUserIdentityService 介面於 src/Frontend/Saintber.Forge.BlazorServer/Services/IUserIdentityService.cs（包含 UpdateLastLoginAsync）
-- [ ] T032 [US2] 建立 UserIdentityService 實作於 src/Frontend/Saintber.Forge.BlazorServer/Services/UserIdentityService.cs（注入 PortalDbContext，實作 UpdateLastLoginAsync 邏輯）
-- [ ] T033 [US2] 於 Program.cs 註冊 UserIdentityService：builder.Services.AddScoped<IUserIdentityService, UserIdentityService>
-- [ ] T034 [US2] 修改 Pages/Index.razor：OnInitializedAsync 中若 isAuthenticated = true，呼叫 UserIdentityService.UpdateLastLoginAsync（記錄登入時間）
-- [ ] T035 [US2] 設定 Azure AD App Registration（手動操作）：
+- [X] T031 [US2] 建立 IUserIdentityService 介面於 src/Frontend/Saintber.Forge.BlazorServer/Services/IUserIdentityService.cs（包含 UpdateLastLoginAsync）
+- [X] T032 [US2] 建立 UserIdentityService 實作於 src/Frontend/Saintber.Forge.BlazorServer/Services/UserIdentityService.cs（注入 PortalDbContext，實作 UpdateLastLoginAsync 邏輯）
+- [X] T033 [US2] 於 Program.cs 註冊 UserIdentityService：builder.Services.AddScoped<IUserIdentityService, UserIdentityService>
+- [X] T034 [US2] 修改 Pages/Index.razor：OnInitializedAsync 中若 isAuthenticated = true，呼叫 UserIdentityService.UpdateLastLoginAsync（記錄登入時間）
+- [X] T035 [US2] 設定 Azure AD App Registration（手動操作）：
   - 建立 App Registration（名稱：Saintber.Forge.Portal.Dev）
   - 設定 Redirect URI：https://localhost:5001/signin-oidc
   - 建立 Client Secret
   - 記錄 TenantId、ClientId、ClientSecret
-- [ ] T036 [US2] 使用 dotnet user-secrets 設定 Azure AD 資訊：
+- [X] T036 [US2] 使用 dotnet user-secrets 設定 Azure AD 資訊：
   - dotnet user-secrets set "AzureAd:TenantId" "<YOUR_TENANT_ID>"
   - dotnet user-secrets set "AzureAd:ClientId" "<YOUR_CLIENT_ID>"
   - dotnet user-secrets set "AzureAd:ClientSecret" "<YOUR_CLIENT_SECRET>"
@@ -124,11 +124,11 @@
 
 **Tasks**:
 
-- [ ] T038 [US3] 修改 wwwroot/css/app.css 於 src/Frontend/Saintber.Forge.BlazorServer/wwwroot/css/app.css：
+- [X] T038 [US3] 修改 wwwroot/css/app.css 於 src/Frontend/Saintber.Forge.BlazorServer/wwwroot/css/app.css：
   - 加入 Media Query：@media (min-width: 768px) and (max-width: 1199px) → grid-template-columns: repeat(2, 1fr)
   - 加入 Media Query：@media (min-width: 1200px) → grid-template-columns: repeat(4, 1fr)
   - 預設（< 768px）維持單欄：grid-template-columns: 1fr
-- [ ] T039 [US3] 優化 ToolCard.razor.css 於 src/Frontend/Saintber.Forge.BlazorServer/Components/ToolCard.razor.css：
+- [X] T039 [US3] 優化 ToolCard.razor.css 於 src/Frontend/Saintber.Forge.BlazorServer/Components/ToolCard.razor.css：
   - 確保卡片 max-width 與 padding 在小螢幕下不產生水平捲軸
   - 加入 responsive font-size（可選，視覺優化）
 - [ ] T040 [US3] 手動驗證（Gate B）：
@@ -149,17 +149,17 @@
 
 **Tasks**:
 
-- [ ] T042 處理 Edge Case：Index.razor 中，若 visibleTools.Count == 0，顯示友善訊息「目前無可用功能」（US1 已包含，確認實作）
-- [ ] T043 處理 Token 過期情境：Index.razor 中，若 AuthenticationStateProvider 回傳 isAuthenticated = false（Token 過期），自動降級為公開 Tool 模式（US2 Acceptance Scenario 4）
-- [ ] T044 [P] 優化 ToolRegistrationService 查詢：確保 GetAllToolsAsync 與 GetPublicToolsAsync 使用 .AsNoTracking()（僅讀取，無需追蹤）
-- [ ] T045 [P] 加入 Logging：ToolRegistrationService 與 UserIdentityService 注入 ILogger，記錄查詢與錯誤
-- [ ] T046 建立 appsettings.Development.json 於 src/Frontend/Saintber.Forge.BlazorServer/appsettings.Development.json（設定詳細 Logging Level 為 Debug）
-- [ ] T047 更新 README.md 於 specs/001-portal-home/README.md（若尚未存在，建立）：記錄本地開發快速啟動步驟（參照 quickstart.md）
-- [ ] T048 執行完整 Gate A 驗證：
+- [X] T042 處理 Edge Case：Index.razor 中，若 visibleTools.Count == 0，顯示友善訊息「目前無可用功能」（US1 已包含，確認實作）
+- [X] T043 處理 Token 過期情境：Index.razor 中，若 AuthenticationStateProvider 回傳 isAuthenticated = false（Token 過期），自動降級為公開 Tool 模式（US2 Acceptance Scenario 4）
+- [X] T044 [P] 優化 ToolRegistrationService 查詢：確保 GetAllToolsAsync 與 GetPublicToolsAsync 使用 .AsNoTracking()（僅讀取，無需追蹤）
+- [X] T045 [P] 加入 Logging：ToolRegistrationService 與 UserIdentityService 注入 ILogger，記錄查詢與錯誤
+- [X] T046 建立 appsettings.Development.json 於 src/Frontend/Saintber.Forge.BlazorServer/appsettings.Development.json（設定詳細 Logging Level 為 Debug）
+- [X] T047 更新 README.md 於 specs/001-portal-home/README.md（若尚未存在，建立）：記錄本地開發快速啟動步驟（參照 quickstart.md）
+- [X] T048 執行完整 Gate A 驗證：
   - dotnet restore（確認套件還原成功）
   - dotnet build（確認 Errors = 0）
   - dotnet test --filter Category=Unit（若有單元測試）
-- [ ] T049 建立 Verification Record 於 docs/plan/verification/001-portal-home.verify.md（記錄 Gate A 執行結果、Gate B 手動驗證結果）
+- [X] T049 建立 Verification Record 於 docs/plan/verification/001-portal-home.verify.md（記錄 Gate A 執行結果、Gate B 手動驗證結果）
 
 **Completion Criteria**: 所有 Edge Cases 正確處理，Logging 完善，Gate A 通過，Verification Record 已建立。
 

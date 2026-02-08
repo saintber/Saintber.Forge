@@ -1,0 +1,15 @@
+@using Saintber.Forge.Persistence.EF.Postgres.Entities
+
+<div class="tool-card">
+    <h3>@Tool.ToolName</h3>
+    @if (!string.IsNullOrWhiteSpace(Tool.Description))
+    {
+        <p class="description">@Tool.Description</p>
+    }
+    <a href="@Tool.Url" class="tool-link">前往工具 →</a>
+</div>
+
+@code {
+    [Parameter]
+    public required ToolRegistration Tool { get; set; }
+}

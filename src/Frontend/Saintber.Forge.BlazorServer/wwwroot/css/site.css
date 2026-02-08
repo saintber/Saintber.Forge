@@ -62,3 +62,25 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+/* Tool Grid Layout - RWD Support */
+.tool-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .tool-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop: 4 columns */
+@media (min-width: 1200px) {
+    .tool-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}

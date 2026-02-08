@@ -1,6 +1,11 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
 using Saintber.Forge.BlazorServer.Data;
+using Saintber.Forge.BlazorServer.Services;
+using Saintber.Forge.Persistence.EF.Postgres;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +13,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+
+// Add DbContext with PostgreSQL
+builder.Services.AddDbContext<PortalDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PortalDb")));
+
+// Add Microsoft Identity Web Authentication
+builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, "AzureAd");
+
+// Register ToolRegistrationService
+builder.Services.AddScoped<IToolRegistrationService, ToolRegistrationService>();
+
+// Register UserIdentityService
+builder.Services.AddScoped<IUserIdentityService, UserIdentityService>();
 
 var app = builder.Build();
 
@@ -24,6 +42,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
