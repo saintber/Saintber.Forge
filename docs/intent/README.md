@@ -1,101 +1,177 @@
-# Intent — Saintber.Forge
+# Saintber.Forge — Documentation Guide
 
-本目錄用於存放 **Intent 文件**，  
-並作為每一個工具、能力或問題域的**主題容器**。
+本 README 用於說明 **Saintber.Forge 專案中 SDD（Specification-Driven Development）文件的結構、責任邊界與使用方式**，  
+並提供後續維護者在撰寫需求、呼叫 Speckit 指令時的操作依據。
 
-Intent 目錄下可同時包含：
-
-- intent（為什麼要做）
-- decision（目前被要求怎麼做）
+本文件本身不定義任何業務規則或技術決策。
 
 ---
 
-## Intent 的定位
+## 文件分類與責任
 
-Intent 文件用來描述某一項工具、能力或專案：
+本專案的文件依其角色分為下列幾類：
 
-- 要解決什麼問題
-- 為什麼值得解決
-- 解決對象是誰
-- 若成功，期望產生什麼結果（Outcome）
+### Constitution
+- 定義不可退讓的治理原則
+- 所有文件與實作皆不得違反憲章
 
-Intent **不描述**：
+### Intent
+- 記錄「為什麼要做這個功能」
+- 保存人類對問題的理解，以及理解的演進歷史
+- 不描述實作方式或技術細節
 
-- 技術選型或實作細節
-- 專案或程式碼結構
-- 開發流程、完成條件或測試策略
+### Decision
+- 記錄在特定 Intent 前提下，所做出的實作約束或設計取捨
+- 僅適用於該 Intent
+- 不具通用性
 
-上述內容分別由 Policy、Decision、Plan 等文件負責。
+### Policy
+- 定義長期且通用的規範（結構、安全、技術基線、測試治理等）
+- 違反需有明確理由
 
----
-
-## Decision 與 Intent 的關係
-
-在 Saintber.Forge 中，Decision 被視為 **Intent 的附屬文件**。
-
-Decision 文件用於記錄：
-
-- 在該 Intent 前提下
-- 因設計審查（如 SD view）、外部限制或階段性需求
-- 所做出的**具體實作決策或約束**
-
-Decision 的特性為：
-
-- 僅適用於該 Intent 主題
-- 可能是暫時性的
-- 不具通用性（因此不屬於 Policy）
+### Plan / Spec / Verification
+- 屬於實作與交付層
+- 由 Speckit 依 Intent / Decision / Policy 產生
+- 不屬於需求定義文件
 
 ---
 
-## 建議目錄結構
+## Intent 文件規則（重要）
 
-每一個 Intent 建議建立為獨立子目錄，  
-並在該目錄下放置對應的 decision 文件（若存在）：
+### Intent 的定位
+
+Intent 文件用於記錄：
+
+- 原始利害關係人需求
+- 問題定義與動機
+- 功能意圖的演進過程
+
+Intent 文件 **不是**：
+- 規格書（spec）
+- 實作說明
+- Release Note
+
+---
+
+### Intent 採用「單檔、多版本紀錄」模式
+
+每一個 Intent 以 **單一 intent.md** 存在，  
+在文件內透過 **Intent Version Index** 記錄意圖的演進。
+
+版本的意義為：
+- 人類理解與需求認知的演進
+- 而非實作版本或交付版本
+
+---
+
+### Intent 目錄結構
 
 ```text
 docs/intent/
-├─ tool-a/
-│  ├─ intent.md
-│  └─ decision.md
-└─ tool-b/
+└─ <intent-id>-<intent-name>/
    ├─ intent.md
    └─ decision.md
 ```
 
-* `intent.md`：說明該主題的動機與問題定義
-* `decision.md`：記錄該主題目前被要求採取的實作方式
+範例：
+
+```text
+docs/intent/
+└─ 001-portal-home/
+   ├─ intent.md
+   └─ decision.md
+```
 
 ---
 
-## 與其他文件的責任邊界
+## Intent.md 大綱範例
 
-* **Constitution**
+Intent 文件應遵循下列結構（摘要）：
 
-  * 定義不可退讓的治理原則
-  * Intent 與 Decision 皆不得違反憲章
+```md
+# <Feature Name> — Intent Record
 
-* **Policy**
+## Intent Version Index
+| Version | Date | Trigger | Summary |
 
-  * 定義長期且通用的規範
-  * Decision 不得隱性修改或取代 Policy
+## Current Effective Intent
+(標示目前生效版本)
 
-* **Plan**
+## Problem Statement
+## Motivation
+## Stakeholders & Users
+## Desired Outcome
+## Assumptions & Known Constraints
+## Out of Scope
+## Related Documents
+```
 
-  * 描述執行方式與工作拆解
-  * Plan 可引用 intent 與 decision 作為前提
-
-Intent 與 Decision 僅提供「背景與約束」，
-不作為完成判定或品質保證的依據。
-
----
-
-## Intent / Decision 的生命週期
-
-* Intent 與其對應的 Decision 可隨專案演進調整
-* 當某 Intent 不再適用時，其整個目錄應一併移除
-* 不再有效的 Intent / Decision 不應作為後續決策依據
+僅 **Current Effective Intent** 區段以下內容，
+應被視為目前有效的意圖描述。
 
 ---
 
-本 README 僅用於說明 Intent 與 Decision 文件的角色與使用方式。
-不定義任何治理規則或實作要求。
+## Decision 文件規則
+
+* 每一個 Intent 最多一份 decision.md
+* 記錄該 Intent 下的實作約束與取捨
+* 若內容演變為長期通用規則，應升級為 Policy
+
+---
+
+## Speckit 指令使用原則
+
+### 產生憲章
+
+```text
+/speckit.constitution docs/constitution/constitution.md
+```
+
+---
+
+### 產生規格（specify）
+
+```text
+/speckit.specify
+Inputs:
+- docs/intent/001-portal-home/intent.md
+- docs/intent/001-portal-home/decision.md
+
+Policies:
+- docs/constitution/constitution.md
+- docs/policy/project-structure.md
+- docs/policy/security-baseline.md
+- docs/policy/tech-baseline.md
+- docs/policy/implementation-definition-of-done.md
+
+Instruction:
+- 僅使用 Current Effective Intent 作為需求基準
+- 不得從歷史 Intent Version 推導需求
+```
+
+---
+
+## Intent 與交付版本的關係說明
+
+* Intent 的版本：
+
+  * 描述「人類對功能的理解如何演進」
+* Release / Spec 的版本：
+
+  * 描述「實際交付了什麼」
+
+兩者刻意分離，以避免語意混淆。
+
+---
+
+## 文件維護原則
+
+* Intent 可隨理解演進而補充版本紀錄
+* Decision 可被更新、撤銷或升級為 Policy
+* 不再適用的 Intent 目錄應整體移除
+* 文件應保持「單一責任」，避免跨類型混寫
+
+---
+
+本 README 僅作為文件使用與治理指引。
+不作為需求、規格或實作依據。
