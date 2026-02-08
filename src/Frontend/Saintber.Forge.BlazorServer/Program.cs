@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddControllersWithViews().AddMicrosoftIdentityUI();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
@@ -20,6 +21,7 @@ builder.Services.AddDbContext<PortalDbContext>(options =>
 
 // Add Microsoft Identity Web Authentication
 builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, "AzureAd");
+builder.Services.AddAuthorization();
 
 // Register ToolRegistrationService
 builder.Services.AddScoped<IToolRegistrationService, ToolRegistrationService>();
@@ -46,6 +48,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
+app.MapRazorPages();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

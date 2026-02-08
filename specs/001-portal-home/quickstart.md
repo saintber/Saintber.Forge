@@ -46,7 +46,7 @@ dotnet tool install --global dotnet-ef
    - **Supported account types**: `Accounts in this organizational directory only`
    - **Redirect URI**: 
      - Platform: `Web`
-     - URI: `https://localhost:5001/signin-oidc`
+     - URI: `https://localhost:7289/signin-oidc`
 4. 建立後，記錄以下資訊：
    - **Application (client) ID**
    - **Directory (tenant) ID**
@@ -182,16 +182,16 @@ dotnet run
 
 ```
 info: Microsoft.Hosting.Lifetime[14]
-      Now listening on: https://localhost:5001
+      Now listening on: https://localhost:7289
 info: Microsoft.Hosting.Lifetime[14]
-      Now listening on: http://localhost:5000
+      Now listening on: http://localhost:5114
 info: Microsoft.Hosting.Lifetime[0]
       Application started. Press Ctrl+C to shut down.
 ```
 
 ### 3.2. Access Portal Home
 
-1. 開啟瀏覽器，訪問 `https://localhost:5001`
+1. 開啟瀏覽器，訪問 `https://localhost:7289`
 2. 若未登入：
    - 應顯示公開 Tool 卡片（範例工具 A）
    - 導航列顯示「登入」按鈕
@@ -301,7 +301,7 @@ AADSTS700016: Application with identifier 'xxx' was not found in the directory
 
 1. 檢查 `appsettings.json` 或 User Secrets 中的 `ClientId` 是否正確
 2. 檢查 Azure AD App Registration 是否存在
-3. 確認 Redirect URI 為 `https://localhost:5001/signin-oidc`
+3. 確認 Redirect URI 為 `https://localhost:7289/signin-oidc`
 
 ### 5.3. HTTPS 憑證錯誤
 
@@ -327,7 +327,7 @@ dotnet dev-certs https --trust
 
 **Solution**:
 
-1. 檢查防火牆是否封鎖 `localhost:5001`
+1. 檢查防火牆是否封鎖 `localhost:7289`
 2. 確認 `Program.cs` 有設定 `app.MapBlazorHub()`
 3. 檢查瀏覽器是否支援 WebSocket（現代瀏覽器皆支援）
 

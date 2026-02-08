@@ -80,7 +80,7 @@
   - 無 Tool 時顯示「目前無可用功能」訊息
 - [X] T027 [US1] 建立基本 CSS Grid 樣式於 src/Frontend/Saintber.Forge.BlazorServer/wwwroot/css/app.css（預設單欄佈局，稍後 US3 擴充 RWD）
 - [X] T028 [US1] 執行本地開發環境 Migration：dotnet ef database update --project src/Persistence/Saintber.Forge.Persistence.EF.Postgres --startup-project src/Frontend/Saintber.Forge.BlazorServer
-- [ ] T029 [US1] 手動驗證：啟動 Blazor Server（dotnet run），開啟瀏覽器訪問 https://localhost:5001，確認顯示 2 張公開 Tool 卡片（範例 Tool A）
+- [X] T029 [US1] 手動驗證：啟動 Blazor Server（dotnet run），開啟瀏覽器訪問 https://localhost:7289，確認顯示公開 Tool 卡片（範例工具 A）
 
 **Completion Criteria**: 未登入狀態下首頁顯示公開 Tool 卡片，點擊卡片可導覽至 Tool URL（即使 Tool 尚未實作，URL 導覽行為正確）。
 
@@ -103,14 +103,14 @@
 - [X] T034 [US2] 修改 Pages/Index.razor：OnInitializedAsync 中若 isAuthenticated = true，呼叫 UserIdentityService.UpdateLastLoginAsync（記錄登入時間）
 - [X] T035 [US2] 設定 Azure AD App Registration（手動操作）：
   - 建立 App Registration（名稱：Saintber.Forge.Portal.Dev）
-  - 設定 Redirect URI：https://localhost:5001/signin-oidc
+  - 設定 Redirect URI：https://localhost:7289/signin-oidc
   - 建立 Client Secret
   - 記錄 TenantId、ClientId、ClientSecret
 - [X] T036 [US2] 使用 dotnet user-secrets 設定 Azure AD 資訊：
   - dotnet user-secrets set "AzureAd:TenantId" "<YOUR_TENANT_ID>"
   - dotnet user-secrets set "AzureAd:ClientId" "<YOUR_CLIENT_ID>"
   - dotnet user-secrets set "AzureAd:ClientSecret" "<YOUR_CLIENT_SECRET>"
-- [ ] T037 [US2] 手動驗證：啟動 Blazor Server，點擊「登入」按鈕，完成 Microsoft 登入，確認返回首頁後顯示所有 Tool 卡片（範例 Tool A + Tool B）
+- [X] T037 [US2] 手動驗證:啟動 Blazor Server,點擊「登入」按鈕,完成 Microsoft 登入,確認返回首頁後顯示所有 Tool 卡片(範例 Tool A + Tool B)
 
 **Completion Criteria**: 登入用戶能看到所有 Tool 卡片（包含 IsPublic=false 的 Tool），UserIdentity 表格正確記錄登入時間。
 
@@ -131,7 +131,7 @@
 - [X] T039 [US3] 優化 ToolCard.razor.css 於 src/Frontend/Saintber.Forge.BlazorServer/Components/ToolCard.razor.css：
   - 確保卡片 max-width 與 padding 在小螢幕下不產生水平捲軸
   - 加入 responsive font-size（可選，視覺優化）
-- [ ] T040 [US3] 手動驗證（Gate B）：
+- [X] T040 [US3] 手動驗證（Gate B）：
   - 開啟 Chrome DevTools → Toggle Device Toolbar
   - 測試 1920px（桌機）：驗證 4 欄佈局
   - 測試 800px（平板）：驗證 2 欄佈局

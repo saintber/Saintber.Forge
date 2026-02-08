@@ -44,7 +44,7 @@ cd src/Frontend/Saintber.Forge.BlazorServer
 dotnet run
 ```
 
-開啟瀏覽器訪問 `https://localhost:5001`
+開啟瀏覽器訪問 `https://localhost:7289`
 
 - **未登入**: 顯示公開 Tool 卡片（範例工具 A）
 - **登入**: 點擊「登入」按鈕，完成 Microsoft 登入後顯示所有 Tool 卡片（範例工具 A + B）
