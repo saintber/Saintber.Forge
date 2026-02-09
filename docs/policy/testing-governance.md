@@ -1,163 +1,174 @@
-# Testing Governance — Saintber.Forge
+# Testing Governance
 
-> Purpose  
-> 定義 Saintber.Forge 中「測試的角色、使用原則與一致性慣例」，  
-> 以提升測試的可理解性與長期維護價值。
+本文件定義 Saintber.Forge 專案中之測試治理原則，  
+用以規範測試類型、測試專案與其「被測目標專案」之對應關係、命名方式，以及在 CI/CD 中的執行責任。
 
-> Scope  
-> 本文件屬於工程政策層（Policy），  
-> 不定義完成條件（Definition of Done），  
-> 不描述專案結構，  
-> 僅描述測試在工程流程中的定位與治理慣例。
+本文件屬於 **Policy 級文件**，  
+所有 Forge 專案與子項目皆須遵循，除非在特定 Intent 下另有 **Intent 專屬 Decision 文件** 明確說明例外。:contentReference[oaicite:0]{index=0}
 
 ---
 
-## 一、測試在 Forge 中的定位
+## 一、測試治理核心原則
 
-### 1. 測試的角色
-
-在 Forge 中，測試用於：
-
-- 驗證行為是否符合預期
-- 降低修改帶來的破壞風險
-- 協助理解程式碼的實際用途
-
-測試不是品質保證的唯一來源，  
-也不作為單獨宣告完成的依據。
+1. **測試專案必須明確對應一個被測目標專案**
+2. **測試類型必須透過專案命名即可辨識**
+3. **是否可於 CI/CD 執行，必須由測試專案類型決定**
+4. **不得以測試內容或資料夾結構隱含測試類型**
 
 ---
 
-### 2. 與 Definition of Done 的關係
+## 二、被測目標專案（Target Project）
 
-- 是否需要測試、採用何種測試形式，  
-  由 `implementation-definition-of-done.md` 判定
-- 本文件不重複定義「完成所需條件」
+本治理文件中所稱之「被測目標專案」，  
+指的是實際被測試的 Forge 主專案，例如：
 
----
+- `Saintber.Forge.BlazorServer`
+- `Saintber.Forge.Auth`
+- `Saintber.Forge.Persistence.EF.Postgres`
 
-## 二、測試類型與使用原則
-
-### 3. 單元測試（Unit Test）
-
-單元測試適用於：
-
-- 純業務邏輯
-- 無外部系統相依的行為
-- 可快速驗證的邏輯分支
-
-單元測試應具備以下特性：
-
-- 可在本機或 CI 中獨立執行
-- 不依賴外部資源（DB、API、檔案系統）
+測試專案之命名，**必須以其被測目標專案名稱作為前綴**，  
+以確保測試責任與歸屬清楚可追溯。
 
 ---
 
-### 4. 整合測試（Integration Test）
+## 三、測試類型與專案命名規範
 
-整合測試適用於：
+### 1. 單元測試（Unit Tests）
 
-- 涉及資料庫、外部 API 或基礎設施的行為
-- 無法以單元測試合理模擬的流程
+#### 定義
 
-整合測試需：
+單元測試用於驗證被測目標專案中之：
 
-- 明確標示其外部相依條件
-- 可重現、可重跑
-- 失敗時可追蹤原因
+- 類別
+- 方法
+- 元件
+- 純邏輯服務
 
----
+且 **不依賴任何外部環境或基礎設施**。
 
-## 三、測試命名與一致性慣例（Conventions）
-
-### 5. 測試專案命名慣例
-
-為提升可辨識性與一致性，建議採用以下命名方式：
-
-- **單元測試專案**
-```
-
-<TargetProject>.Tests
+#### 命名規範
 
 ```
 
-- **整合測試專案**
-```
-
-<TargetProject>.IntegrationTests
+<被測目標專案>.UnitTests
 
 ```
 
+#### 範例
+
+- `Saintber.Forge.BlazorServer.UnitTests`
+- `Saintber.Forge.Auth.UnitTests`
+
+#### CI/CD 規範
+
+- **必須** 可於 CI/CD Pipeline 中自動執行
+- 不得依賴：
+  - 資料庫
+  - 外部 API
+  - 檔案系統
+  - 網路、Queue、Cache 等基礎設施
+- 為主要品質 Gate（Gate A）之一
+
 ---
 
-### 6. 測試類別命名慣例
+### 2. 整合測試（Integration Tests）
 
-建議測試類別命名方式：
+#### 定義
 
-- 單元測試：
+整合測試用於驗證被測目標專案與以下項目之整合行為：
+
+- 資料庫
+- 外部服務
+- 基礎設施
+- 真實或模擬環境資源
+
+#### 命名規範
+
 ```
 
-<TargetClassName>Tests
+<被測目標專案>.IntegrationTests
 
 ```
 
-- 整合測試：
+#### 範例
+
+- `Saintber.Forge.BlazorServer.IntegrationTests`
+- `Saintber.Forge.Auth.IntegrationTests`
+
+#### CI/CD 規範
+
+- **不強制** 於 CI/CD Pipeline 中自動執行
+- 允許：
+  - 僅於特定環境執行
+  - 作為 Gate B（手動或條件式驗證）
+  - 由 UI Tests 或人工驗測替代
+- 測試結果必須以以下方式之一被記錄：
+  - 測試報告
+  - 驗測紀錄（Verification Record）
+  - 對應 Intent 專屬 Decision 文件
+
+---
+
+## 四、命名遷移與修正原則
+
+若既有文件、工具或產生器使用以下命名：
+
 ```
 
-<TargetFeatureName>IntegrationTests
+<被測目標專案>.Tests
 
 ```
 
-命名目的在於：
-- 讓測試類型一眼可辨
-- 降低理解與維護成本  
-而非限制實作彈性。
+則應依其實際測試性質進行明確拆分與更名：
+
+- **可於 CI/CD 執行、無外部相依者**  
+  → 遷移至  
+```
+
+<被測目標專案>.UnitTests
+
+```
+
+- **依賴外部環境或基礎設施者**  
+→ 遷移至  
+```
+
+<被測目標專案>.IntegrationTests
+
+```
+
+不得再以單一 `.Tests` 專案同時承載不同測試責任。
 
 ---
 
-## 四、測試與結構的界線
+## 五、禁止事項
 
-### 7. 測試不得成為耦合來源
-
-- 測試專案不得成為跨工具相依的入口
-- 不得為測試方便而破壞既有結構邊界
-- 不得在測試中引入隱性共享狀態
-
----
-
-### 8. 測試與實作的關係
-
-- 測試可存取公開介面
-- 不應依賴內部實作細節
-- 測試失敗應反映行為問題，而非結構巧合
+1. 不得將 Integration Tests 放入 UnitTests 專案
+2. 不得以資料夾（如 `E2E/`、`Integration/`）取代專案層級區分
+3. 不得因 CI/CD 穩定性考量而降低測試命名清晰度
+4. 不得讓測試專案的可執行性依賴 Pipeline 特定設定掩蓋其本質
 
 ---
 
-## 五、測試與驗證記錄
+## 六、例外與變更管理
 
-### 9. 與 Verification Record 的關係
+若特定 Intent 需要偏離本治理規範（例如：強制 CI/CD 執行整合測試、或採用不同命名），  
+必須在該 Intent 目錄下提供明確之 **Decision 文件** 說明原因、範圍與期限。
 
-- 測試的實際執行結果，應記錄於對應的 Verification Record
-- Verification Record 為每次可交付變更的驗證證據
-- 本文件不作為測試結果的記錄位置
+Decision 文件位置與命名遵循文件指南：:contentReference[oaicite:1]{index=1}
 
----
-
-## 六、例外與演進
-
-### 10. 測試例外
-
-若因實驗性或技術限制無法撰寫測試：
-
-- 需於 Verification Record 中說明原因
-- 不得將測試缺失視為預設狀態
-- 應於後續變更中補齊或回收風險
+```text
+docs/intent/<intent-id>-<intent-name>/
+├─ intent.md
+└─ decision.md
+````
 
 ---
 
-### 11. 文件調整原則
+## 七、與其他治理文件之關係
 
-- 本文件可隨專案成熟度調整
-- 調整目標為提升測試的實際價值與一致性
-- 若調整影響完成判定方式，應回到 DoD 文件評估
+* 本文件為 **Testing Policy**
+* 測試是否為交付完成條件，依據：
 
----
+  * `implementation-definition-of-done.md`
+* 本文件僅規範測試「命名、分類與執行責任」，不定義具體測試案例內容或驗收規格。

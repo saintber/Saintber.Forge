@@ -1,0 +1,242 @@
+openapi: 3.0.3
+info:
+  title: Tool Registration API
+  description: |
+    Portal Home 工具註冊查詢 API。
+    
+    **權限說明**:
+    - 公開端點：無需驗證
+    - 需驗證端點：需 Microsoft Identity 有效 Token
+    
+    **版本**: MVP (Phase 1)  
+    **Out of Scope**: Tool CRUD（未來 Admin API）
+  version: 1.0.0
+  contact:
+    name: Saintber.Forge Team
+
+servers:
+  - url: https://localhost:5001/api
+    description: Local Development Server
+
+paths:
+  /tools/public:
+    get:
+      summary: 取得所有公開 Tool 清單
+      description: |
+        回傳 `IsPublic = true` 的所有 Tool，依 `DisplayOrder` 升冪排序。
+        此端點無需驗證（未登入用戶可使用）。
+      operationId: getPublicTools
+      tags:
+        - Tools
+      security: []  # 無需驗證
+      responses:
+        '200':
+          description: 成功取得公開 Tool 清單
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ToolRegistration'
+              example:
+                - toolId: "10000000-0000-0000-0000-000000000001"
+                  toolName: "範例工具 A"
+                  description: "這是一個公開的範例工具"
+                  url: "/tools/example-a"
+                  isPublic: true
+                  displayOrder: 1
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tools:
+    get:
+      summary: 取得所有 Tool 清單（需驗證）
+      description: |
+        回傳所有 Tool（包含公開與非公開），依 `DisplayOrder` 升冪排序。
+        需有效的 Microsoft Identity Token。
+      operationId: getAllTools
+      tags:
+        - Tools
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 成功取得所有 Tool 清單
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ToolRegistration'
+              example:
+                - toolId: "10000000-0000-0000-0000-000000000001"
+                  toolName: "範例工具 A"
+                  description: "這是一個公開的範例工具"
+                  url: "/tools/example-a"
+                  isPublic: true
+                  displayOrder: 1
+                - toolId: "10000000-0000-0000-0000-000000000002"
+                  toolName: "範例工具 B（需登入）"
+                  description: "這是一個需要登入的範例工具"
+                  url: "/tools/example-b"
+                  isPublic: false
+                  displayOrder: 2
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tools/{toolId}:
+    get:
+      summary: 取得特定 Tool 詳細資訊（未來擴充）
+      description: |
+        依 `toolId` 取得單一 Tool。
+        
+        **Note**: Portal Home MVP 不使用此端點，保留為未來 API 擴充。
+      operationId: getToolById
+      tags:
+        - Tools
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: toolId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tool 唯一識別碼
+      responses:
+        '200':
+          description: 成功取得 Tool 詳細資訊
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolRegistration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    ToolRegistration:
+      type: object
+      required:
+        - toolId
+        - toolName
+        - url
+        - isPublic
+        - displayOrder
+      properties:
+        toolId:
+          type: string
+          format: uuid
+          description: Tool 唯一識別碼
+          example: "10000000-0000-0000-0000-000000000001"
+        toolName:
+          type: string
+          maxLength: 100
+          description: Tool 名稱
+          example: "範例工具 A"
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Tool 說明文字
+          example: "這是一個公開的範例工具"
+        url:
+          type: string
+          maxLength: 2000
+          description: Tool 進入 URL（相對或絕對路徑）
+          example: "/tools/example-a"
+        isPublic:
+          type: boolean
+          description: 是否為公開 Tool（未登入可見）
+          example: true
+        displayOrder:
+          type: integer
+          format: int32
+          description: 顯示順序（數值越小越優先）
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          description: 建立時間（UTC）
+          example: "2026-02-08T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: 最後更新時間（UTC）
+          example: "2026-02-08T10:00:00Z"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: 錯誤代碼
+          example: "UNAUTHORIZED"
+        message:
+          type: string
+          description: 錯誤訊息
+          example: "驗證失敗，請重新登入"
+        details:
+          type: string
+          nullable: true
+          description: 詳細錯誤資訊（僅開發環境）
+          example: "Token expired at 2026-02-08T09:00:00Z"
+
+  responses:
+    Unauthorized:
+      description: 驗證失敗
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "UNAUTHORIZED"
+            message: "驗證失敗，請重新登入"
+    
+    NotFound:
+      description: 資源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "NOT_FOUND"
+            message: "Tool 不存在"
+    
+    InternalServerError:
+      description: 伺服器內部錯誤
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "INTERNAL_SERVER_ERROR"
+            message: "系統發生錯誤，請稍後再試"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Microsoft Identity Platform 核發的 Access Token。
+        
+        **取得方式**:
+        1. 透過 Microsoft.Identity.Web 自動處理（Blazor Server 內建）
+        2. 手動測試可使用 Azure Portal / Postman 取得 Token
+        
+        **Token 格式**: `Bearer <access_token>`
+
+tags:
+  - name: Tools
+    description: Tool 註冊資料查詢
