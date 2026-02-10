@@ -25,6 +25,7 @@ tests/
 C# / .NET 8.0 (LTS) 或最新 LTS 版本: Follow standard conventions
 
 ## Recent Changes
+- 002-lyrics-guess-game: Added C# 12 / .NET 8 (net8.0)
 - 001-portal-home: Added C# 12 / .NET 8 (net8.0)
 
 - 001-jwt-authentication: Added C# / .NET 8.0 (LTS) 或最新 LTS 版本
