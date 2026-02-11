@@ -17,14 +17,14 @@
 
 ### Research Findings
 
-**Current State**: 專案中尚未整合 copilot.sdk，需要從頭建立 AI 整合層。
+**Current State**: 專案中尚未整合 AI SDK，需要從頭建立 AI 整合層。
 
-**Decision**: 不使用現成的 copilot.sdk，改為建立自訂 AI 整合服務層 `IAIServiceProvider`
+**Decision**: 建立自訂 AI 整合服務抽象層 `IAIServiceProvider`，優先實作使用 **GitHub Copilot SDK** 的實作類別
 
 **Rationale**:
-1. **專案現況**: 搜尋結果顯示專案中沒有 copilot.sdk 相關參照或設定
-2. **治理原則符合**: 自訂抽象層符合 Constitution Principle 5（契約介面）與 Principle 6（可替換性）
-3. **實作彈性**: 可支援多種 AI 提供者（OpenAI、Azure OpenAI、本地模型）
+1. **抽象層設計**: 符合 Constitution Principle 5（契約介面）與 Principle 6（可替換性），避免工具直接耦合特定 AI 供應商
+2. **Copilot SDK 優先**: GitHub Copilot SDK 支援多廠商模型（OpenAI、Anthropic 等），提供跨供應商的統一介面
+3. **實作彈性**: 保留替換為其他實作的可能性（Azure OpenAI、本地模型、Semantic Kernel）
 4. **錯誤控制**: 自訂逾時、重試、降級策略
 
 ### Alternatives Considered
@@ -32,8 +32,9 @@
 | 方案 | 優點 | 缺點 | 決策 |
 |------|------|------|------|
 | 直接使用 OpenAI SDK | 官方支援、文件完整 | 耦合特定廠商，違反可替換性原則 | ❌ 拒絕 |
-| 自訂 IAIServiceProvider | 符合治理原則、可抽換 | 需自行處理錯誤與重試 | ✅ 採用 |
-| Semantic Kernel | 微軟官方抽象層、功能完整 | 引入額外依賴、學習曲線 | 🔶 備案 |
+| GitHub Copilot SDK + IAIServiceProvider | 跨廠商支援、符合治理原則、統一介面 | 需自行處理錯誤與重試 | ✅ 採用（優先實作）|
+| Azure OpenAI + IAIServiceProvider | Azure 生態整合、企業支援 | 僅支援 OpenAI 模型 | 🔶 備案（未來擴充）|
+| Semantic Kernel | 微軟官方抽象層、功能完整 | 引入額外依賴、學習曲線 | 🔶 備案（未來擴充）|
 
 ### Implementation Approach
 
@@ -98,21 +99,21 @@ public interface IAIServiceProvider
 }
 ```
 
-#### 2. OpenAI 實作範例（可替換為其他提供者）
+#### 2. Copilot SDK 實作範例（優先實作）
 
 ```csharp
-public class OpenAIServiceProvider : IAIServiceProvider
+public class CopilotAIServiceProvider : IAIServiceProvider
 {
-    private readonly HttpClient _httpClient;
+    private readonly ICopilotClient _copilotClient; // GitHub Copilot SDK 客戶端
     private readonly IConfiguration _configuration;
-    private readonly ILogger<OpenAIServiceProvider> _logger;
+    private readonly ILogger<CopilotAIServiceProvider> _logger;
 
-    public OpenAIServiceProvider(
-        HttpClient httpClient, 
+    public CopilotAIServiceProvider(
+        ICopilotClient copilotClient, 
         IConfiguration configuration,
-        ILogger<OpenAIServiceProvider> logger)
+        ILogger<CopilotAIServiceProvider> logger)
     {
-        _httpClient = httpClient;
+        _copilotClient = copilotClient;
         _configuration = configuration;
         _logger = logger;
     }
@@ -130,27 +131,23 @@ public class OpenAIServiceProvider : IAIServiceProvider
 
         try
         {
-            var requestBody = new
+            // GitHub Copilot SDK 支援跨廠商模型（OpenAI、Anthropic 等）
+            // 僅需變更 modelId 參數即可切換不同廠商的模型
+            var chatRequest = new CopilotChatRequest
             {
-                model = modelId,
-                messages = new[]
+                Model = modelId, // 如 "gpt-4-turbo"、"claude-3-sonnet" 等
+                Messages = new[]
                 {
-                    new { role = "system", content = prompt },
-                    new { role = "user", content = userInput }
+                    new CopilotMessage { Role = "system", Content = prompt },
+                    new CopilotMessage { Role = "user", Content = userInput }
                 },
-                temperature = 0.3,
-                response_format = new { type = "json_object" } // 強制 JSON 輸出
+                Temperature = 0.3,
+                ResponseFormat = CopilotResponseFormat.Json // 強制 JSON 輸出
             };
 
-            var response = await _httpClient.PostAsJsonAsync(
-                "https://api.openai.com/v1/chat/completions", 
-                requestBody, 
-                cts.Token);
-
-            response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadFromJsonAsync<OpenAIResponse>(cts.Token);
+            var response = await _copilotClient.ChatAsync(chatRequest, cts.Token);
             
-            return JsonSerializer.Deserialize<T>(result.Choices[0].Message.Content)!;
+            return JsonSerializer.Deserialize<T>(response.Content)!;
         }
         catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
         {
@@ -171,18 +168,20 @@ public class OpenAIServiceProvider : IAIServiceProvider
 #### 3. DI 註冊（Program.cs）
 
 ```csharp
-// AI Service Provider 註冊（可切換實作）
-builder.Services.AddHttpClient<IAIServiceProvider, OpenAIServiceProvider>()
-    .ConfigureHttpClient(client =>
-    {
-        client.BaseAddress = new Uri("https://api.openai.com");
-        client.DefaultRequestHeaders.Add(
-            "Authorization", 
-            $"Bearer {builder.Configuration["OpenAI:ApiKey"]}");
-    });
+// 註冊 GitHub Copilot SDK 客戶端（優先實作）
+builder.Services.AddCopilotClient(options =>
+{
+    options.ApiKey = builder.Configuration["Copilot:ApiKey"] ?? 
+                     Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+    // Copilot SDK 自動支援多廠商模型，無需額外設定
+});
 
-// 或使用 Azure OpenAI
-// builder.Services.AddHttpClient<IAIServiceProvider, AzureOpenAIServiceProvider>()...
+// 註冊 AI Service Provider（使用 Copilot 實作）
+builder.Services.AddScoped<IAIServiceProvider, CopilotAIServiceProvider>();
+
+// 未來可擴充其他實作：
+// builder.Services.AddScoped<IAIServiceProvider, AzureOpenAIServiceProvider>();
+// builder.Services.AddScoped<IAIServiceProvider, LocalModelServiceProvider>();
 ```
 
 ### Testing Strategy
@@ -256,7 +255,7 @@ public async Task ParsePlaylistAsync_Should_Return_Songs_When_AI_Response_Valid(
 
 ### Implementation Approach
 
-#### 1. appsettings.json 結構
+#### 1. appsettings.json 結構（支援 Copilot SDK 跨廠商模型）
 
 ```json
 {
@@ -283,6 +282,13 @@ public async Task ParsePlaylistAsync_Should_Return_Songs_When_AI_Response_Valid(
         "ModelId": "claude-3-sonnet",
         "DisplayName": "Claude 3 Sonnet（精準理解）",
         "Provider": "Anthropic",
+        "IsEnabled": true,
+        "IsDefault": false
+      },
+      {
+        "ModelId": "claude-3-opus",
+        "DisplayName": "Claude 3 Opus（最強推理）",
+        "Provider": "Anthropic",
         "IsEnabled": false,
         "IsDefault": false
       }
@@ -291,8 +297,17 @@ public async Task ParsePlaylistAsync_Should_Return_Songs_When_AI_Response_Valid(
       "ParsePlaylistSeconds": 10,
       "ValidateAnswerSeconds": 5
     }
+  },
+  "Copilot": {
+    "ApiKey": "${GITHUB_TOKEN}"
   }
 }
+
+// 說明：
+// - Copilot SDK 統一支援多廠商模型（OpenAI、Anthropic 等）
+// - Provider 欄位標記模型原始來源，但實際呼叫統一透過 Copilot SDK
+// - 切換模型時僅需變更 ModelId 參數，無需切換實作類別
+// - IsEnabled 控制模型是否在下拉選單中顯示
 ```
 
 #### 2. 設定模型類別
@@ -300,10 +315,30 @@ public async Task ParsePlaylistAsync_Should_Return_Songs_When_AI_Response_Valid(
 ```csharp
 public class AIModelConfig
 {
+    /// <summary>
+    /// AI SDK 實際呼叫時使用的模型識別碼（如 "gpt-4-turbo"、"claude-3-sonnet"）
+    /// </summary>
     public string ModelId { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// 對使用者友善的顯示名稱（如 "GPT-4 Turbo（快速、準確）"）
+    /// </summary>
     public string DisplayName { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// AI 模型的原始供應商（如 "OpenAI"、"Anthropic"）
+    /// 註：Copilot SDK 支援多廠商，此欄位用於標記來源，實際呼叫統一透過 Copilot SDK
+    /// </summary>
     public string Provider { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// 模型是否在下拉選單中顯示
+    /// </summary>
     public bool IsEnabled { get; set; }
+    
+    /// <summary>
+    /// 是否為系統啟動時預設選用的模型
+    /// </summary>
     public bool IsDefault { get; set; }
 }
 
@@ -377,6 +412,34 @@ public class LyricsGuessGameService : ILyricsGuessGameService
 ```plaintext
 appsettings.json          # 全域設定
 appsettings.AIModels.json # AI 模型共用設定（可獨立版控）
+```
+
+### Copilot SDK 跨廠商模型支援說明
+
+**特性**:
+- GitHub Copilot SDK 原生支援多種 AI 供應商（OpenAI、Anthropic 等）
+- 同一個 `CopilotAIServiceProvider` 實作可切換不同廠商的模型
+- 切換模型時僅需變更 `ModelId` 參數，無需變更實作類別或重新註冊服務
+
+**設計優勢**:
+1. **統一介面**: 使用者選擇 GPT-4 或 Claude 3，程式碼呼叫方式完全相同
+2. **簡化配置**: 無需為每個廠商設定不同的 API Endpoint 或認證方式
+3. **靈活擴充**: 新增其他廠商模型僅需更新 `appsettings.json`，無需修改程式碼
+
+**實作範例**:
+```csharp
+// 切換模型時僅需變更 modelId 參數
+await _aiService.ParseStructuredDataAsync<List<Song>>(
+    prompt, 
+    userInput, 
+    "gpt-4-turbo",      // OpenAI 模型
+    timeout);
+
+await _aiService.ParseStructuredDataAsync<List<Song>>(
+    prompt, 
+    userInput, 
+    "claude-3-sonnet",  // Anthropic 模型（相同實作類別）
+    timeout);
 ```
 
 ---

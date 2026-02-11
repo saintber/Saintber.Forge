@@ -37,16 +37,23 @@
 ## D2. AI 呼叫方式
 
 **Decision**  
-所有 AI 相關能力皆透過 `copilot.sdk` 呼叫。
+所有 AI 相關能力皆透過自訂抽象層 `IAIServiceProvider` 呼叫，  
+優先實作使用 **GitHub Copilot SDK** 的實作類別。
 
 **Rationale**
-- 統一 AI 呼叫入口，避免工具內部直接耦合特定模型或供應商
-- 與既有 Forge 專案的 AI 使用策略保持一致
-- 便於未來替換、擴充或停用特定 AI 模型
+- **抽象層設計**：符合 Constitution Principle 5（契約介面）與 Principle 6（可替換性），避免工具內部直接耦合特定 AI 供應商
+- **Copilot SDK 優先**：GitHub Copilot 支援多廠商模型（OpenAI、Anthropic 等），提供跨供應商的統一介面
+- **未來擴充性**：保留替換為其他實作的可能性（如 Azure OpenAI、本地模型、Semantic Kernel）
+- **統一呼叫入口**：便於未來替換、擴充或停用特定 AI 模型
 
 **Consequences**
-- 功能本身不直接依賴 OpenAI、Azure OpenAI 或其他 SDK
-- AI 能力視為外部服務，由 SDK 層負責抽象與錯誤處理
+- 功能本身不直接依賴 OpenAI、Azure OpenAI 或其他特定 SDK
+- AI 能力視為外部服務，由抽象層負責錯誤處理與重試邏輯
+- 優先實作 Copilot SDK，但設計上保持實作可替換性
+
+**Implementation Priority**
+1. **Phase 1**: 實作 `CopilotAIServiceProvider`（基於 GitHub Copilot SDK）
+2. **Future**: 視需求擴充其他實作（`AzureOpenAIServiceProvider`、`LocalModelServiceProvider` 等）
 
 ---
 
@@ -73,24 +80,32 @@
 AI 模型資訊以結構化資料來源管理，而非硬編碼於程式中。
 
 **Minimum Fields**
-- 模型名稱（Display Name）
-- AI 廠商（Vendor）
-- AI 模型識別碼（Model）
-- 是否為預設模型（IsDefault）
-- 是否啟用中（IsEnabled）
+- **模型名稱（DisplayName）**: 對使用者友善的顯示名稱（如「GPT-4 Turbo（快速、準確）」）
+- **模型識別碼（ModelId）**: AI SDK 實際呼叫時使用的識別字串（如「gpt-4-turbo」、「claude-3-sonnet"）
+- **供應商（Provider）**: AI 模型的原始供應商（如「OpenAI」、「Anthropic」）
+- **是否為預設模型（IsDefault）**: 標記系統啟動時預設選用的模型
+- **是否啟用中（IsEnabled）**: 控制模型是否在下拉選單中顯示
+
+**Copilot SDK 跨廠商支援考量**
+- GitHub Copilot SDK 支援多種 AI 供應商（OpenAI、Anthropic 等）
+- 同一個 Copilot SDK 實作可切換不同廠商的模型
+- `Provider` 欄位用於記錄模型原始來源，但實際呼叫統一透過 Copilot SDK
+- 模型切換時，僅需變更 `ModelId` 參數，無需切換實作類別
 
 **Initial State**
-- 預設填入目前 Copilot 可用且啟用的模型
-- 僅標記一個模型為預設模型
+- 預設填入目前 Copilot SDK 可用且啟用的模型（跨 OpenAI、Anthropic 等廠商）
+- 僅標記一個模型為預設模型（建議選擇速度與準確度平衡的模型）
 
 **Rationale**
-- 明確區分「可選模型」與「實際呼叫模型」
-- 避免未啟用模型被誤用
-- 便於後續調整預設值而不影響程式邏輯
+- **跨廠商統一管理**：Copilot SDK 的多廠商支援特性，允許在單一實作中切換不同供應商模型
+- **明確區分「可選模型」與「實際呼叫模型」**：避免未啟用模型被誤用
+- **便於擴充**：新增模型僅需更新設定檔，無需修改程式碼
+- **使用者透明**：使用者選擇模型時僅看到 `DisplayName`，無需了解底層 SDK 差異
 
 **Consequences**
 - 功能啟動時需載入模型清單
 - 若預設模型失效，需能安全降級或提示使用者
+- 同一個 `CopilotAIServiceProvider` 實作可支援多廠商模型切換
 
 ---
 
