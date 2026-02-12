@@ -1,0 +1,208 @@
+@page "/lyrics-guess-game"
+@using Saintber.Forge.Tools.LyricsGuessGame.Abstractions
+@using Saintber.Forge.Tools.LyricsGuessGame.Abstractions.Models
+@using Saintber.Forge.Tools.LyricsGuessGame.BLL.Config
+@inject ILyricsGuessGameService GameService
+@inject LyricsGuessGameConfig Config
+
+<h1>Lyrics Guess Game</h1>
+
+<div class="toolbar">
+    <button class="btn btn-primary" @onclick="ShowPlaylistInput">輸入歌單</button>
+    @if (GameState.IsPlaylistParsed)
+    {
+        <button class="btn btn-secondary" @onclick="ShowPlaylistView">查看歌單</button>
+    }
+</div>
+
+<PlaylistInputDialog Visible="IsInputDialogVisible" OnConfirm="HandlePlaylistConfirmAsync" OnCancel="HidePlaylistInput" />
+<PlaylistViewDialog Visible="IsViewDialogVisible" Songs="GameState.Songs" OnClose="HidePlaylistView" />
+
+@if (IsParsing)
+{
+    <p>正在解析歌單...</p>
+}
+
+@if (IsLoadingLyrics)
+{
+    <p>正在載入歌詞...</p>
+}
+
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
+
+@if (!string.IsNullOrWhiteSpace(StatusMessage))
+{
+    <p>@StatusMessage</p>
+}
+
+@if (GameState.CurrentQuestion != null)
+{
+    <div class="question-card">
+        <h3>猜歌題目</h3>
+        <pre>@GameState.CurrentQuestion.LyricsSnippet</pre>
+    </div>
+}
+
+@code {
+    private readonly Random _random = new();
+
+    public GameState GameState { get; private set; } = new();
+
+    public bool IsParsing { get; private set; }
+
+    public bool IsLoadingLyrics { get; private set; }
+
+    public string? ErrorMessage { get; private set; }
+
+    public string? StatusMessage { get; private set; }
+
+    public bool IsInputDialogVisible { get; private set; }
+
+    public bool IsViewDialogVisible { get; private set; }
+
+    public string SelectedModelId { get; private set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        var enabledModels = Config.AvailableModels.Where(m => m.IsEnabled).ToList();
+        SelectedModelId = enabledModels.FirstOrDefault(m => m.IsDefault)?.ModelId
+            ?? enabledModels.FirstOrDefault()?.ModelId
+            ?? string.Empty;
+
+        GameState.SelectedModelId = SelectedModelId;
+    }
+
+    public Task HandlePlaylistConfirmAsync(string playlistText)
+    {
+        return HandlePlaylistConfirmInternalAsync(playlistText);
+    }
+
+    public Task StartNextQuestionAsync()
+    {
+        return StartNextQuestionInternalAsync();
+    }
+
+    private void ShowPlaylistInput()
+    {
+        IsInputDialogVisible = true;
+        ErrorMessage = null;
+        StatusMessage = null;
+    }
+
+    private Task HidePlaylistInput()
+    {
+        IsInputDialogVisible = false;
+        return Task.CompletedTask;
+    }
+
+    private void ShowPlaylistView()
+    {
+        IsViewDialogVisible = true;
+    }
+
+    private Task HidePlaylistView()
+    {
+        IsViewDialogVisible = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task HandlePlaylistConfirmInternalAsync(string playlistText)
+    {
+        ErrorMessage = null;
+        StatusMessage = null;
+        IsParsing = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var songs = await GameService.ParsePlaylistBasicInfoAsync(playlistText, SelectedModelId);
+
+            GameState = new GameState
+            {
+                Songs = songs,
+                IsPlaylistParsed = true,
+                IsGameActive = false,
+                SelectedModelId = SelectedModelId
+            };
+
+            IsInputDialogVisible = false;
+            await StartNextQuestionInternalAsync();
+        }
+        catch
+        {
+            ErrorMessage = "歌單解析失敗，請重試";
+        }
+        finally
+        {
+            IsParsing = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task StartNextQuestionInternalAsync()
+    {
+        ErrorMessage = null;
+        StatusMessage = null;
+        IsLoadingLyrics = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var availableIndices = GameState.Songs
+                .Select((song, index) => new { song, index })
+                .Where(x => !GameState.UsedSongIndices.Contains(x.index)
+                            && !GameState.FailedSongIndices.Contains(x.index))
+                .Select(x => x.index)
+                .ToList();
+
+            if (availableIndices.Count == 0)
+            {
+                GameState.IsGameActive = false;
+                GameState.CurrentQuestion = null;
+                StatusMessage = "遊戲結束";
+                return;
+            }
+
+            var retryCount = Math.Max(1, Config.InitializationRetryCount);
+            for (var attempt = 0; attempt < retryCount; attempt++)
+            {
+                if (availableIndices.Count == 0)
+                {
+                    break;
+                }
+
+                var pickIndex = availableIndices[_random.Next(availableIndices.Count)];
+                var song = GameState.Songs[pickIndex];
+
+                await GameService.InitializeSongLyricsAsync(song, SelectedModelId);
+
+                if (song.InitializationFailed || !song.IsInitialized)
+                {
+                    GameState.FailedSongIndices.Add(pickIndex);
+                    availableIndices.Remove(pickIndex);
+                    continue;
+                }
+
+                var question = GameService.GenerateQuestion(song, pickIndex);
+                GameState.CurrentQuestion = question;
+                GameState.UsedSongIndices.Add(pickIndex);
+                GameState.IsGameActive = true;
+                return;
+            }
+
+            ErrorMessage = "歌詞初始化失敗，請稍後再試";
+        }
+        catch
+        {
+            ErrorMessage = "歌詞初始化失敗，請稍後再試";
+        }
+        finally
+        {
+            IsLoadingLyrics = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}

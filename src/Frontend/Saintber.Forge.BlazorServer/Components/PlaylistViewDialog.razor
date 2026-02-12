@@ -1,0 +1,39 @@
+@using Microsoft.AspNetCore.Components
+@using Saintber.Forge.Tools.LyricsGuessGame.Abstractions.Models
+
+@if (Visible)
+{
+    <div class="dialog-backdrop">
+        <div class="dialog">
+            <h3>歌單清單</h3>
+            <ul>
+                @foreach (var song in Songs)
+                {
+                    <li>@song.Title - @song.Artist</li>
+                }
+            </ul>
+            <div class="dialog-actions">
+                <button class="btn btn-secondary" @onclick="OnCloseClicked">關閉</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool Visible { get; set; }
+
+    [Parameter]
+    public IReadOnlyList<Song> Songs { get; set; } = Array.Empty<Song>();
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private async Task OnCloseClicked()
+    {
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+}

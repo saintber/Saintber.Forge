@@ -115,21 +115,21 @@ Based on plan.md project structure:
 
 ### UI Components (Tests optional for UI layout, MANDATORY for interaction logic)
 
-- [ ] T045 [P] [US1] Create PlaylistInputDialog component in `src/Frontend/.../Components/PlaylistInputDialog.razor`
-- [ ] T046 [P] [US1] Create PlaylistViewDialog component in `src/Frontend/.../Components/PlaylistViewDialog.razor`
-- [ ] T047 [US1] Create LyricsGuessGame main page in `src/Frontend/.../Pages/LyricsGuessGame.razor`
+- [X] T045 [P] [US1] Create PlaylistInputDialog component in `src/Frontend/.../Components/PlaylistInputDialog.razor`
+- [X] T046 [P] [US1] Create PlaylistViewDialog component in `src/Frontend/.../Components/PlaylistViewDialog.razor`
+- [X] T047 [US1] Create LyricsGuessGame main page in `src/Frontend/.../Pages/LyricsGuessGame.razor`
 
 ### UI Logic (TDD: Test interaction logic)
 
-- [ ] T048 [US1] Unit test for HandlePlaylistConfirmAsync (parse success) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs` (MUST FAIL initially, use Mock ILyricsGuessGameService)
-- [ ] T049 [US1] Unit test for HandlePlaylistConfirmAsync (parse failure) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
-- [ ] T050 [US1] Implement HandlePlaylistConfirmAsync method in LyricsGuessGame.razor (call ParsePlaylistBasicInfoAsync)
-- [ ] T051 [US1] Unit test for StartNextQuestionAsync (song selection + lyrics initialization) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs` (MUST FAIL initially)
-- [ ] T052 [US1] Implement StartNextQuestionAsync method (random song selection, lazy load lyrics, generate question)
-- [ ] T053 [US1] Add error handling for initialization failures (retry up to 3 times per spec edge case)
-- [ ] T054 [US1] Add UI loading states ("正在解析歌單..." and "正在載入歌詞...")
-- [ ] T055 [US1] Add "查看歌單" button and dialog display logic
-- [ ] T056 [US1] Implement playlist overwrite logic (clear previous state on new input)
+- [X] T048 [US1] Unit test for HandlePlaylistConfirmAsync (parse success) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs` (MUST FAIL initially, use Mock ILyricsGuessGameService)
+- [X] T049 [US1] Unit test for HandlePlaylistConfirmAsync (parse failure) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
+- [X] T050 [US1] Implement HandlePlaylistConfirmAsync method in LyricsGuessGame.razor (call ParsePlaylistBasicInfoAsync)
+- [X] T051 [US1] Unit test for StartNextQuestionAsync (song selection + lyrics initialization) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs` (MUST FAIL initially)
+- [X] T052 [US1] Implement StartNextQuestionAsync method (random song selection, lazy load lyrics, generate question)
+- [X] T053 [US1] Add error handling for initialization failures (retry up to 3 times per spec edge case)
+- [X] T054 [US1] Add UI loading states ("正在解析歌單..." and "正在載入歌詞...")
+- [X] T055 [US1] Add "查看歌單" button and dialog display logic
+- [X] T056 [US1] Implement playlist overwrite logic (clear previous state on new input)
 
 **Checkpoint**: US1 complete - can input playlist, parse songs, display first question
 
