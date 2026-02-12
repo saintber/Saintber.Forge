@@ -127,6 +127,27 @@
 - **初始化等待時間**: 使用者選中某首歌曲時，若該歌曲尚未初始化，系統顯示「正在載入歌詞...」提示（預期 2-5 秒），初始化完成後立即顯示題目
 - **查看歌單洩漏答案**: 使用者在遊戲進行中點擊「查看歌單」按鈕，系統顯示完整歌單清單（不標示哪首歌正在被出題或已初始化狀態），避免洩漏答案
 
+## Constitution Compliance Check
+
+根據 `.specify/memory/constitution.md` 檢視本功能是否符合治理原則：
+
+- ✅ **Principle 3**: Lyrics Guess Game 為獨立 Tool，擁有獨立的 Abstractions 與 BLL 專案，可被獨立建置與移除
+- ✅ **Principle 4**: 僅依賴 GitHub Copilot SDK（外部套件）與自身的 Abstractions，無跨 Tool 實作耦合
+- ✅ **Principle 5**: 對外提供的契約定義於 `Saintber.Forge.Tools.LyricsGuessGame.Abstractions`，遵循契約層共享原則
+- ✅ **Principle 6**: AI 服務透過 `IAIServiceProvider` 介面抽象，保留替換為其他 AI 提供者的彈性（如從 Copilot 切換至 OpenAI 直接呼叫）
+- ✅ **Principle 7**: BlazorServer 透過依賴注入取得 `ILyricsGuessGameService`，不直接建立 BLL 具體類別
+- ✅ **Principle 8**: UI 實作於 BlazorServer 的 `LyricsGuessGame.razor`，Tool 的 BLL 專案僅提供業務邏輯介面
+- ✅ **Principle 11**: 規格提供詳細的 Acceptance Scenarios（Given-When-Then 格式），涵蓋所有使用者故事與邊界情況，足以支援 TDD 實踐（每個場景可轉化為測試案例）
+- ✅ **Principle 12**: 所有功能需求（FR-001 至 FR-023）皆為可驗證的陳述，涵蓋 UI 互動、AI 處理、遊戲邏輯與錯誤處理，可透過單元測試（AI 解析、答案驗證邏輯）與整合測試（完整遊戲流程）驗證
+
+**TDD 實踐注意事項**（實作階段參考）：
+- 本功能的核心邏輯（歌單解析、歌詞初始化、答案驗證、遊戲狀態管理）屬於 TDD 強制範圍
+- 規格中的每個 Acceptance Scenario 應對應至少一個測試案例
+- AI 互動邏輯應透過 Mock `IAIServiceProvider` 進行單元測試
+- 完整遊戲流程應透過整合測試驗證
+
+本功能完全符合憲章治理原則。
+
 ## Requirements
 
 ### Functional Requirements

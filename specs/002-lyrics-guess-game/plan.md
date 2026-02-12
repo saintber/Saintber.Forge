@@ -39,8 +39,22 @@
 - [x] **Principle 6**: ✅ 業務能力設計保持可替換性（所有服務方法為 async、使用 CancellationToken、拋出明確異常型別，支援未來替換為微服務或 FaaS）
 - [x] **Principle 7**: ✅ 使用依賴注入取得服務（Program.cs 註冊 `IAIServiceProvider` 與 `ILyricsGuessGameService`）
 - [x] **Principle 8**: ✅ Presentation 邏輯集中於 BlazorServer 的 Pages/Components，Tool 層僅包含業務邏輯與資料模型
+- [x] **Principle 11**: ✅ 採用 TDD 開發模式，核心邏輯（歌單解析、歌詞初始化、答案驗證、遊戲狀態管理）屬於 TDD 強制範圍，實作前需先撰寫測試（見 Testing 區段）
+- [x] **Principle 12**: ✅ 完成定義包含 Gate A（restore/build/test 全部通過）與 Verification Record，所有測試需執行並通過才可宣告完成
 
 **Phase 1 Re-check Result**: ✅ 所有治理原則皆已滿足，無違反事項。
+
+**TDD Implementation Notes**:
+- **Unit Tests** (TDD 強制範圍): 
+  - `LyricsGuessGameService` 的所有公開方法（歌單解析、問題生成、答案驗證）
+  - `CopilotAIServiceProvider` 的 AI 呼叫邏輯（使用 Mock CopilotClient）
+  - 所有 Model 的驗證邏輯（如 `Song.Lyrics` 延遲載入、`Question.State` 狀態機）
+- **Integration Tests** (可選但建議):
+  - 完整遊戲流程（輸入歌單 → 解析 → 出題 → 答題 → 下一題）
+  - AI 真實呼叫測試（需 GITHUB_TOKEN，可在 Gate B 手動執行）
+- **UI Tests** (Gate B): 
+  - Blazor 元件互動測試（bUnit）
+  - RWD 測試（非 TDD 強制範圍，可在實作後補充）
 
 ## Project Structure
 

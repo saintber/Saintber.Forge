@@ -113,3 +113,23 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+
+## Constitution Compliance Check *(recommended)*
+
+<!--
+  ACTION REQUIRED: Review feature against constitution principles.
+  This ensures the specification aligns with project governance from the start.
+-->
+
+根據 `.specify/memory/constitution.md` 檢視本功能是否符合治理原則：
+
+- [ ] **Principle 3**: 若涉及新 Tool，確認其可被獨立建置、驗證與移除
+- [ ] **Principle 4**: 不會形成工具間的實作耦合
+- [ ] **Principle 5**: 跨 Tool 互動僅透過契約層
+- [ ] **Principle 6**: 業務能力設計保持可替換性
+- [ ] **Principle 7**: 相依關係透過依賴注入
+- [ ] **Principle 8**: Presentation 集中於 BlazorServer/BlazorWasm
+- [ ] **Principle 11**: 規格提供明確的驗收標準（Acceptance Scenarios），足以支援 TDD 實踐（測試可從驗收標準直接轉化）
+- [ ] **Principle 12**: 規格包含可驗證的功能需求（每項需求都能透過自動化或手動測試驗證）
+
+若任一項無法滿足，請在 Assumptions 或 Out of Scope 中說明理由。

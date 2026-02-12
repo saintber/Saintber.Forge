@@ -51,8 +51,22 @@
 - [x] **Principle 6**: Tool 以 URL 存在，完全保留替換彈性（可為內部服務、外部 API、靜態頁面等） ✅
 - [x] **Principle 7**: 不直接呼叫 Tool 業務能力，僅 HTTP 導覽，符合依賴限制 ✅
 - [x] **Principle 8**: Presentation 集中於 BlazorServer，Tool 不包含 UI，完全符合 ✅
+- [x] **Principle 11**: ✅ 採用 TDD 開發模式，服務層邏輯（Tool Registration 查詢、使用者身份驗證）屬於 TDD 強制範圍，實作前需先撰寫測試（見 Testing 區段）
+- [x] **Principle 12**: ✅ 完成定義包含 Gate A（restore/build/test 全部通過）+ Gate B（RWD 手動驗證）與 Verification Record，所有測試需執行並通過才可宣告完成
 
 **Constitution Check Result**: ✅ **PASS** - 完全符合所有治理原則
+
+**TDD Implementation Notes**:
+- **Unit Tests** (TDD 強制範圍):
+  - `ToolRegistrationService` 的所有查詢方法（公開/受保護 Tool 篩選邏輯）
+  - `ToolCard` 元件的互動邏輯（點擊事件、URL 導覽）
+  - 使用者身份驗證狀態判斷邏輯
+- **Integration Tests** (可選但建議):
+  - 完整導覽流程（未登入 → 點擊公開 Tool → 導向正確 URL）
+  - 登入流程整合測試（Microsoft Identity redirect → callback → 顯示受保護 Tool）
+- **E2E/RWD Tests** (Gate B，手動驗證為主):
+  - RWD 斷點測試（桌機/平板/手機三種寬度）
+  - 卡片佈局正確性（Playwright/Selenium 自動化可選）
 
 ## Project Structure
 

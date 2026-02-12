@@ -139,5 +139,7 @@
 - ✅ **Principle 6**: Tool 以 URL 形式存在，保留替換為其他實作型態的彈性
 - ✅ **Principle 7**: Portal Home 不直接呼叫 Tool 的業務邏輯，符合依賴限制
 - ✅ **Principle 8**: Portal Home 為集中 Presentation 責任的正確實踐
+- ✅ **Principle 11**: 規格提供明確的 Acceptance Scenarios（Given-When-Then 格式），每個場景都可直接轉化為測試案例，支援 TDD 實踐
+- ✅ **Principle 12**: 所有功能需求（FR-001 至 FR-012）皆為可驗證的陳述，可透過自動化測試（卡片渲染、URL 導覽）或手動測試（RWD 佈局）驗證
 
 本功能完全符合憲章治理原則。

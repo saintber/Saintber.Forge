@@ -28,21 +28,41 @@
 
 ### 1.2 統一呼叫方式
 
-```csharp
-// 相同的程式碼可呼叫不同廠商的模型
-var chatRequest = new CopilotChatRequest
-{
-    Model = modelId, // 僅此參數變更，其他完全相同
-    Messages = new[]
-    {
-        new CopilotMessage { Role = "system", Content = systemPrompt },
-        new CopilotMessage { Role = "user", Content = userInput }
-    },
-    Temperature = 0.3,
-    ResponseFormat = CopilotResponseFormat.Json
-};
+> **Note**: SDK 0.1.23 以 **Session API** 為主，非 `ChatAsync` 直呼叫模式。
 
-var response = await _copilotClient.ChatAsync(chatRequest, cancellationToken);
+```csharp
+using GitHub.Copilot.SDK;
+
+await using var client = new CopilotClient();
+await client.StartAsync();
+
+await using var session = await client.CreateSessionAsync(new SessionConfig
+{
+  Model = modelId,
+  SystemMessage = string.IsNullOrWhiteSpace(systemPrompt)
+    ? null
+    : new SystemMessageConfig
+    {
+      Mode = SystemMessageMode.Append,
+      Content = systemPrompt
+    }
+});
+
+var done = new TaskCompletionSource();
+session.On(evt =>
+{
+  if (evt is AssistantMessageEvent msg)
+  {
+    Console.WriteLine(msg.Data.Content);
+  }
+  else if (evt is SessionIdleEvent)
+  {
+    done.SetResult();
+  }
+});
+
+await session.SendAsync(new MessageOptions { Prompt = userInput });
+await done.Task;
 ```
 
 ---
@@ -202,9 +222,7 @@ var response = await _copilotClient.ChatAsync(chatRequest, cancellationToken);
 ```json
 {
   "Copilot": {
-    "ApiKey": "${GITHUB_TOKEN}",
-    "BaseUrl": "https://api.githubcopilot.com",
-    "Timeout": 30
+    "GitHubToken": "${GITHUB_TOKEN}"
   },
   "LyricsGuessGame": {
     "AIModels": [
@@ -231,14 +249,17 @@ var response = await _copilotClient.ChatAsync(chatRequest, cancellationToken);
 
 ```csharp
 // Program.cs
-builder.Services.AddCopilotClient(options =>
+using GitHub.Copilot.SDK;
+
+var githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
+  ?? builder.Configuration["Copilot:GitHubToken"]
+  ?? throw new InvalidOperationException("GITHUB_TOKEN is required");
+
+builder.Services.AddSingleton(sp => new CopilotClient(new CopilotClientOptions
 {
-    var config = builder.Configuration.GetSection("Copilot");
-    options.ApiKey = config["ApiKey"] ?? 
-                     Environment.GetEnvironmentVariable("GITHUB_TOKEN");
-    options.BaseUrl = config["BaseUrl"];
-    options.Timeout = TimeSpan.FromSeconds(config.GetValue<int>("Timeout", 30));
-});
+  GithubToken = githubToken,
+  UseLoggedInUser = false
+}));
 ```
 
 ---
@@ -255,11 +276,11 @@ public async Task ParsePlaylistAsync_Should_Return_Songs_When_AI_Response_Valid(
     var mockAIService = new Mock<IAIServiceProvider>();
     mockAIService
         .Setup(x => x.ParseStructuredDataAsync<List<Song>>(
-            It.IsAny<string>(), 
-            It.IsAny<string>(), 
-            It.IsAny<string>(), 
-            It.IsAny<TimeSpan?>(),
-            It.IsAny<CancellationToken>()))
+          It.IsAny<string>(), 
+          It.IsAny<string>(), 
+          It.IsAny<string>(), 
+          It.IsAny<int>(),
+          It.IsAny<CancellationToken>()))
         .ReturnsAsync(new List<Song>
         {
             new Song { Title = "晴天", Artist = "周杰倫" }
@@ -284,18 +305,20 @@ public async Task ParsePlaylistAsync_Should_Return_Songs_When_AI_Response_Valid(
 public async Task CopilotAIService_Should_Support_Multiple_Vendors()
 {
     // Arrange
-    var copilotClient = serviceProvider.GetRequiredService<ICopilotClient>();
-    var aiService = new CopilotAIServiceProvider(copilotClient, ...);
+  var copilotClient = serviceProvider.GetRequiredService<CopilotClient>();
+  var aiService = new CopilotAIServiceProvider(copilotClient);
 
     // Act - OpenAI Model
     var result1 = await aiService.GenerateTextAsync(
-        "Say 'Hello from OpenAI'", 
-        "gpt-4-turbo");
+      "Say 'Hello from OpenAI'",
+      "gpt-4-turbo",
+      timeoutSeconds: 5);
 
     // Act - Anthropic Model
     var result2 = await aiService.GenerateTextAsync(
-        "Say 'Hello from Anthropic'", 
-        "claude-3-sonnet");
+      "Say 'Hello from Anthropic'",
+      "claude-3-sonnet",
+      timeoutSeconds: 5);
 
     // Assert
     Assert.Contains("OpenAI", result1);
