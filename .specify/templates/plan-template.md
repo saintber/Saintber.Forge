@@ -39,6 +39,8 @@
 - [ ] **Principle 6**: 業務能力設計保持可替換性（不綁定同行程假設）
 - [ ] **Principle 7**: 使用依賴注入取得跨 Tool 能力，不直接建立具體實作
 - [ ] **Principle 8**: Presentation 邏輯集中於 BlazorServer/BlazorWasm，Tool 不包含 UI
+- [ ] **Principle 11**: 採用 TDD 開發模式（所有 Domain Logic/Service/Validation/Authorization/FSM 需先寫測試）
+- [ ] **Principle 12**: 完成定義包含 Gate A（restore/build/test 全部通過）及 Verification Record
 
 若任一項無法滿足，需在 Phase 0 Research 中說明理由與替代方案。
 

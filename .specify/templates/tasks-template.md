@@ -8,7 +8,11 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests & TDD Requirements**: 
+- Tests are MANDATORY for all logic within TDD scope (Domain Logic, Application Service, Validation Rules, Authorization Logic, FSM/Workflow)
+- Tests MUST be written FIRST (Red → Green → Refactor) and MUST FAIL before implementation
+- Tests are OPTIONAL only for: pure UI styling, one-time data scripts, static content without logic
+- See `.specify/memory/constitution.md` Principle 11 and `docs/policy/testing-governance.md` for complete TDD requirements
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -79,11 +83,13 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1 (TDD: Write FIRST, must FAIL before implementation) 🔴
 
-> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+> **CRITICAL: Tests MUST be written BEFORE implementation for all logic in TDD scope**  
+> **TDD Scope**: Domain Logic, Application Service, Validation Rules, Authorization Logic, FSM/Workflow  
+> **Exception**: Pure UI styling, one-time scripts, static content (must justify in tasks)
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T010 [P] [US1] Unit test for [logic/service] in tests/unit/test_[name].py (MUST FAIL initially)
 - [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 1
@@ -103,9 +109,9 @@ Examples of foundational tasks (adjust based on your project):
 
 **Goal**: [Brief description of what this story delivers]
 
-**Independent Test**: [How to verify this story works on its own]
+**Independent Test**: [How tTDD: Write FIRST, must FAIL before implementation) 🔴
 
-### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
+- [ ] T018 [P] [US2] Unit test for [logic/service] in tests/unit/test_[name].py (MUST FAIL initially)
 
 - [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
 - [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
@@ -127,9 +133,9 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 3 (TDD: Write FIRST, must FAIL before implementation) 🔴
 
-- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T024 [P] [US3] Unit test for [logic/service] in tests/unit/test_[name].py (MUST FAIL initially)
 - [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 3
@@ -151,11 +157,12 @@ Examples of foundational tasks (adjust based on your project):
 **Purpose**: Improvements that affect multiple user stories
 
 - [ ] TXXX [P] Documentation updates in docs/
-- [ ] TXXX Code cleanup and refactoring
+- [ ] TXXX Code cleanup and refactoring (tests must remain passing)
 - [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
+- [ ] TXXX [P] Additional test coverage for edge cases in tests/unit/
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
+- [ ] TXXX Verify all Gate A requirements (restore/build/test) pass per implementation-definition-of-done.md
 
 ---
 
@@ -175,13 +182,15 @@ Examples of foundational tasks (adjust based on your project):
 - **User Story 1 (P1)**: Can start after Foundational (Phase 2) - No dependencies on other stories
 - **User Story 2 (P2)**: Can start after Foundational (Phase 2) - May integrate with US1 but should be independently testable
 - **User Story 3 (P3)**: Can start after Foundational (Phase 2) - May integrate with US1/US2 but should be independently testable
+ (TDD Flow)
 
-### Within Each User Story
-
-- Tests (if included) MUST be written and FAIL before implementation
-- Models before services
-- Services before endpoints
+- **TDD Red**: Write tests FIRST for all logic in TDD scope - tests MUST FAIL initially
+- **TDD Green**: Implement minimum code to make tests pass
+- **TDD Refactor**: Clean up code while keeping tests green
+- Models before services (TDD applies to model validation logic)
+- Services before endpoints (TDD strongly applies to services)
 - Core implementation before integration
+- Story complete (all tests green)ation before integration
 - Story complete before moving to next priority
 
 ### Parallel Opportunities

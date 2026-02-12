@@ -1,10 +1,10 @@
 # Testing Governance
 
 本文件定義 Saintber.Forge 專案中之測試治理原則，  
-用以規範測試類型、測試專案與其「被測目標專案」之對應關係、命名方式，以及在 CI/CD 中的執行責任。
+用以規範測試類型、測試專案與其「被測目標專案」之對應關係、命名方式、Test-Driven Development（TDD）原則，以及在 CI/CD 中的執行責任。
 
 本文件屬於 **Policy 級文件**，  
-所有 Forge 專案與子項目皆須遵循，除非在特定 Intent 下另有 **Intent 專屬 Decision 文件** 明確說明例外。:contentReference[oaicite:0]{index=0}
+所有 Forge 專案與子項目皆須遵循，除非在特定 Intent 下另有 **Intent 專屬 Decision 文件** 明確說明例外。
 
 ---
 
@@ -14,10 +14,108 @@
 2. **測試類型必須透過專案命名即可辨識**
 3. **是否可於 CI/CD 執行，必須由測試專案類型決定**
 4. **不得以測試內容或資料夾結構隱含測試類型**
+5. **預設採用 Test-Driven Development（TDD）作為開發模式**
 
 ---
 
-## 二、被測目標專案（Target Project）
+## 二、Test-Driven Development（TDD）原則
+
+### 1. 基本規範
+
+Saintber.Forge 專案預設採用 **Test-Driven Development（TDD）** 作為主要開發模式。
+
+除非於特定 Intent 中提供 Decision 文件明確說明例外，  
+所有功能開發應遵循以下順序：
+
+```
+
+Spec → Test → Code → Refactor
+
+```
+
+不得將「完成實作後補寫測試」作為常態流程。
+
+---
+
+### 2. TDD 三階段循環（Red → Green → Refactor）
+
+所有適用 TDD 之開發項目應遵循以下循環：
+
+1. **Red**
+   - 先撰寫測試案例
+   - 測試必須失敗
+   - 測試失敗原因須對應尚未實作之功能
+
+2. **Green**
+   - 撰寫最小可行實作，使測試通過
+   - 不得於此階段進行非必要優化
+
+3. **Refactor**
+   - 在所有測試通過狀態下進行重構
+   - 不得改變測試語意
+   - 重構後所有測試仍須通過
+
+---
+
+### 3. 適用範圍
+
+TDD 原則適用於：
+
+- Domain Logic
+- Application Service
+- 純邏輯元件
+- 驗證規則（Validation Rules）
+- 授權決策邏輯（Authorization Logic）
+- FSM / Workflow 決策邏輯
+
+不強制適用於：
+
+- 純 UI 樣式調整
+- 一次性資料修復腳本
+- 無邏輯行為之樣板程式碼
+- 單純基礎設施連線設定
+
+---
+
+### 4. TDD 與測試類型之關係
+
+- TDD 原則主要適用於 **UnitTests**
+- IntegrationTests 不強制採用 Red → Green 模式
+- IntegrationTests 用於驗證整合行為，而非驅動邏輯開發
+
+---
+
+### 5. 與 CI/CD 之關聯
+
+- 所有依 TDD 撰寫之 UnitTests 必須可於 CI/CD Pipeline 自動執行
+- 若 UnitTests 未通過，不得合併至主分支
+- UnitTests 為品質 Gate A 之一
+
+---
+
+### 6. TDD 禁止事項
+
+1. 不得先完成核心邏輯實作後再撰寫測試
+2. 不得僅撰寫 Happy Path 測試
+3. 不得以 IntegrationTests 取代應屬於 UnitTests 的邏輯驗證
+4. 不得為使測試通過而改變測試語意掩蓋缺陷
+
+---
+
+### 7. 例外處理
+
+若因技術限制或遺留系統因素無法採用 TDD，  
+必須於對應 Intent 目錄中提供 Decision 文件，說明：
+
+- 無法採用 TDD 之原因
+- 影響範圍
+- 風險評估
+- 補救措施
+- 預計恢復 TDD 之時間點
+
+---
+
+## 三、被測目標專案（Target Project）
 
 本治理文件中所稱之「被測目標專案」，  
 指的是實際被測試的 Forge 主專案，例如：
@@ -31,7 +129,7 @@
 
 ---
 
-## 三、測試類型與專案命名規範
+## 四、測試類型與專案命名規範
 
 ### 1. 單元測試（Unit Tests）
 
@@ -109,7 +207,7 @@
 
 ---
 
-## 四、命名遷移與修正原則
+## 五、命名遷移與修正原則
 
 若既有文件、工具或產生器使用以下命名：
 
@@ -141,7 +239,7 @@
 
 ---
 
-## 五、禁止事項
+## 六、禁止事項
 
 1. 不得將 Integration Tests 放入 UnitTests 專案
 2. 不得以資料夾（如 `E2E/`、`Integration/`）取代專案層級區分
@@ -150,25 +248,26 @@
 
 ---
 
-## 六、例外與變更管理
+## 七、例外與變更管理
 
-若特定 Intent 需要偏離本治理規範（例如：強制 CI/CD 執行整合測試、或採用不同命名），  
+若特定 Intent 需要偏離本治理規範，  
 必須在該 Intent 目錄下提供明確之 **Decision 文件** 說明原因、範圍與期限。
 
-Decision 文件位置與命名遵循文件指南：:contentReference[oaicite:1]{index=1}
+Decision 文件位置與命名：
 
-```text
+```
+
 docs/intent/<intent-id>-<intent-name>/
 ├─ intent.md
 └─ decision.md
-````
+
+```
 
 ---
 
-## 七、與其他治理文件之關係
+## 八、與其他治理文件之關係
 
-* 本文件為 **Testing Policy**
-* 測試是否為交付完成條件，依據：
-
-  * `implementation-definition-of-done.md`
-* 本文件僅規範測試「命名、分類與執行責任」，不定義具體測試案例內容或驗收規格。
+- 本文件為 **Testing Policy**
+- 測試是否為交付完成條件，依據：
+  - `implementation-definition-of-done.md`
+- 本文件規範測試命名、分類、TDD 原則與執行責任，不定義具體測試案例內容或驗收規格。

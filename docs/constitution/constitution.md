@@ -1,3 +1,48 @@
+<!--
+Sync Impact Report — Constitution v1.1.0
+
+Version Change: v1.0.0 → v1.1.0
+Ratification Date: 2026-02-07
+Last Amended: 2026-02-12
+
+Modified Principles:
+- None
+
+Added Sections:
+- Principle 11: Test-Driven Development 為預設開發模式（新增）
+- Principle 12: 完成定義必須包含測試驗證（新增）
+
+Removed Sections:
+- None
+
+Version Bump Rationale:
+- MINOR (v1.0.0 → v1.1.0): 新增兩個治理原則（TDD 與完成定義），實質擴充治理指引
+- 新增原則來自 testing-governance.md 和 implementation-definition-of-done.md 的治理要求
+- 確保憲章與現有 policy 文件一致
+
+Templates Consistency Status:
+✅ plan-template.md — Constitution Check section already present, aligns with new TDD principle
+⚠️ tasks-template.md — REQUIRES UPDATE: Currently states tests are OPTIONAL, conflicts with TDD requirement
+✅ spec-template.md — User scenarios align with tool independence and TDD approach
+⚠️ commands/*.md — Should reference TDD requirement when generating tasks
+
+Dependency Artifacts:
+✅ project-structure.md — Aligns with Tool isolation and DI principles
+✅ security-baseline.md — Security capabilities align with non-mandatory principle
+✅ tech-baseline.md — Technology choices support tool replaceability
+✅ testing-governance.md — SOURCE: This policy defines TDD as default development mode
+✅ implementation-definition-of-done.md — SOURCE: This policy requires TDD compliance in Gate A
+✅ README.md — Documentation structure supports constitution hierarchy
+
+Follow-up TODOs:
+- Update tasks-template.md to reflect TDD as default (not optional)
+- Review command templates to ensure TDD guidance is included
+- Update any existing task lists that treat tests as optional
+
+Deferred Items:
+- None
+-->
+
 # Constitution — Saintber.Forge
 
 > **⚠️ 文件遷移通知**  
@@ -5,9 +50,9 @@
 > 以下內容為該文件的副本，供文件瀏覽使用。  
 > **正式治理文件位置**: `.specify/memory/constitution.md`
 
-> **Governance Document Version**: v1.0.0  
+> **Governance Document Version**: v1.1.0  
 > **Ratification Date**: 2026-02-07  
-> **Last Amended**: 2026-02-08
+> **Last Amended**: 2026-02-12
 
 > Purpose  
 > 本文件定義 Saintber.Forge 專案的**治理憲章**，  
@@ -24,9 +69,9 @@
 | Property | Value |
 |----------|-------|
 | Project Name | Saintber.Forge |
-| Version | v1.0.0 |
+| Version | v1.1.0 |
 | Ratification Date | 2026-02-07 |
-| Last Amended | 2026-02-08 |
+| Last Amended | 2026-02-12 |
 | Status | Active |
 | Amendment Authority | Project Constitution Committee |
 
@@ -208,9 +253,90 @@ public class MyController
 
 ---
 
+### Principle 11: Test-Driven Development 為預設開發模式
+
+**裁決**:  
+- Saintber.Forge 採用 **Test-Driven Development (TDD)** 作為預設開發模式
+- 所有涉及可測試邏輯的變更，必須遵循 Red → Green → Refactor 循環
+- 測試不得為事後補寫而未經失敗驗證
+
+**理由**:  
+TDD 確保：
+1. 需求被明確轉化為可驗證的測試案例
+2. 實作僅包含滿足測試所需的最小可行程式碼
+3. 重構在測試保護下進行，降低引入缺陷的風險
+4. 程式碼的可測試性從設計階段即被考慮
+
+**適用範圍**:  
+TDD 強制適用於：
+- Domain Logic（領域邏輯）
+- Application Service（應用服務）
+- Validation Rules（驗證規則）
+- Authorization Decision Logic（授權決策邏輯）
+- FSM / Workflow Decision（狀態機與工作流決策）
+
+**不強制適用**:  
+- 純 UI 樣式調整
+- 無邏輯行為之靜態內容
+- 一次性資料修復腳本
+- 純基礎設施連線設定
+
+**例外處理**:  
+若因技術限制或遺留系統因素無法採用 TDD，必須於對應 Intent 目錄中提供 Decision 文件，說明：
+- 無法採用 TDD 之原因
+- 影響範圍
+- 風險評估
+- 補救措施
+- 預計恢復 TDD 之時間點
+
+**參考文件**:  
+- `docs/policy/testing-governance.md` — TDD 三階段循環與適用範圍詳細說明
+- `docs/policy/implementation-definition-of-done.md` — TDD 在完成定義中的驗證要求
+
+---
+
+### Principle 12: 完成定義必須包含測試驗證
+
+**裁決**:  
+- 任何可交付變更必須通過 Gate A（自動驗證）：restore → build → test
+- 涉及 TDD 強制範圍的變更，必須存在對應 UnitTests
+- 測試未通過時，不得宣告完成（Done）
+
+**理由**:  
+明確的完成定義防止：
+1. 以推論取代實際驗證
+2. 跳過測試執行仍宣告完成
+3. 涉及邏輯變更卻無測試覆蓋
+4. 測試失敗但以「非 compiler error」為由通過
+
+**最低要求**:  
+每次可交付變更必須：
+- 執行 `dotnet restore` 成功
+- 執行 `dotnet build` 成功（Errors = 0）
+- 執行 `dotnet test` 且所有測試通過
+- 產出 Verification Record（記錄 Gate A/B 執行結果）
+
+**完成狀態**:  
+- **Done**: Gate A 通過，且若需求包含手動驗證，Gate B 亦完成
+- **Blocked: Manual Verification**: Gate A 通過，但 Gate B 尚未完成
+- **Not Done**: Gate A 未通過或缺少 Verification Record
+
+**禁止事項**:  
+- restore 失敗但宣稱可忽略
+- build 未通過但宣稱僅為設定問題
+- 存在測試但未執行測試
+- 涉及 TDD 強制範圍卻未新增測試
+- 跳過驗證流程直接宣告 Done
+
+**參考文件**:  
+- `docs/policy/implementation-definition-of-done.md` — Gate A/B 詳細檢查清單與 Verification Record 模板
+- `docs/policy/testing-governance.md` — 測試類型與執行責任定義
+
+---
+
 ## 三、憲章與其他文件的關係
 
-### Principle 9: 憲章優先原則
+### Principle 13: 憲章優先原則
 
 **裁決**:  
 - 所有 policy、plan 與實作內容不得違反本憲章所定義之裁決
@@ -228,7 +354,7 @@ public class MyController
 
 ---
 
-### Principle 10: 憲章不描述實作細節
+### Principle 14: 憲章不描述實作細節
 
 **裁決**:  
 - 本文件不描述結構、目錄、命名或工具配置
@@ -290,5 +416,6 @@ Implementation (實際程式碼)
 ---
 
 **Document Control**  
-- Authoritative Source: `.specify/memory/constitution.md`  
-- This Document: `docs/constitution/constitution.md` (read-only copy)
+- Location: `.specify/memory/constitution.md`  
+- Authoritative Source: This document  
+- Related Documents: See `docs/README.md` for complete documentation structure
