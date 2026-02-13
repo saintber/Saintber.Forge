@@ -56,6 +56,15 @@
 
 ---
 
+## Lyrics Guess Game 文件入口
+
+- 規格與任務：`specs/002-lyrics-guess-game/`
+- 服務契約：`specs/002-lyrics-guess-game/contracts/`
+- 快速啟動：`specs/002-lyrics-guess-game/quickstart.md`
+- Gate 驗證紀錄：`docs/plan/verification/`
+
+---
+
 ## 建議閱讀順序
 
 1. `.specify/memory/constitution.md`（或 `docs/constitution/constitution.md`）

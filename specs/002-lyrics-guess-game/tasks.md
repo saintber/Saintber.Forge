@@ -143,15 +143,15 @@ Based on plan.md project structure:
 
 ### UI & Logic (TDD: Test answer validation flow)
 
-- [ ] T057 [US2] Unit test for SubmitAnswerAsync (correct answer) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs` (MUST FAIL initially)
-- [ ] T058 [US2] Unit test for SubmitAnswerAsync (wrong answer with hints) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
-- [ ] T059 [US2] Unit test for SubmitAnswerAsync (validation error handling) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
-- [ ] T060 [US2] Add answer input field and submit button to LyricsGuessGame.razor
-- [ ] T061 [US2] Implement SubmitAnswerAsync method (call ValidateAnswerAsync, display feedback)
-- [ ] T062 [US2] Implement feedback display logic (答對了! / 風格很像但不是 / 只差一個字 / 不對喔！)
-- [ ] T063 [US2] Implement auto-advance to next question on correct answer
-- [ ] T064 [US2] Add validation error handling with retry option
-- [ ] T065 [US2] Clear answer input after each submission
+- [X] T057 [US2] Unit test for SubmitAnswerAsync (correct answer) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs` (MUST FAIL initially)
+- [X] T058 [US2] Unit test for SubmitAnswerAsync (wrong answer with hints) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
+- [X] T059 [US2] Unit test for SubmitAnswerAsync (validation error handling) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
+- [X] T060 [US2] Add answer input field and submit button to LyricsGuessGame.razor
+- [X] T061 [US2] Implement SubmitAnswerAsync method (call ValidateAnswerAsync, display feedback)
+- [X] T062 [US2] Implement feedback display logic (答對了! / 風格很像但不是 / 只差一個字 / 不對喔！)
+- [X] T063 [US2] Implement auto-advance to next question on correct answer
+- [X] T064 [US2] Add validation error handling with retry option
+- [X] T065 [US2] Clear answer input after each submission
 
 **Checkpoint**: US2 complete - answer validation and feedback working, auto-advance on correct answer
 
@@ -165,11 +165,11 @@ Based on plan.md project structure:
 
 ### UI & Logic
 
-- [ ] T066 [US3] Add "公佈答案" button to LyricsGuessGame.razor
-- [ ] T067 [US3] Implement RevealAnswerAsync method (display correct answer, auto-advance after delay)
-- [ ] T068 [US3] Ensure revealed songs are excluded from future questions in current game session
-- [ ] T069 [US3] Add game end detection (all songs completed)
-- [ ] T070 [US3] Implement "遊戲結束" message with restart options
+- [X] T066 [US3] Add "公佈答案" button to LyricsGuessGame.razor
+- [X] T067 [US3] Implement RevealAnswerAsync method (display correct answer, auto-advance after delay)
+- [X] T068 [US3] Ensure revealed songs are excluded from future questions in current game session
+- [X] T069 [US3] Add game end detection (all songs completed)
+- [X] T070 [US3] Implement "遊戲結束" message with restart options
 
 **Checkpoint**: US3 complete - reveal answer functionality working, game end detection in place
 
@@ -183,10 +183,10 @@ Based on plan.md project structure:
 
 ### UI & Logic
 
-- [ ] T071 [P] [US4] Add AI model selection dropdown to LyricsGuessGame.razor
-- [ ] T072 [US4] Load available models from LyricsGuessGameConfig into dropdown
-- [ ] T073 [US4] Implement model selection change handler
-- [ ] T074 [US4] Add error handling for model-specific failures with fallback message
+- [X] T071 [P] [US4] Add AI model selection dropdown to LyricsGuessGame.razor
+- [X] T072 [US4] Load available models from LyricsGuessGameConfig into dropdown
+- [X] T073 [US4] Implement model selection change handler
+- [X] T074 [US4] Add error handling for model-specific failures with fallback message
 
 **Checkpoint**: US4 complete - model selection working, errors handled gracefully
 
@@ -200,9 +200,9 @@ Based on plan.md project structure:
 
 ### UI & Logic
 
-- [ ] T075 [US5] Ensure "輸入歌單" button always visible during gameplay
-- [ ] T076 [US5] Implement state reset logic (clear songs, questions, used indices)
-- [ ] T077 [US5] Add confirmation dialog for reset (optional: prevent accidental reset)
+- [X] T075 [US5] Ensure "輸入歌單" button always visible during gameplay
+- [X] T076 [US5] Implement state reset logic (clear songs, questions, used indices)
+- [X] T077 [US5] Add confirmation dialog for reset (optional: prevent accidental reset)
 
 **Checkpoint**: US5 complete - playlist reset working, all user stories functional
 
@@ -212,17 +212,17 @@ Based on plan.md project structure:
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T078 [P] Update README.md with Lyrics Guess Game section in `docs/README.md`
-- [ ] T079 [P] Add XML documentation to IAIServiceProvider interface
-- [ ] T080 [P] Add XML documentation to ILyricsGuessGameService interface
-- [ ] T081 Verify timeout settings match quickstart.md (ParsePlaylist: 10s, FetchLyrics: 5s, ValidateAnswer: 5s)
-- [ ] T082 Review error messages for user-friendliness
+- [X] T078 [P] Update README.md with Lyrics Guess Game section in `docs/README.md`
+- [X] T079 [P] Add XML documentation to IAIServiceProvider interface
+- [X] T080 [P] Add XML documentation to ILyricsGuessGameService interface
+- [X] T081 Verify timeout settings match quickstart.md (ParsePlaylist: 10s, FetchLyrics: 5s, ValidateAnswer: 5s)
+- [X] T082 Review error messages for user-friendliness
 - [ ] T083 Execute quickstart.md validation (follow guide step-by-step)
-- [ ] T084 [P] Verify GITHUB_TOKEN loaded from environment variable (security check - already implemented)
-- [ ] T085 Run `dotnet restore` (Gate A verification)
-- [ ] T086 Run `dotnet build` (Gate A verification - must have 0 errors)
-- [ ] T087 Run `dotnet test` (Gate A verification - all tests must pass)
-- [ ] T088 Create Verification Record in `docs/plan/verification/002-lyrics-guess-game-initial.verify.md`
+- [X] T084 [P] Verify GITHUB_TOKEN loaded from environment variable (security check - already implemented)
+- [X] T085 Run `dotnet restore` (Gate A verification)
+- [X] T086 Run `dotnet build` (Gate A verification - must have 0 errors)
+- [X] T087 Run `dotnet test` (Gate A verification - all tests must pass)
+- [X] T088 Create Verification Record in `docs/plan/verification/002-lyrics-guess-game-initial.verify.md`
 
 **Checkpoint**: All polish tasks complete, ready for Gate B verification
 
