@@ -10,10 +10,11 @@
 
 ### Questions
 - 歌單解析：能否讓 AI 從非結構化文字中萃取歌曲清單（JSON 格式）？
-- 歌詞取得：能否讓 AI 依據歌名與歌手取得完整歌詞？
+- 歌詞節錄：能否讓 AI 依據歌名與歌手即時節錄歌詞片段（10字以上完整句子）？
 - 答案判定：能否讓 AI 進行語意比對（容忍錯字、簡繁體）？
 - 模型切換：能否在執行期間動態切換 AI 模型？
 - 錯誤處理：逾時、Quota 超限、模型不可用的處理方式？
+- **v1.1 新增**：AI 因法規限制拒絕節錄歌詞時的降級處理？
 
 ### Research Findings
 
@@ -66,7 +67,7 @@ public interface IAIServiceProvider
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 使用 AI 取得文字內容（如歌詞）
+    /// 使用 AI 取得文字內容（如歌詞片段節錄）
     /// </summary>
     /// <param name="prompt">提示詞</param>
     /// <param name="modelId">AI 模型識別碼</param>
@@ -102,78 +103,176 @@ public interface IAIServiceProvider
 #### 2. Copilot SDK 實作範例（優先實作）
 
 ```csharp
+using System.Text;
+using System.Text.Json;
+using GitHub.Copilot.SDK;
+using Saintber.Forge.Tools.LyricsGuessGame.Abstractions;
+using Saintber.Forge.Tools.LyricsGuessGame.Abstractions.Exceptions;
+
 public class CopilotAIServiceProvider : IAIServiceProvider
 {
-    private readonly ICopilotClient _copilotClient; // GitHub Copilot SDK 客戶端
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<CopilotAIServiceProvider> _logger;
+    private readonly CopilotClient _copilotClient; // GitHub Copilot SDK 客戶端
+    private readonly SemaphoreSlim _startLock = new(1, 1);
+    private bool _started;
 
-    public CopilotAIServiceProvider(
-        ICopilotClient copilotClient, 
-        IConfiguration configuration,
-        ILogger<CopilotAIServiceProvider> logger)
+    public CopilotAIServiceProvider(CopilotClient copilotClient)
     {
-        _copilotClient = copilotClient;
-        _configuration = configuration;
-        _logger = logger;
+        _copilotClient = copilotClient ?? throw new ArgumentNullException(nameof(copilotClient));
     }
 
     public async Task<T> ParseStructuredDataAsync<T>(
         string prompt, 
         string userInput, 
         string modelId, 
-        TimeSpan? timeout = null,
+        int timeoutSeconds,
         CancellationToken cancellationToken = default)
     {
-        var timeoutValue = timeout ?? TimeSpan.FromSeconds(10);
+        var responseText = await SendPromptAsync(
+            systemPrompt: prompt,
+            userPrompt: userInput,
+            modelId: modelId,
+            timeoutSeconds: timeoutSeconds,
+            cancellationToken: cancellationToken);
+
+        // 從回應中提取 JSON（可能包含 markdown 包裹）
+        var jsonText = ExtractJson(responseText);
+        return JsonSerializer.Deserialize<T>(jsonText) 
+               ?? throw new AIServiceException("AI returned null or invalid JSON");
+    }
+
+    protected virtual async Task<string> SendPromptAsync(
+        string systemPrompt,
+        string userPrompt,
+        string modelId,
+        int timeoutSeconds,
+        CancellationToken cancellationToken)
+    {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(timeoutValue);
+        cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
+
+        // 確保 Copilot Client 已啟動
+        await EnsureStartedAsync(cts.Token);
+
+        // 建立 Session 設定
+        var sessionConfig = new SessionConfig
+        {
+            Model = modelId // 支援跨廠商模型：gpt-4-turbo、claude-3-sonnet 等
+        };
+
+        // 設定 System Message（如果有）
+        if (!string.IsNullOrWhiteSpace(systemPrompt))
+        {
+            sessionConfig.SystemMessage = new SystemMessageConfig
+            {
+                Mode = SystemMessageMode.Append,
+                Content = systemPrompt
+            };
+        }
+
+        // 建立 Session
+        await using var session = await _copilotClient.CreateSessionAsync(sessionConfig);
+
+        var responseBuilder = new StringBuilder();
+        var completionSource = new TaskCompletionSource<string>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+
+        // 訂閱事件以接收 AI 回應
+        using var subscription = session.On(evt =>
+        {
+            if (evt is AssistantMessageEvent messageEvent)
+            {
+                // 收集 AI 回應內容
+                if (!string.IsNullOrWhiteSpace(messageEvent.Data?.Content))
+                {
+                    responseBuilder.Append(messageEvent.Data.Content);
+                }
+            }
+            else if (evt is SessionIdleEvent)
+            {
+                // Session 閒置表示回應完成
+                completionSource.TrySetResult(responseBuilder.ToString());
+            }
+        });
+
+        // 發送使用者訊息
+        await session.SendAsync(new MessageOptions { Prompt = userPrompt });
+
+        // 等待回應完成或逾時
+        using var registration = cts.Token.Register(() => 
+            completionSource.TrySetCanceled(cts.Token));
 
         try
         {
-            // GitHub Copilot SDK 支援跨廠商模型（OpenAI、Anthropic 等）
-            // 僅需變更 modelId 參數即可切換不同廠商的模型
-            var chatRequest = new CopilotChatRequest
-            {
-                Model = modelId, // 如 "gpt-4-turbo"、"claude-3-sonnet" 等
-                Messages = new[]
-                {
-                    new CopilotMessage { Role = "system", Content = prompt },
-                    new CopilotMessage { Role = "user", Content = userInput }
-                },
-                Temperature = 0.3,
-                ResponseFormat = CopilotResponseFormat.Json // 強制 JSON 輸出
-            };
-
-            var response = await _copilotClient.ChatAsync(chatRequest, cts.Token);
-            
-            return JsonSerializer.Deserialize<T>(response.Content)!;
+            return await completionSource.Task;
         }
-        catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
+        catch (OperationCanceledException)
         {
-            _logger.LogWarning("AI request timeout after {Timeout}s", timeoutValue.TotalSeconds);
-            throw new TimeoutException($"AI 呼叫逾時（{timeoutValue.TotalSeconds} 秒）");
+            throw new AIServiceException($"AI request timed out after {timeoutSeconds} seconds");
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex) when (ex is not AIServiceException)
         {
-            _logger.LogError(ex, "AI service request failed");
-            throw new AIServiceException("AI 服務暫時無法使用，請稍後再試", ex);
+            throw new AIServiceException($"AI service error: {ex.Message}", ex);
         }
     }
 
-    // 其他方法實作...
+    private async Task EnsureStartedAsync(CancellationToken cancellationToken)
+    {
+        if (_started) return;
+
+        await _startLock.WaitAsync(cancellationToken);
+        try
+        {
+            if (!_started)
+            {
+                await _copilotClient.StartAsync(cancellationToken);
+                _started = true;
+            }
+        }
+        finally
+        {
+            _startLock.Release();
+        }
+    }
+
+    private static string ExtractJson(string response)
+    {
+        // 移除可能的 markdown 程式碼區塊包裹
+        var trimmed = response.Trim();
+        if (trimmed.StartsWith("```json"))
+        {
+            var lines = trimmed.Split('\n');
+            return string.Join('\n', lines.Skip(1).SkipLast(1));
+        }
+        if (trimmed.StartsWith("```"))
+        {
+            var lines = trimmed.Split('\n');
+            return string.Join('\n', lines.Skip(1).SkipLast(1));
+        }
+        return trimmed;
+    }
+
+    // 其他方法實作類似...
 }
 ```
+
+**關鍵實作重點**:
+1. **Session 管理**: 使用 `CreateSessionAsync` 建立對話 session，支援 system message 設定
+2. **事件驅動**: 透過 `session.On(evt => {...})` 訂閱事件來接收 AI 回應
+3. **非同步串流**: 使用 `AssistantMessageEvent` 收集回應片段，`SessionIdleEvent` 標記完成
+4. **啟動控制**: 使用 `SemaphoreSlim` 確保 CopilotClient 只啟動一次
+5. **JSON 提取**: 處理 AI 可能回傳 markdown 包裹的 JSON 格式
 
 #### 3. DI 註冊（Program.cs）
 
 ```csharp
 // 註冊 GitHub Copilot SDK 客戶端（優先實作）
-builder.Services.AddCopilotClient(options =>
+builder.Services.AddSingleton<CopilotClient>(sp =>
 {
-    options.ApiKey = builder.Configuration["Copilot:ApiKey"] ?? 
-                     Environment.GetEnvironmentVariable("GITHUB_TOKEN");
-    // Copilot SDK 自動支援多廠商模型，無需額外設定
+    var token = builder.Configuration["Copilot:ApiKey"] ?? 
+                Environment.GetEnvironmentVariable("GITHUB_TOKEN") ??
+                throw new InvalidOperationException("GitHub Token not configured");
+    
+    return new CopilotClient(token);
 });
 
 // 註冊 AI Service Provider（使用 Copilot 實作）
@@ -183,6 +282,11 @@ builder.Services.AddScoped<IAIServiceProvider, CopilotAIServiceProvider>();
 // builder.Services.AddScoped<IAIServiceProvider, AzureOpenAIServiceProvider>();
 // builder.Services.AddScoped<IAIServiceProvider, LocalModelServiceProvider>();
 ```
+
+**註冊說明**:
+- `CopilotClient` 註冊為 Singleton，因為它內部維護連線狀態，且支援多執行緒安全
+- `IAIServiceProvider` 註冊為 Scoped，每個請求獨立實例，避免狀態競爭
+- Copilot SDK 透過 GitHub Token 進行認證，優先從設定檔讀取，否則從環境變數取得
 
 ### Testing Strategy
 
@@ -446,53 +550,58 @@ await _aiService.ParseStructuredDataAsync<List<Song>>(
 
 ## R3. 前端資料儲存策略
 
-### Questions
+### Questions  
 - Blazor Server Component 狀態變數記憶體限制？
-- 延遲初始化機制（Lazy Loading）如何設計？
-- AI 解析分兩階段的效能影響（基本資訊 vs 完整歌詞）？
+- AI 解析歌單與即時節錄歌詞的分離設計？
+- 即時節錄機制對遊戲流暢度的影響？
 
 ### Research Findings
 
-**Decision**: 使用 **Blazor Component 狀態變數 + 延遲初始化機制**
+**Decision**: 使用 **Blazor Component 狀態變數 + AI 即時節錄歌詞策略**
+
+**v1.1 重要變更**: 因 AI 法規限制無法提供完整歌詞，改為僅保存歌名/演唱者，出題時即時節錄歌詞片段
 
 **兩階段 AI 處理流程**:
 
 | 階段 | 處理內容 | AI 回應時間 | 資料大小 | 觸發時機 |
 |------|---------|------------|---------|---------|
 | 第一階段 | 解析「歌名/演唱者」 | 1-3 秒/首 | ~100 bytes/首 | 歌單輸入後立即執行 |
-| 第二階段 | 取得「完整歌詞」 | 2-5 秒/首 | 1-3 KB/首 | 隨機選中該歌曲時才執行 |
+| 第二階段 | 即時節錄「歌詞片段」 | 2-5 秒/題 | ~不保存~ | 每次出題時即時請求 |
 
 **時間對比分析**:
 ```
-原方案（一次性解析所有歌曲完整資料）:
+原方案（v1.0：一次性解析所有歌曲完整資料）:
 - 50 首歌 = 50 首 × 2-5 秒 = 100-250 秒等待時間（不可接受）
 
-新方案（延遲初始化）:
-- 第一階段: 50 首歌 × 1-3 秒 = 50-150 秒 → 分批處理可降至 5-10 秒
-- 第二階段: 僅首次選中該歌曲時載入 2-5 秒（分散至遊戲過程）
-- 使用者開始遊戲時間: 5-10 秒（vs 原 100-250 秒，提升 10-25 倍）
+延遲初始化方案（已廢棄，因 AI 法規限制）:
+- 第一階段: 50 首歌 × 1-3 秒 = 5-10 秒
+- 第二階段: 僅首次選中該歌曲時載入完整歌詞 2-5 秒
+
+新方案（v1.1：即時節錄策略）:
+- 第一階段: 50 首歌 × 1-3 秒 = 5-10 秒（僅解析歌名/演唱者）
+- 第二階段: 每次出題時即時節錄歌詞片段 2-5 秒（不保存）
+- 使用者開始遊戲時間: 5-10 秒（相同但記憶體需求降低）
+- 優勢: 符合 AI 使用政策、極低記憶體消耗、無版權風險
 ```
 
-**資料結構設計**:
+**資料結構設計（v1.1）**:
 ```csharp
 public class Song {
     public string Title { get; set; }         // 第一階段取得
     public string Artist { get; set; }        // 第一階段取得
-    public string? Lyrics { get; set; }       // 第二階段延遲載入（預設 null）
-    public bool IsInitialized => Lyrics != null;  // 初始化狀態檢查
-    public bool InitializationFailed { get; set; }  // 標記 AI 無法取得歌詞的歌曲
+    public bool CanGenerateQuestion { get; set; } = true;  // 標記是否能成功節錄歌詞
+    // 註：不保存歌詞內容，符合 AI 使用政策
 }
 
 public class GameState {
     public List<Song> Songs { get; set; } = new();
     public HashSet<int> UsedSongIndices { get; set; } = new();  // 已出題歌曲索引
-    public HashSet<int> FailedSongIndices { get; set; } = new();  // 初始化失敗歌曲索引
+    // 註：不需 FailedSongIndices，因不保存歌詞狀態
 }
 ```
 
 **UI 改進（防止洩漏答案）**:
-- **原方案問題**: 唯讀文字方塊持續顯示歌單，玩家可從「正在載入歌詞...」提示判斷被選中哪首歌
-- **新方案**: 「查看歌單」按鈕 + 彈窗顯示，彈窗僅顯示「歌名 - 演唱者」，**不顯示初始化狀態**
+- **「查看歌單」按鈕 + 彈窗顯示**：彈窗僅顯示「歌名 - 演唱者」，不顯示節錄狀態
 - **優勢**: 維持遊戲懸念，避免洩漏答案
 
 ### Alternatives Considered
@@ -504,17 +613,18 @@ public class GameState {
 | 數據持久性 | Tab 關閉清除 | 永久儲存 | Page Refresh 清除 |
 | 效能 | 同步 I/O | 非同步 I/O | 記憶體直接存取 |
 | Blazor Server 適配 | 低（需 JS Interop） | 低（需 JS Interop） | 高（原生 C# 模型） |
-| 延遲初始化支援 | 可行但需額外邏輯 | 可行但過度複雜 | 天然支援（nullable Lyrics） |
+| 即時節錄支援 | 可行但需額外邏輯 | 可行但過度複雜 | 天然支援（無狀態保存） |
 
 **為何選擇 Component 狀態**:
 1. **原生 C# 支援**: 直接使用 List<Song>，無需 JS Interop
-2. **延遲初始化友善**: Lyrics 屬性使用 nullable 類型，IsInitialized 檢查簡單
-3. **記憶體效率**: 僅已出題歌曲才載入完整歌詞（如 100 首歌玩 20 輪，僅 20 首初始化 = 20-60 KB）
+2. **即時節錄友善**: 不保存歌詞，每次出題即時請求，無狀態衝突
+3. **極低記憶體效率**: 僅保存歌名/演唱者（如 100 首歌 = 10 KB），不保存歌詞
 4. **符合 Blazor Server 模型**: Component 狀態變數是 Blazor Server 標準做法
+5. **合規設計**: 符合 AI 使用政策，無版權儲存風險
 
 ### Implementation Approach
 
-#### 1. 兩階段 AI 處理流程
+#### 1. 兩階段 AI 處理流程（v1.1）
 
 **第一階段：解析歌名/演唱者（歌單輸入時）**
 ```csharp
@@ -531,62 +641,65 @@ public async Task<List<Song>> ParsePlaylistBasicInfoAsync(
         prompt,
         playlistText,
         aiModelId,
-        TimeSpan.FromSeconds(5),  // 快速解析，不含歌詞
+        5,  // 快速解析，不含歌詞
         cancellationToken);
 
-    // 初始化所有歌曲為未初始化狀態
+    // 所有歌曲預設可出題
     foreach (var song in songs)
     {
-        song.Lyrics = null;  // 延遲載入
-        song.InitializationFailed = false;
+        song.CanGenerateQuestion = true;
     }
 
     return songs;
 }
 ```
 
-**第二階段：延遲載入歌詞（隨機選中時）**
+**第二階段：即時節錄歌詞片段（每次出題時）**
 ```csharp
-public async Task<bool> InitializeSongLyricsAsync(
+public async Task<string?> GenerateLyricsSnippetAsync(
     Song song, 
     string aiModelId, 
     CancellationToken cancellationToken = default)
 {
-    // 如果已初始化或已失敗，跳過
-    if (song.IsInitialized || song.InitializationFailed)
-        return song.IsInitialized;
-
     try
     {
-        var prompt = $"請提供歌曲「{song.Title}」（演唱者：{song.Artist}）的完整歌詞。";
+        var prompt = $@"請針對歌曲「{song.Title}」（演唱者：{song.Artist}）隨機節錄歌詞片段作為猜歌題目。
+要求：
+1. 最少 10 個字以上
+2. 必須為完整句子，不可中斷
+3. 句數越少越好，優先採用單一句子
+4. 僅回傳歌詞片段本身，不要包含歌名或其他說明
+
+範例輸出：
+雨一直下 氣氛不算融洽";
         
-        var lyrics = await _aiService.GenerateTextAsync(
+        var snippet = await _aiService.GenerateTextAsync(
             prompt,
             aiModelId,
-            TimeSpan.FromSeconds(5),  // 單首歌詞快速載入
+            5,  // 即時節錄快速回應
             cancellationToken);
 
-        if (!string.IsNullOrWhiteSpace(lyrics))
+        if (!string.IsNullOrWhiteSpace(snippet) && snippet.Length >= 10)
         {
-            song.Lyrics = lyrics;
-            return true;
+            return snippet.Trim();
         }
         else
         {
-            song.InitializationFailed = true;
-            return false;
+            song.CanGenerateQuestion = false;  // 標記無法節錄
+            return null;
         }
     }
-    catch (Exception ex)
+    catch (AIServiceException ex)
     {
-        _logger.LogWarning(ex, "無法初始化歌曲 {Title} - {Artist} 的歌詞", song.Title, song.Artist);
-        song.InitializationFailed = true;
-        return false;
+        _logger.LogWarning(ex, "無法為歌曲 {Title} - {Artist} 節錄歌詞（可能因法規限制）", 
+            song.Title, song.Artist);
+        song.CanGenerateQuestion = false;
+        return null;
     }
 }
 ```
 
-#### 2. 隨機選歌邏輯（含延遲初始化）
+#### 2. 隨機選歌邏輯（含節錄失敗處理）
 
 ```csharp
 public async Task<Question?> GenerateRandomQuestionAsync(

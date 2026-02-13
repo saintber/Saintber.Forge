@@ -1,31 +1,33 @@
 # Implementation Plan: Lyrics Guess Game
 
-**Branch**: `002-lyrics-guess-game` | **Date**: 2026-02-11 | **Spec**: [spec.md](spec.md)
+**Branch**: `002-lyrics-guess-game` | **Date**: 2026-02-11 | **Last Updated**: 2026-02-13 (v1.1) | **Spec**: [spec.md](spec.md)
 **Input**: Feature specification from `/specs/002-lyrics-guess-game/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
-建立以歌詞為基礎的猜歌互動遊戲，允許使用者輸入歌單、由 AI 解析歌詞、隨機出題並判定答案。
+建立以歌詞為基礎的猜歌互動遊戲，允許使用者輸入歌單、由 AI 解析歌名與演唱者、出題時即時節錄歌詞片段並判定答案。
+
+**v1.1 重要變更**：因 AI 法規限制無法提供完整歌詞，改為每次出題時即時節錄歌詞片段（10字以上完整句子）
 
 **技術方案**:
-- 使用 **Blazor Server** 架構，所有資料儲存於 Component 狀態變數（不涉及資料庫）
+- 使用 **Blazor Server** 架構，僅保存歌名/演唱者於 Component 狀態變數（不保存歌詞）
 - 透過 **GitHub Copilot SDK** 作為 AI 整合層，支援跨廠商模型（OpenAI、Anthropic）
-- 採用 **兩階段 AI 處理 + 延遲初始化** 機制：第一階段僅解析歌名/演唱者（5-10 秒），第二階段隨需載入歌詞（2-5 秒/首）
+- 採用 **即時節錄策略**：第一階段僅解析歌名/演唱者（5-10 秒），出題時即時向 AI 請求節錄歌詞片段（2-5 秒/題）
 - 建立 `IAIServiceProvider` 抽象層，符合 Constitution Principle 5（契約介面）與 Principle 6（可替換性）
 
 ## Technical Context
 
 **Language/Version**: C# 12 / .NET 8.0  
 **Primary Dependencies**: Blazor Server, GitHub Copilot SDK, ASP.NET Core 8.0  
-**Storage**: N/A（僅使用 Blazor Component 狀態變數，不涉及資料庫或瀏覽器持久化儲存）  
+**Storage**: N/A（僅使用 Blazor Component 狀態變數保存歌名/演唱者，不保存歌詞或涉及資料庫）  
 **Testing**: xUnit, Moq, FluentAssertions  
 **Target Platform**: Web（Blazor Server over SignalR）  
 **Project Type**: web  
-**Performance Goals**: AI 歌單解析 < 10 秒（50 首歌）、單首歌詞載入 < 5 秒、答案判定 < 3 秒  
-**Constraints**: SignalR ClientTimeout 30 秒、記憶體使用 < 5 MB（100 首歌完整初始化）  
-**Scale/Scope**: 支援 50+ 首歌曲歌單、跨廠商 AI 模型切換（OpenAI、Anthropic）
+**Performance Goals**: AI 歌單解析 < 10 秒（50 首歌）、AI 即時節錄歌詞 < 5 秒、答案判定 < 3 秒  
+**Constraints**: SignalR ClientTimeout 30 秒、記憶體使用 < 1 MB（100 首歌僅保存歌名/演唱者）、符合 AI 使用政策（不保存完整歌詞）  
+**Scale/Scope**: 支援 50+ 首歌曲歌單、跨廠商 AI 模型切換（OpenAI、Anthropic）、即時歌詞節錄成功率 80%+
 
 ## Constitution Check
 
@@ -46,12 +48,13 @@
 
 **TDD Implementation Notes**:
 - **Unit Tests** (TDD 強制範圍): 
-  - `LyricsGuessGameService` 的所有公開方法（歌單解析、問題生成、答案驗證）
+  - `LyricsGuessGameService` 的所有公開方法（歌單解析、歌詞即時節錄、問題生成、答案驗證）
   - `CopilotAIServiceProvider` 的 AI 呼叫邏輯（使用 Mock CopilotClient）
-  - 所有 Model 的驗證邏輯（如 `Song.Lyrics` 延遲載入、`Question.State` 狀態機）
+  - 所有 Model 的驗證邏輯（如 `Song` 僅含歌名/演唱者、`Question.State` 狀態機）
 - **Integration Tests** (可選但建議):
-  - 完整遊戲流程（輸入歌單 → 解析 → 出題 → 答題 → 下一題）
+  - 完整遊戲流程（輸入歌單 → 解析 → 即時節錄 → 出題 → 答題 → 下一題）
   - AI 真實呼叫測試（需 GITHUB_TOKEN，可在 Gate B 手動執行）
+  - AI 節錄失敗處理測試（模擬法規拒絕、重試邏輯）
 - **UI Tests** (Gate B): 
   - Blazor 元件互動測試（bUnit）
   - RWD 測試（非 TDD 強制範圍，可在實作後補充）
