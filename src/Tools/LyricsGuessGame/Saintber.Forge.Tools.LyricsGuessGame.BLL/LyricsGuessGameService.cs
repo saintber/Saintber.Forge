@@ -37,9 +37,9 @@ public class LyricsGuessGameService : ILyricsGuessGameService
         var prompt = @"請將以下歌單文字解析為歌曲清單。每行可能是：
 - 歌曲名稱（自動推測演唱者）
 - 歌曲名稱 + 演唱者（用空格、tab、或「-」分隔）
-- 僅演唱者（取得其代表作）
+- 歌曲說明（取得最符合作品或代表作）
 
-請以 JSON 陣列格式回應：
+請以 JSON 陣列格式回應，**禁止**加入任何其他說明、評語：
 [
   { ""Title"": ""歌曲名稱"", ""Artist"": ""演唱者"" },
   ...
