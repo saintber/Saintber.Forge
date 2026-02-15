@@ -42,7 +42,7 @@
 
 @if (IsLoadingLyrics)
 {
-    <p>正在載入歌詞...</p>
+    <p>正在出題...</p>
 }
 
 @if (!string.IsNullOrWhiteSpace(ErrorMessage))
@@ -87,8 +87,6 @@
 }
 
 @code {
-    private readonly Random _random = new();
-
     public GameState GameState { get; private set; } = new();
 
     public bool IsParsing { get; private set; }
@@ -117,10 +115,17 @@
 
     protected override void OnInitialized()
     {
-        AvailableModels = Config.AvailableModels.Where(m => m.IsEnabled).ToList();
-        SelectedModelId = AvailableModels.FirstOrDefault(m => m.IsDefault)?.ModelId
-            ?? AvailableModels.FirstOrDefault()?.ModelId
-            ?? string.Empty;
+        AvailableModels = GameService.GetAvailableModels();
+        SelectedModelId = string.Empty;
+
+        try
+        {
+            SelectedModelId = GameService.GetDefaultModelId();
+        }
+        catch (InvalidOperationException)
+        {
+            SelectedModelId = AvailableModels.FirstOrDefault()?.ModelId ?? string.Empty;
+        }
 
         GameState.SelectedModelId = SelectedModelId;
     }
@@ -261,51 +266,36 @@
 
         try
         {
-            var availableIndices = GameState.Songs
-                .Select((song, index) => new { song, index })
-                .Where(x => !GameState.UsedSongIndices.Contains(x.index)
-                            && !GameState.FailedSongIndices.Contains(x.index))
-                .Select(x => x.index)
-                .ToList();
+            var question = await GameService.GenerateRandomQuestionAsync(
+                GameState,
+                SelectedModelId,
+                Math.Max(1, Config.InitializationRetryCount));
 
-            if (availableIndices.Count == 0)
+            if (question == null)
             {
+                var remainingCount = GameState.Songs
+                    .Select((song, index) => new { song, index })
+                    .Count(x => x.song.CanGenerateQuestion && !GameState.UsedSongIndices.Contains(x.index));
+
                 GameState.IsGameActive = false;
                 GameState.CurrentQuestion = null;
-                StatusMessage = "遊戲結束";
-                IsGameEnded = true;
+
+                if (GameState.UsedSongIndices.Count >= GameState.Songs.Count)
+                {
+                    StatusMessage = "遊戲結束！所有歌曲已完成";
+                    IsGameEnded = true;
+                }
+                else if (remainingCount == 0)
+                {
+                    ErrorMessage = "AI 服務暫時無法提供歌詞，請更換歌單或稍後再試";
+                }
+
                 return;
             }
 
-            var retryCount = Math.Max(1, Config.InitializationRetryCount);
-            for (var attempt = 0; attempt < retryCount; attempt++)
-            {
-                if (availableIndices.Count == 0)
-                {
-                    break;
-                }
-
-                var pickIndex = availableIndices[_random.Next(availableIndices.Count)];
-                var song = GameState.Songs[pickIndex];
-
-                await GameService.InitializeSongLyricsAsync(song, SelectedModelId);
-
-                if (song.InitializationFailed || !song.IsInitialized)
-                {
-                    GameState.FailedSongIndices.Add(pickIndex);
-                    availableIndices.Remove(pickIndex);
-                    continue;
-                }
-
-                var question = GameService.GenerateQuestion(song, pickIndex);
-                GameState.CurrentQuestion = question;
-                GameState.UsedSongIndices.Add(pickIndex);
-                GameState.IsGameActive = true;
-                IsGameEnded = false;
-                return;
-            }
-
-            ErrorMessage = "歌詞初始化失敗，請稍後再試";
+            GameState.CurrentQuestion = question;
+            GameState.IsGameActive = true;
+            IsGameEnded = false;
         }
         catch (AIServiceException)
         {
@@ -315,12 +305,12 @@
             }
             else
             {
-                ErrorMessage = "歌詞初始化失敗，請稍後再試";
+                ErrorMessage = "歌詞節錄失敗，請稍後再試";
             }
         }
         catch
         {
-            ErrorMessage = "歌詞初始化失敗，請稍後再試";
+            ErrorMessage = "歌詞節錄失敗，請稍後再試";
         }
         finally
         {
@@ -435,7 +425,6 @@
 
         GameState.CurrentQuestion = null;
         GameState.UsedSongIndices.Clear();
-        GameState.FailedSongIndices.Clear();
         GameState.IsGameActive = false;
 
         await StartNextQuestionInternalAsync();
@@ -459,7 +448,6 @@
         GameState.Songs.Clear();
         GameState.CurrentQuestion = null;
         GameState.UsedSongIndices.Clear();
-        GameState.FailedSongIndices.Clear();
         GameState.IsPlaylistParsed = false;
         GameState.IsGameActive = false;
         GameState.SelectedModelId = SelectedModelId;

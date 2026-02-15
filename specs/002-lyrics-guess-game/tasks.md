@@ -61,56 +61,56 @@ Based on plan.md project structure:
 
 ### Models & Exceptions (TDD: Write tests FIRST for validation logic)
 
-- [ ] T010 [P] **[v1.1 調整]** Update Song model tests in `tests/.../UnitTests/Models/SongTests.cs` - 移除 Lyrics/InitializationFailed 驗證，新增 CanGenerateQuestion 測試
-- [ ] T011 [P] **[v1.1 調整]** Update Song model in `src/Tools/.../Abstractions/Models/Song.cs` - 移除 Lyrics (string?) 和 InitializationFailed (bool)，新增 CanGenerateQuestion (bool，預設 true)，移除 IsInitialized 計算屬性
-- [ ] T012 [P] Unit test for Question model in `tests/.../UnitTests/Models/QuestionTests.cs` (MUST FAIL initially)
-- [ ] T013 [P] Create Question model with QuestionState enum in `src/Tools/.../Abstractions/Models/Question.cs`
-- [ ] T014 [P] **[v1.1 調整]** Update GameState model tests in `tests/.../UnitTests/Models/GameStateTests.cs` - 移除 FailedSongIndices 測試
-- [ ] T015 [P] **[v1.1 調整]** Update GameState model in `src/Tools/.../Abstractions/Models/GameState.cs` - 移除 FailedSongIndices (HashSet<int>)
-- [ ] T016 [P] Create AIModelConfig model in `src/Tools/.../Abstractions/Models/AIModelConfig.cs`
-- [ ] T017 [P] Create AnswerValidationResult model with SimilarityType enum in `src/Tools/.../Abstractions/Models/AnswerValidationResult.cs`
-- [ ] T018 [P] Create AIServiceException in `src/Tools/.../Abstractions/Exceptions/AIServiceException.cs`
+- [X] T010 [P] **[v1.1 調整]** Update Song model tests in `tests/.../UnitTests/Models/SongTests.cs` - 移除 Lyrics/InitializationFailed 驗證，新增 CanGenerateQuestion 測試
+- [X] T011 [P] **[v1.1 調整]** Update Song model in `src/Tools/.../Abstractions/Models/Song.cs` - 移除 Lyrics (string?) 和 InitializationFailed (bool)，新增 CanGenerateQuestion (bool，預設 true)，移除 IsInitialized 計算屬性
+- [X] T012 [P] Unit test for Question model in `tests/.../UnitTests/Models/QuestionTests.cs` (MUST FAIL initially)
+- [X] T013 [P] Create Question model with QuestionState enum in `src/Tools/.../Abstractions/Models/Question.cs`
+- [X] T014 [P] **[v1.1 調整]** Update GameState model tests in `tests/.../UnitTests/Models/GameStateTests.cs` - 移除 FailedSongIndices 測試
+- [X] T015 [P] **[v1.1 調整]** Update GameState model in `src/Tools/.../Abstractions/Models/GameState.cs` - 移除 FailedSongIndices (HashSet<int>)
+- [X] T016 [P] Create AIModelConfig model in `src/Tools/.../Abstractions/Models/AIModelConfig.cs`
+- [X] T017 [P] Create AnswerValidationResult model with SimilarityType enum in `src/Tools/.../Abstractions/Models/AnswerValidationResult.cs`
+- [X] T018 [P] Create AIServiceException in `src/Tools/.../Abstractions/Exceptions/AIServiceException.cs`
 
 ### Service Interfaces
 
-- [ ] T019 [P] Create IAIServiceProvider interface in `src/Tools/.../Abstractions/IAIServiceProvider.cs` - ParseStructuredDataAsync, GenerateTextAsync, ValidateAnswerAsync
-- [ ] T020 [P] **[v1.1 調整]** Update ILyricsGuessGameService interface in `src/Tools/.../Abstractions/ILyricsGuessGameService.cs` - 移除 InitializeSongLyricsAsync，新增 GenerateLyricsSnippetAsync (Song, modelId) → string?，將 GenerateQuestionAsync 改名為 GenerateRandomQuestionAsync
+- [X] T019 [P] Create IAIServiceProvider interface in `src/Tools/.../Abstractions/IAIServiceProvider.cs` - ParseStructuredDataAsync, GenerateTextAsync
+- [X] T020 [P] **[v1.1 調整]** Update ILyricsGuessGameService interface in `src/Tools/.../Abstractions/ILyricsGuessGameService.cs` - 移除 InitializeSongLyricsAsync，新增 GenerateLyricsSnippetAsync (Song, modelId) → string?，將 GenerateQuestionAsync 改名為 GenerateRandomQuestionAsync
 
 ### Configuration
 
-- [ ] T021 Create LyricsGuessGameConfig class in `src/Tools/.../BLL/Config/LyricsGuessGameConfig.cs`
-- [ ] T022 Update `appsettings.json` with Copilot (GitHub Token) and LyricsGuessGame (AIModels, Timeouts) sections per quickstart.md
+- [X] T021 Create LyricsGuessGameConfig class in `src/Tools/.../BLL/Config/LyricsGuessGameConfig.cs`
+- [X] T022 Update `appsettings.json` with Copilot (GitHub Token) and LyricsGuessGame (AIModels, Timeouts) sections per quickstart.md
 
 ### Service Implementations (TDD: Write tests FIRST)
 
-- [ ] T023 [P] Unit test for CopilotAIServiceProvider.ParseStructuredDataAsync in `tests/.../UnitTests/Services/CopilotAIServiceProviderTests.cs` (MUST FAIL initially)
-- [ ] T024 [P] Unit test for CopilotAIServiceProvider.GenerateTextAsync in `tests/.../UnitTests/Services/CopilotAIServiceProviderTests.cs` (MUST FAIL initially)
-- [ ] T025 [P] Unit test for CopilotAIServiceProvider.ValidateAnswerAsync in `tests/.../UnitTests/Services/CopilotAIServiceProviderTests.cs` (MUST FAIL initially)
-- [ ] T026 Implement CopilotAIServiceProvider skeleton in `src/Tools/.../BLL/CopilotAIServiceProvider.cs` with Session-based API (CreateSessionAsync, On events, SendAsync)
-- [ ] T027 Implement ParseStructuredDataAsync method - use Session API, extract JSON from markdown, deserialize with timeout handling
-- [ ] T028 Implement GenerateTextAsync method - use Session API with event-based streaming (AssistantMessageEvent + SessionIdleEvent)
-- [ ] T029 Implement ValidateAnswerAsync method - prompt engineering for answer validation, return AnswerValidationResult
-- [ ] T030 Refactor: Extract common EnsureStartedAsync, SendPromptAsync helper, ExtractJson utility
+- [X] T023 [P] Unit test for CopilotAIServiceProvider.ParseStructuredDataAsync in `tests/.../UnitTests/Services/CopilotAIServiceProviderTests.cs` (MUST FAIL initially)
+- [X] T024 [P] Unit test for CopilotAIServiceProvider.GenerateTextAsync in `tests/.../UnitTests/Services/CopilotAIServiceProviderTests.cs` (MUST FAIL initially)
+- [X] T025 [P] Unit test for CopilotAIServiceProvider JSON extraction via ParseStructuredDataAsync in `tests/.../UnitTests/Services/CopilotAIServiceProviderTests.cs` (MUST FAIL initially)
+- [X] T026 Implement CopilotAIServiceProvider skeleton in `src/Tools/.../BLL/CopilotAIServiceProvider.cs` with Session-based API (CreateSessionAsync, On events, SendAsync)
+- [X] T027 Implement ParseStructuredDataAsync method - use Session API, extract JSON from markdown, deserialize with timeout handling
+- [X] T028 Implement GenerateTextAsync method - use Session API with event-based streaming (AssistantMessageEvent + SessionIdleEvent)
+- [X] T029 Ensure CopilotAIServiceProvider stays domain-agnostic (common AI calls only)
+- [X] T030 Refactor: Extract common EnsureStartedAsync, SendPromptAsync helper, ExtractJson utility
 
 ### Game Service (TDD: Write tests FIRST)
 
-- [ ] T031 Unit test for LyricsGuessGameService.ParsePlaylistBasicInfoAsync in `tests/.../UnitTests/Services/LyricsGuessGameServiceTests.cs` (MUST FAIL initially, use Mock IAIServiceProvider)
-- [ ] T032 [P] **[v1.1 新增]** Unit test for LyricsGuessGameService.GenerateLyricsSnippetAsync in `tests/.../UnitTests/Services/LyricsGuessGameServiceTests.cs` - 測試成功節錄、失敗標記 CanGenerateQuestion、法規拒絕處理
-- [ ] T033 [P] **[v1.1 調整]** Update unit test for LyricsGuessGameService.GenerateRandomQuestionAsync in `tests/.../UnitTests/Services/LyricsGuessGameServiceTests.cs` - 測試即時節錄整合、跳過無法節錄的歌曲、重試邏輯
-- [ ] T034 Unit test for LyricsGuessGameService.ValidateAnswerAsync in `tests/.../UnitTests/Services/LyricsGuessGameServiceTests.cs` (MUST FAIL initially)
-- [ ] T035 Implement LyricsGuessGameService skeleton in `src/Tools/.../BLL/LyricsGuessGameService.cs`
-- [ ] T036 Implement ParsePlaylistBasicInfoAsync method - call AI to parse "歌名/演唱者" only (不含歌詞)，所有歌曲預設 CanGenerateQuestion = true
-- [ ] T037 **[v1.1 新增]** Implement GenerateLyricsSnippetAsync method - 呼叫 AI 節錄歌詞片段（10字以上完整句子），失敗時設定 song.CanGenerateQuestion = false，不保存歌詞內容
-- [ ] T038 **[v1.1 調整]** Implement GenerateRandomQuestionAsync method - 隨機選歌 → 呼叫 GenerateLyricsSnippetAsync 即時節錄 → 建立 Question（節錄失敗則重試最多 3 次）
-- [ ] T039 Implement ValidateAnswerAsync method - delegate to IAIServiceProvider.ValidateAnswerAsync
-- [ ] T040 Implement GetAvailableModels and GetDefaultModelId methods - load from LyricsGuessGameConfig
+- [X] T031 Unit test for LyricsGuessGameService.ParsePlaylistBasicInfoAsync in `tests/.../UnitTests/Services/LyricsGuessGameServiceTests.cs` (MUST FAIL initially, use Mock IAIServiceProvider)
+- [X] T032 [P] **[v1.1 新增]** Unit test for LyricsGuessGameService.GenerateLyricsSnippetAsync in `tests/.../UnitTests/Services/LyricsGuessGameServiceTests.cs` - 測試成功節錄、失敗標記 CanGenerateQuestion、法規拒絕處理
+- [X] T033 [P] **[v1.1 調整]** Update unit test for LyricsGuessGameService.GenerateRandomQuestionAsync in `tests/.../UnitTests/Services/LyricsGuessGameServiceTests.cs` - 測試即時節錄整合、跳過無法節錄的歌曲、重試邏輯
+- [X] T034 Unit test for LyricsGuessGameService.ValidateAnswerAsync in `tests/.../UnitTests/Services/LyricsGuessGameServiceTests.cs` (MUST FAIL initially)
+- [X] T035 Implement LyricsGuessGameService skeleton in `src/Tools/.../BLL/LyricsGuessGameService.cs`
+- [X] T036 Implement ParsePlaylistBasicInfoAsync method - call AI to parse "歌名/演唱者" only (不含歌詞)，所有歌曲預設 CanGenerateQuestion = true
+- [X] T037 **[v1.1 新增]** Implement GenerateLyricsSnippetAsync method - 呼叫 AI 節錄歌詞片段（10字以上完整句子），失敗時設定 song.CanGenerateQuestion = false，不保存歌詞內容
+- [X] T038 **[v1.1 調整]** Implement GenerateRandomQuestionAsync method - 隨機選歌 → 呼叫 GenerateLyricsSnippetAsync 即時節錄 → 建立 Question（節錄失敗則重試最多 3 次）
+- [X] T039 Implement ValidateAnswerAsync method - compose prompt and call ParseStructuredDataAsync
+- [X] T040 Implement GetAvailableModels and GetDefaultModelId methods - load from LyricsGuessGameConfig
 
 ### DI Registration
 
-- [ ] T041 Register CopilotClient (singleton with GitHub Token from env/config) in `src/Frontend/Saintber.Forge.BlazorServer/Program.cs`
-- [ ] T042 Register IAIServiceProvider → CopilotAIServiceProvider (scoped) in Program.cs
-- [ ] T043 Register ILyricsGuessGameService → LyricsGuessGameService (scoped) in Program.cs
-- [ ] T044 Bind LyricsGuessGameConfig from appsettings.json using IOptions pattern in Program.cs
+- [X] T041 Register CopilotClient (singleton with GitHub Token from env/config) in `src/Frontend/Saintber.Forge.BlazorServer/Program.cs`
+- [X] T042 Register IAIServiceProvider → CopilotAIServiceProvider (scoped) in Program.cs
+- [X] T043 Register ILyricsGuessGameService → LyricsGuessGameService (scoped) in Program.cs
+- [X] T044 Bind LyricsGuessGameConfig from appsettings.json using IOptions pattern in Program.cs
 
 **Checkpoint**: Foundation complete - all services testable via mocks, all tests GREEN
 
@@ -124,21 +124,21 @@ Based on plan.md project structure:
 
 ### UI Components (Tests optional for UI layout, MANDATORY for interaction logic)
 
-- [ ] T045 [P] [US1] Create PlaylistInputDialog component in `src/Frontend/.../Components/PlaylistInputDialog.razor` - 多行文字方塊 + 確認/取消按鈕
-- [ ] T046 [P] [US1] **[v1.1 調整]** Create PlaylistViewDialog component in `src/Frontend/.../Components/PlaylistViewDialog.razor` - 彈窗顯示「歌名 - 演唱者」清單，**不顯示** CanGenerateQuestion 狀態（避免洩漏答案）
-- [ ] T047 [US1] Create LyricsGuessGame main page in `src/Frontend/.../Pages/LyricsGuessGame.razor` - 含「輸入歌單」、「查看歌單」按鈕與題目顯示區域
+- [X] T045 [P] [US1] Create PlaylistInputDialog component in `src/Frontend/.../Components/PlaylistInputDialog.razor` - 多行文字方塊 + 確認/取消按鈕
+- [X] T046 [P] [US1] **[v1.1 調整]** Create PlaylistViewDialog component in `src/Frontend/.../Components/PlaylistViewDialog.razor` - 彈窗顯示「歌名 - 演唱者」清單，**不顯示** CanGenerateQuestion 狀態（避免洩漏答案）
+- [X] T047 [US1] Create LyricsGuessGame main page in `src/Frontend/.../Pages/LyricsGuessGame.razor` - 含「輸入歌單」、「查看歌單」按鈕與題目顯示區域
 
 ### UI Logic (TDD: Test interaction logic)
 
-- [ ] T048 [US1] Unit test for HandlePlaylistConfirmAsync (parse success) in `tests/Saintber.Forge.BlazorServer.UnitTests/Pages/LyricsGuessGameTests.cs` (MUST FAIL initially, use Mock ILyricsGuessGameService)
-- [ ] T049 [US1] Unit test for HandlePlaylistConfirmAsync (parse failure) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
-- [ ] T050 [US1] Implement HandlePlaylistConfirmAsync in LyricsGuessGame.razor - call ParsePlaylistBasicInfoAsync，顯示「正在解析歌單...」（5-10 秒），成功後顯示「查看歌單」按鈕
-- [ ] T051 [US1] **[v1.1 調整]** Unit test for StartNextQuestionAsync in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs` - 測試隨機選歌 + 即時節錄整合、節錄失敗重試邏輯
-- [ ] T052 [US1] **[v1.1 調整]** Implement StartNextQuestionAsync in LyricsGuessGame.razor - 呼叫 GenerateRandomQuestionAsync（含即時節錄），顯示「正在出題...」（2-5 秒），節錄成功後顯示歌詞片段
-- [ ] T053 [US1] **[v1.1 調整]** Add error handling for lyrics snippet generation failures - 節錄失敗重試最多 3 次，若連續失敗顯示「AI 服務暫時無法提供歌詞，請更換歌單或稍後再試」
-- [ ] T054 [US1] **[v1.1 調整]** Add UI loading states - 「正在解析歌單...」（第一階段）和「正在出題...」（第二階段即時節錄）
-- [ ] T055 [US1] Add「查看歌單」button and dialog display logic - 點擊後顯示 PlaylistViewDialog 彈窗
-- [ ] T056 [US1] Implement playlist overwrite logic - 點擊「輸入歌單」時清空 GameState (Songs, UsedSongIndices, CurrentQuestion)
+- [X] T048 [US1] Unit test for HandlePlaylistConfirmAsync (parse success) in `tests/Saintber.Forge.BlazorServer.UnitTests/Pages/LyricsGuessGameTests.cs` (MUST FAIL initially, use Mock ILyricsGuessGameService)
+- [X] T049 [US1] Unit test for HandlePlaylistConfirmAsync (parse failure) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
+- [X] T050 [US1] Implement HandlePlaylistConfirmAsync in LyricsGuessGame.razor - call ParsePlaylistBasicInfoAsync，顯示「正在解析歌單...」（5-10 秒），成功後顯示「查看歌單」按鈕
+- [X] T051 [US1] **[v1.1 調整]** Unit test for StartNextQuestionAsync in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs` - 測試隨機選歌 + 即時節錄整合、節錄失敗重試邏輯
+- [X] T052 [US1] **[v1.1 調整]** Implement StartNextQuestionAsync in LyricsGuessGame.razor - 呼叫 GenerateRandomQuestionAsync（含即時節錄），顯示「正在出題...」（2-5 秒），節錄成功後顯示歌詞片段
+- [X] T053 [US1] **[v1.1 調整]** Add error handling for lyrics snippet generation failures - 節錄失敗重試最多 3 次，若連續失敗顯示「AI 服務暫時無法提供歌詞，請更換歌單或稍後再試」
+- [X] T054 [US1] **[v1.1 調整]** Add UI loading states - 「正在解析歌單...」（第一階段）和「正在出題...」（第二階段即時節錄）
+- [X] T055 [US1] Add「查看歌單」button and dialog display logic - 點擊後顯示 PlaylistViewDialog 彈窗
+- [X] T056 [US1] Implement playlist overwrite logic - 點擊「輸入歌單」時清空 GameState (Songs, UsedSongIndices, CurrentQuestion)
 
 **Checkpoint**: US1 complete - 可輸入歌單、解析歌名/演唱者、即時節錄歌詞並顯示第一題
 
@@ -152,15 +152,15 @@ Based on plan.md project structure:
 
 ### UI & Logic (TDD: Test answer validation flow)
 
-- [ ] T057 [US2] Unit test for SubmitAnswerAsync (correct answer) in `tests/.../BlazorServer.UnitTests/Pages/LyricsGuessGameTests.cs` (MUST FAIL initially)
-- [ ] T058 [US2] Unit test for SubmitAnswerAsync (wrong answer with hints: CloseMatch, SameArtist, Unrelated) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
-- [ ] T059 [US2] Unit test for SubmitAnswerAsync (AI validation error handling) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
-- [ ] T060 [US2] Add answer input field and submit button to LyricsGuessGame.razor
-- [ ] T061 [US2] Implement SubmitAnswerAsync in LyricsGuessGame.razor - call ValidateAnswerAsync (3-5 秒)，根據 SimilarityType 顯示對應回饋
-- [ ] T062 [US2] Implement feedback display logic - 「答對了！」(Exact) / 「風格很像但不是」(SameArtist) / 「只差一個字」(CloseMatch) / 「不對喔！再猜一次」(Unrelated)
-- [ ] T063 [US2] **[v1.1 調整]** Implement auto-advance to next question on correct answer - 呼叫 StartNextQuestionAsync（含「正在出題...」+ 即時節錄 2-5 秒）
-- [ ] T064 [US2] Add AI validation error handling - 顯示「判定失敗，請重試」並允許重新提交或公佈答案
-- [ ] T065 [US2] Clear answer input and feedback after advancing to next question
+- [X] T057 [US2] Unit test for SubmitAnswerAsync (correct answer) in `tests/.../BlazorServer.UnitTests/Pages/LyricsGuessGameTests.cs` (MUST FAIL initially)
+- [X] T058 [US2] Unit test for SubmitAnswerAsync (wrong answer with hints: CloseMatch, SameArtist, Unrelated) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
+- [X] T059 [US2] Unit test for SubmitAnswerAsync (AI validation error handling) in `tests/.../UnitTests/Pages/LyricsGuessGameTests.cs`
+- [X] T060 [US2] Add answer input field and submit button to LyricsGuessGame.razor
+- [X] T061 [US2] Implement SubmitAnswerAsync in LyricsGuessGame.razor - call ValidateAnswerAsync (3-5 秒)，根據 SimilarityType 顯示對應回饋
+- [X] T062 [US2] Implement feedback display logic - 「答對了！」(Exact) / 「風格很像但不是」(SameArtist) / 「只差一個字」(CloseMatch) / 「不對喔！再猜一次」(Unrelated)
+- [X] T063 [US2] **[v1.1 調整]** Implement auto-advance to next question on correct answer - 呼叫 StartNextQuestionAsync（含「正在出題...」+ 即時節錄 2-5 秒）
+- [X] T064 [US2] Add AI validation error handling - 顯示「判定失敗，請重試」並允許重新提交或公佈答案
+- [X] T065 [US2] Clear answer input and feedback after advancing to next question
 
 **Checkpoint**: US2 complete - 答案驗證與回饋正常運作，答對後自動進入下一題（含即時節錄）
 
@@ -174,11 +174,11 @@ Based on plan.md project structure:
 
 ### UI & Logic
 
-- [ ] T066 [US3] Add「公佈答案」button to LyricsGuessGame.razor
-- [ ] T067 [US3] **[v1.1 調整]** Implement RevealAnswerAsync in LyricsGuessGame.razor - display correct answer, update Question.QuestionState = RevealedAnswer, 自動呼叫 StartNextQuestionAsync（含即時節錄）
-- [ ] T068 [US3] Ensure revealed songs are tracked in UsedSongIndices to prevent repeat in current session
-- [ ] T069 [US3] Add game end detection - 當所有歌曲皆已出題（UsedSongIndices.Count == Songs.Count）或所有歌曲皆無法節錄時顯示遊戲結束
-- [ ] T070 [US3] Implement「遊戲結束！所有歌曲已完成」message with「重新開始」or「輸入新歌單」options
+- [X] T066 [US3] Add「公佈答案」button to LyricsGuessGame.razor
+- [X] T067 [US3] **[v1.1 調整]** Implement RevealAnswerAsync in LyricsGuessGame.razor - display correct answer, update Question.QuestionState = RevealedAnswer, 自動呼叫 StartNextQuestionAsync（含即時節錄）
+- [X] T068 [US3] Ensure revealed songs are tracked in UsedSongIndices to prevent repeat in current session
+- [X] T069 [US3] Add game end detection - 當所有歌曲皆已出題（UsedSongIndices.Count == Songs.Count）或所有歌曲皆無法節錄時顯示遊戲結束
+- [X] T070 [US3] Implement「遊戲結束！所有歌曲已完成」message with「重新開始」or「輸入新歌單」options
 
 **Checkpoint**: US3 complete - 公佈答案功能正常，遊戲結束偵測正確
 
@@ -192,10 +192,10 @@ Based on plan.md project structure:
 
 ### UI & Logic
 
-- [ ] T071 [P] [US4] Add AI model selection dropdown to LyricsGuessGame.razor
-- [ ] T072 [US4] Load available models from ILyricsGuessGameService.GetAvailableModels() into dropdown (顯示 DisplayName，value 為 ModelId)
-- [ ] T073 [US4] Implement model selection change handler - update GameState.SelectedModelId
-- [ ] T074 [US4] Add error handling for model-specific failures - 「所選模型暫時無法使用，請切換其他模型或稍後再試」
+- [X] T071 [P] [US4] Add AI model selection dropdown to LyricsGuessGame.razor
+- [X] T072 [US4] Load available models from ILyricsGuessGameService.GetAvailableModels() into dropdown (顯示 DisplayName，value 為 ModelId)
+- [X] T073 [US4] Implement model selection change handler - update GameState.SelectedModelId
+- [X] T074 [US4] Add error handling for model-specific failures - 「所選模型暫時無法使用，請切換其他模型或稍後再試」
 
 **Checkpoint**: US4 complete - 模型選擇功能正常，錯誤處理完善
 
@@ -209,9 +209,9 @@ Based on plan.md project structure:
 
 ### UI & Logic
 
-- [ ] T075 [US5] Ensure「輸入歌單」button always visible during gameplay
-- [ ] T076 [US5] Implement state reset logic in HandlePlaylistConfirmAsync - clear GameState.Songs, GameState.CurrentQuestion, GameState.UsedSongIndices before parsing new playlist
-- [ ] T077 [US5] Add confirmation dialog for reset (optional, to prevent accidental data loss) - 「確定要覆蓋目前的歌單與進度嗎？」
+- [X] T075 [US5] Ensure「輸入歌單」button always visible during gameplay
+- [X] T076 [US5] Implement state reset logic in HandlePlaylistConfirmAsync - clear GameState.Songs, GameState.CurrentQuestion, GameState.UsedSongIndices before parsing new playlist
+- [X] T077 [US5] Add confirmation dialog for reset (optional, to prevent accidental data loss) - 「確定要覆蓋目前的歌單與進度嗎？」
 
 **Checkpoint**: US5 complete - 歌單覆蓋功能正常，所有使用者故事功能完整
 
@@ -221,17 +221,17 @@ Based on plan.md project structure:
 
 **Purpose**: 改進與驗證，確保所有使用者故事品質
 
-- [ ] T078 [P] **[v1.1 更新]** Update README.md with v1.1 changes in `docs/README.md` - 說明即時節錄策略、記憶體優化、AI 法規限制
-- [ ] T079 [P] Add XML documentation to IAIServiceProvider interface methods
-- [ ] T080 [P] Add XML documentation to ILyricsGuessGameService interface methods
-- [ ] T081 **[v1.1 調整]** Verify timeout settings match quickstart.md - ParsePlaylist: 10s, **GenerateLyricsSnippet: 5s** (取代 FetchLyrics), ValidateAnswer: 5s
-- [ ] T082 Review error messages for user-friendliness - 特別檢查 AI 法規拒絕、節錄失敗的訊息
-- [ ] T083 Execute quickstart.md validation - 從頭到尾執行快速開始指南，驗證所有步驟正確
-- [ ] T084 [P] Verify GITHUB_TOKEN security - 確保從環境變數載入，不硬編碼於程式碼或簽入版控
-- [ ] T085 Run `dotnet restore` (Gate A verification)
-- [ ] T086 Run `dotnet build` (Gate A verification - must have 0 errors)
-- [ ] T087 Run `dotnet test` (Gate A verification - all tests must pass, verify TDD coverage for all logic)
-- [ ] T088 **[v1.1 更新]** Create Verification Record in `docs/plan/verification/002-lyrics-guess-game-v1.1.verify.md` - 記錄 v1.1 規格變更驗證結果
+- [X] T078 [P] **[v1.1 更新]** Update README.md with v1.1 changes in `docs/README.md` - 說明即時節錄策略、記憶體優化、AI 法規限制
+- [X] T079 [P] Add XML documentation to IAIServiceProvider interface methods
+- [X] T080 [P] Add XML documentation to ILyricsGuessGameService interface methods
+- [X] T081 **[v1.1 調整]** Verify timeout settings match quickstart.md - ParsePlaylist: 10s, **GenerateLyricsSnippet: 5s** (取代 FetchLyrics), ValidateAnswer: 5s
+- [X] T082 Review error messages for user-friendliness - 特別檢查 AI 法規拒絕、節錄失敗的訊息
+- [X] T083 Execute quickstart.md validation - 從頭到尾執行快速開始指南，驗證所有步驟正確
+- [X] T084 [P] Verify GITHUB_TOKEN security - 確保從環境變數載入，不硬編碼於程式碼或簽入版控
+- [X] T085 Run `dotnet restore` (Gate A verification)
+- [X] T086 Run `dotnet build` (Gate A verification - must have 0 errors)
+- [X] T087 Run `dotnet test` (Gate A verification - all tests must pass, verify TDD coverage for all logic)
+- [X] T088 **[v1.1 更新]** Create Verification Record in `docs/plan/verification/002-lyrics-guess-game-v1.1.verify.md` - 記錄 v1.1 規格變更驗證結果
 
 **Checkpoint**: All polish tasks complete, ready for Gate B verification
 

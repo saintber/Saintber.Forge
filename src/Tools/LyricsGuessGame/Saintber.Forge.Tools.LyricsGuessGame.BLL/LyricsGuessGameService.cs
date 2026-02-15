@@ -1,4 +1,3 @@
-using System.Text;
 using Saintber.Forge.Tools.LyricsGuessGame.Abstractions;
 using Saintber.Forge.Tools.LyricsGuessGame.Abstractions.Exceptions;
 using Saintber.Forge.Tools.LyricsGuessGame.Abstractions.Models;
@@ -56,15 +55,14 @@ public class LyricsGuessGameService : ILyricsGuessGameService
         {
             Title = dto.Title,
             Artist = dto.Artist,
-            Lyrics = null,
-            InitializationFailed = false
+            CanGenerateQuestion = true
         }).ToList();
     }
 
     /// <summary>
-    /// 初始化歌曲歌詞（延遲載入）
+    /// 即時節錄歌曲歌詞片段
     /// </summary>
-    public async Task InitializeSongLyricsAsync(
+    public async Task<string?> GenerateLyricsSnippetAsync(
         Song song,
         string modelId,
         CancellationToken cancellationToken = default)
@@ -74,107 +72,96 @@ public class LyricsGuessGameService : ILyricsGuessGameService
             throw new ArgumentNullException(nameof(song));
         }
 
-        if (song.IsInitialized)
-        {
-            return; // Already initialized
-        }
-
-        var prompt = $@"請提供歌曲《{song.Title}》（演唱者：{song.Artist}）的完整歌詞。
-
+        var prompt = $@"請針對歌曲「{song.Title}」（演唱者：{song.Artist}）隨機節錄歌詞片段作為猜歌題目。
 要求：
-1. 僅提供歌詞文字，不包含任何說明或註解
-2. 每段之間用空行分隔
-3. 如果無法取得歌詞，請回應：""LYRICS_NOT_FOUND""";
+1. 最少 10 個字以上
+2. 必須為完整句子，不可中斷
+3. 句數越少越好，優先採用單一句子
+4. 僅回傳歌詞片段本身，不要包含歌名或其他說明
+5. 不可回傳完整歌詞，只回傳單一片段";
 
-        try
+        const int maxAttempts = 2;
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
         {
-            var lyrics = await _aiService.GenerateTextAsync(
-                prompt,
-                modelId,
-                _config.FetchLyricsTimeoutSeconds,
-                cancellationToken);
-
-            if (lyrics.Contains("LYRICS_NOT_FOUND") || lyrics.Length < 50)
+            try
             {
-                song.InitializationFailed = true;
-                return;
-            }
+                var snippet = await _aiService.GenerateTextAsync(
+                    prompt,
+                    modelId,
+                    _config.GenerateLyricsSnippetTimeoutSeconds,
+                    cancellationToken);
 
-            song.Lyrics = lyrics;
+                if (IsSnippetValid(snippet))
+                {
+                    return snippet.Trim();
+                }
+            }
+            catch (AIServiceException)
+            {
+                song.CanGenerateQuestion = false;
+                return null;
+            }
         }
-        catch (AIServiceException)
-        {
-            song.InitializationFailed = true;
-            throw;
-        }
+
+        song.CanGenerateQuestion = false;
+        return null;
     }
 
     /// <summary>
-    /// 生成新題目（隨機選取歌詞片段）
+    /// 生成新題目（隨機選歌並即時節錄歌詞片段）
     /// </summary>
-    public Question GenerateQuestion(Song song, int songIndex)
+    public async Task<Question?> GenerateRandomQuestionAsync(
+        GameState gameState,
+        string modelId,
+        int maxRetries = 3,
+        CancellationToken cancellationToken = default)
     {
-        if (song == null)
+        if (gameState == null)
         {
-            throw new ArgumentNullException(nameof(song));
+            throw new ArgumentNullException(nameof(gameState));
         }
-
-        if (!song.IsInitialized)
-        {
-            throw new InvalidOperationException($"Song '{song.Title}' lyrics are not initialized");
-        }
-
-        // Split lyrics into lines
-        var lines = song.Lyrics!
-            .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
-            .Where(line => !string.IsNullOrWhiteSpace(line))
+        var availableIndices = gameState.Songs
+            .Select((song, index) => new { song, index })
+            .Where(x => x.song.CanGenerateQuestion && !gameState.UsedSongIndices.Contains(x.index))
+            .Select(x => x.index)
             .ToList();
 
-        if (lines.Count == 0)
+        if (availableIndices.Count == 0)
         {
-            throw new InvalidOperationException($"Song '{song.Title}' has no valid lyrics lines");
+            return null;
         }
 
-        // Select random starting line
-        var maxStartIndex = Math.Max(0, lines.Count - 3); // Ensure at least 3 lines available
-        var startIndex = _random.Next(0, maxStartIndex + 1);
-
-        // Build snippet (2-4 lines)
-        var lineCount = Math.Min(4, lines.Count - startIndex);
-        lineCount = Math.Max(2, lineCount);
-        
-        var snippet = new StringBuilder();
-        for (int i = 0; i < lineCount; i++)
+        var attempts = Math.Max(1, maxRetries);
+        for (var attempt = 0; attempt < attempts; attempt++)
         {
-            if (startIndex + i < lines.Count)
+            if (availableIndices.Count == 0)
             {
-                snippet.AppendLine(lines[startIndex + i]);
+                break;
             }
-        }
 
-        var snippetText = snippet.ToString().Trim();
+            var pickIndex = availableIndices[_random.Next(availableIndices.Count)];
+            var song = gameState.Songs[pickIndex];
+            var snippet = await GenerateLyricsSnippetAsync(song, modelId, cancellationToken);
 
-        // Ensure snippet meets minimum length requirement
-        var contentLength = snippetText.Replace(" ", "").Replace("\n", "").Replace("\r", "").Length;
-        if (contentLength < _config.MinSnippetLength)
-        {
-            // Fallback: use first 3 lines
-            snippet.Clear();
-            for (int i = 0; i < Math.Min(3, lines.Count); i++)
+            if (string.IsNullOrWhiteSpace(snippet))
             {
-                snippet.AppendLine(lines[i]);
+                song.CanGenerateQuestion = false;
+                availableIndices.Remove(pickIndex);
+                continue;
             }
-            snippetText = snippet.ToString().Trim();
+
+            gameState.UsedSongIndices.Add(pickIndex);
+            return new Question
+            {
+                LyricsSnippet = snippet,
+                CorrectSongTitle = song.Title,
+                CorrectArtist = song.Artist,
+                SongIndex = pickIndex,
+                QuestionState = QuestionState.Unanswered
+            };
         }
 
-        return new Question
-        {
-            LyricsSnippet = snippetText,
-            CorrectSongTitle = song.Title,
-            CorrectArtist = song.Artist,
-            SongIndex = songIndex,
-            QuestionState = QuestionState.Unanswered
-        };
+        return null;
     }
 
     /// <summary>
@@ -195,12 +182,48 @@ public class LyricsGuessGameService : ILyricsGuessGameService
             };
         }
 
-        return await _aiService.ValidateAnswerAsync(
-            userAnswer,
-            correctAnswer,
+        var prompt = $@"請比較使用者答案與正確答案的相似度。請以 JSON 格式回應：
+{{
+  ""SimilarityType"": ""Exact|AlmostCorrect|SimilarButWrong|Wrong"",
+  ""Feedback"": ""給使用者的回饋訊息（繁體中文）""
+}}
+
+正確答案：{correctAnswer}
+使用者答案：{userAnswer}";
+
+        return await _aiService.ParseStructuredDataAsync<AnswerValidationResult>(
+            prompt,
+            string.Empty,
             modelId,
             _config.ValidateAnswerTimeoutSeconds,
             cancellationToken);
+    }
+
+    public List<AIModelConfig> GetAvailableModels()
+    {
+        return _config.AvailableModels.Where(m => m.IsEnabled).ToList();
+    }
+
+    public string GetDefaultModelId()
+    {
+        return _config.AvailableModels.FirstOrDefault(m => m.IsDefault)?.ModelId
+               ?? throw new InvalidOperationException("未設定預設 AI 模型");
+    }
+
+    private bool IsSnippetValid(string snippet)
+    {
+        if (string.IsNullOrWhiteSpace(snippet))
+        {
+            return false;
+        }
+
+        var contentLength = snippet
+            .Replace(" ", string.Empty)
+            .Replace("\n", string.Empty)
+            .Replace("\r", string.Empty)
+            .Length;
+
+        return contentLength >= _config.MinSnippetLength;
     }
 
     // DTO removed: parse directly into Song to simplify testing and avoid private type coupling.

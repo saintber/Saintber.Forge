@@ -21,11 +21,6 @@ public class GameState
     public HashSet<int> UsedSongIndices { get; set; } = new();
 
     /// <summary>
-    /// 初始化失敗的歌曲索引集合（避免重複嘗試）
-    /// </summary>
-    public HashSet<int> FailedSongIndices { get; set; } = new();
-
-    /// <summary>
     /// 使用者目前選擇的 AI 模型識別碼
     /// </summary>
     public string SelectedModelId { get; set; } = string.Empty;

@@ -22,41 +22,22 @@ public class SongTests
         // Assert
         song.Title.Should().Be("晴天");
         song.Artist.Should().Be("周杰倫");
-        song.Lyrics.Should().BeNull();
-        song.InitializationFailed.Should().BeFalse();
-        song.IsInitialized.Should().BeFalse();
+        song.CanGenerateQuestion.Should().BeTrue();
     }
 
     [Fact]
-    public void Song_IsInitialized_ShouldBeTrue_WhenLyricsAreSet()
+    public void Song_ShouldAllow_DisablingQuestionGeneration()
     {
         // Arrange
         var song = new Song
         {
             Title = "晴天",
             Artist = "周杰倫",
-            Lyrics = "故事的小黃花\n從出生那年就飄著..."
+            CanGenerateQuestion = false
         };
 
         // Assert
-        song.IsInitialized.Should().BeTrue();
-    }
-
-    [Fact]
-    public void Song_InitializationFailed_ShouldNotAffect_IsInitialized_WhenLyricsNull()
-    {
-        // Arrange
-        var song = new Song
-        {
-            Title = "晴天",
-            Artist = "周杰倫",
-            InitializationFailed = true
-        };
-
-        // Assert
-        song.IsInitialized.Should().BeFalse();
-        song.InitializationFailed.Should().BeTrue();
-        song.Lyrics.Should().BeNull();
+        song.CanGenerateQuestion.Should().BeFalse();
     }
 
     [Fact]

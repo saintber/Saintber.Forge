@@ -28,9 +28,9 @@ public class LyricsGuessGameConfig
     public int ParsePlaylistTimeoutSeconds { get; set; } = 10;
 
     /// <summary>
-    /// 取得歌詞逾時秒數（預設 5 秒）
+    /// 歌詞片段即時節錄逾時秒數（預設 5 秒）
     /// </summary>
-    public int FetchLyricsTimeoutSeconds { get; set; } = 5;
+    public int GenerateLyricsSnippetTimeoutSeconds { get; set; } = 5;
 
     /// <summary>
     /// 答案驗證逾時秒數（預設 5 秒）
@@ -48,7 +48,7 @@ public class LyricsGuessGameConfig
     public int MaxSnippetLength { get; set; } = 50;
 
     /// <summary>
-    /// 初始化失敗重試次數（預設 3 次）
+    /// 出題失敗重試次數（預設 3 次）
     /// </summary>
     public int InitializationRetryCount { get; set; } = 3;
 }

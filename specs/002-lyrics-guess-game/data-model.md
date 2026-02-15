@@ -12,7 +12,7 @@
 
 **設計原則**:
 - 資料生命週期：頁面載入時建立，頁面重新整理時清空
-- 延遲初始化：歌詞僅在選中該歌曲時載入（延遲載入機制）
+- 即時片段提取：歌詞片段僅在出題時動態提取（不快取完整歌詞）
 - 無使用者身份：不區分登入狀態，不儲存個人資料
 
 ---
@@ -63,48 +63,39 @@
 
 | 欄位名稱 | 型別 | 必填 | 說明 |
 |---------|------|------|------|
-| `Title` | `string` | ✅ | 歌曲名稱（第一階段 AI 解析取得） |
-| `Artist` | `string` | ✅ | 演唱者名稱（第一階段 AI 解析取得） |
-| `Lyrics` | `string?` | ❌ | 完整歌詞（第二階段延遲載入，預設為 `null`） |
-| `InitializationFailed` | `bool` | ✅ | 標記該歌曲是否初始化失敗（AI 無法取得歌詞），預設 `false` |
-
-**計算屬性**:
-```csharp
-public bool IsInitialized => Lyrics != null;
-```
+| `Title` | `string` | ✅ | 歌曲名稱（AI 解析歌單時取得） |
+| `Artist` | `string` | ✅ | 演唱者名稱（AI 解析歌單時取得） |
+| `CanGenerateQuestion` | `bool` | ✅ | 標記該歌曲是否可用於出題（預設 `true`，若 AI 無法提取歌詞片段則設為 `false`） |
 
 **狀態轉換**:
 ```
-[建立] → Title/Artist 已設定, Lyrics = null, InitializationFailed = false
+[建立] → Title/Artist 已設定, CanGenerateQuestion = true
    ↓
-[選中出題] → 若 Lyrics == null，呼叫 AI 取得歌詞
+[選中出題] → 呼叫 AI 即時提取歌詞片段（10+ 字完整句子）
    ↓
-[初始化成功] → Lyrics 被賦值（非 null）
-[初始化失敗] → InitializationFailed = true, Lyrics 仍為 null
+[提取成功] → 建立 Question 物件，CanGenerateQuestion 維持 true
+[提取失敗] → CanGenerateQuestion = false（該歌曲後續不再嘗試）
 ```
 
 **驗證規則**:
 - `Title` 與 `Artist` 不可同時為空字串
-- 若 `InitializationFailed = true`，則 `Lyrics` 必須為 `null`
 
 **範例資料**:
 ```csharp
-// 第一階段：僅有基本資訊
+// 正常歌曲（可出題）
 new Song 
 { 
     Title = "晴天", 
     Artist = "周杰倫", 
-    Lyrics = null,
-    InitializationFailed = false
+    CanGenerateQuestion = true
 }
 
-// 第二階段：已初始化
+// 提取失敗歌曲（不可出題）
 new Song 
 { 
-    Title = "晴天", 
-    Artist = "周杰倫", 
-    Lyrics = "故事的小黃花\n從出生那年就飄著...",
-    InitializationFailed = false
+    Title = "稀有歌曲", 
+    Artist = "未知歌手", 
+    CanGenerateQuestion = false
 }
 ```
 
@@ -164,28 +155,27 @@ new Question
 
 | 欄位名稱 | 型別 | 必填 | 說明 |
 |---------|------|------|------|
-| `Songs` | `List<Song>` | ✅ | 歌曲清單（第一階段 AI 解析後建立） |
+| `Songs` | `List<Song>` | ✅ | 歌曲清單（AI 解析歌單後建立） |
 | `CurrentQuestion` | `Question?` | ❌ | 當前題目（遊戲開始後建立） |
 | `UsedSongIndices` | `HashSet<int>` | ✅ | 已出題的歌曲索引集合（避免重複出題） |
-| `FailedSongIndices` | `HashSet<int>` | ✅ | 初始化失敗的歌曲索引集合（避免重複嘗試） |
 | `SelectedModelId` | `string` | ✅ | 使用者目前選擇的 AI 模型識別碼 |
-| `IsPlaylistParsed` | `bool` | ✅ | 歌單是否已完成第一階段解析 |
+| `IsPlaylistParsed` | `bool` | ✅ | 歌單是否已完成解析 |
 | `IsGameActive` | `bool` | ✅ | 遊戲是否正在進行中 |
 
 **狀態轉換**:
 ```
 [初始狀態] 
-  Songs = [], CurrentQuestion = null, UsedSongIndices = {}, FailedSongIndices = {}
+  Songs = [], CurrentQuestion = null, UsedSongIndices = {}
   IsPlaylistParsed = false, IsGameActive = false
      ↓
 [輸入歌單 + AI 解析] 
-  Songs = [...], IsPlaylistParsed = true
+  Songs = [...], IsPlaylistParsed = true（所有歌曲 CanGenerateQuestion = true）
      ↓
 [開始遊戲 + 首次出題]
-  CurrentQuestion = {...}, UsedSongIndices = {0}, IsGameActive = true
+  隨機選擇可用歌曲 → AI 即時提取片段 → CurrentQuestion = {...}, UsedSongIndices = {0}, IsGameActive = true
      ↓
 [答對/公佈答案]
-  CurrentQuestion = null → 重新隨機選歌 → CurrentQuestion = {...}, UsedSongIndices = {0, 3}
+  CurrentQuestion = null → 重新隨機選歌 + AI 即時提取 → CurrentQuestion = {...}, UsedSongIndices = {0, 3}
      ↓
 [所有歌曲已出完]
   IsGameActive = false
@@ -193,7 +183,6 @@ new Question
 
 **驗證規則**:
 - `UsedSongIndices` 中的索引值需在 `Songs` 的有效範圍內
-- `FailedSongIndices` 與 `UsedSongIndices` 的交集應為空（失敗的歌曲不應被出題）
 - `IsGameActive = true` 時，`CurrentQuestion` 不可為 `null`
 
 ---
@@ -206,8 +195,7 @@ GameState
   │   └─ Song
   │       ├─ Title
   │       ├─ Artist
-  │       ├─ Lyrics (nullable)
-  │       └─ InitializationFailed
+  │       └─ CanGenerateQuestion
   │
   ├─ CurrentQuestion (0..1)
   │   └─ Question
@@ -218,7 +206,6 @@ GameState
   │       └─ QuestionState
   │
   ├─ UsedSongIndices (0..*)
-  ├─ FailedSongIndices (0..*)
   └─ SelectedModelId (references AIModelConfig.ModelId)
 
 AIModelConfig (from appsettings.json)
@@ -233,24 +220,25 @@ AIModelConfig (from appsettings.json)
 
 ## State Management Strategy
 
-### 延遲初始化機制
+### 即時歌詞片段提取機制（v1.1）
 
-**第一階段：歌單解析（快速）**
+**階段一：歌單解析（僅基本資訊）**
 - 輸入：使用者輸入的歌單文字
-- AI 處理：僅解析「歌名/演唱者」（不包含歌詞）
+- AI 處理：僅解析「歌名/演唱者」（**不包含歌詞**）
 - 預期時間：5-10 秒（50 首歌）
-- 輸出：`List<Song>`（所有 `Lyrics = null`）
+- 輸出：`List<Song>`（所有歌曲僅含 Title/Artist，`CanGenerateQuestion = true`）
 
-**第二階段：歌詞載入（隨需）**
-- 觸發時機：隨機選中該歌曲準備出題時
-- AI 處理：取得該歌曲的完整歌詞
+**階段二：出題時即時提取片段（隨需）**
+- 觸發時機：隨機選中歌曲準備出題時
+- AI 處理：**僅提取 10+ 字的完整句子片段**（不取得完整歌詞）
 - 預期時間：2-5 秒（單首歌）
-- 輸出：更新 `Song.Lyrics`
+- 輸出：`Question` 物件（包含 `LyricsSnippet`），**不儲存於 Song 實體**
+- 失敗處理：若 AI 無法提取片段，設定 `Song.CanGenerateQuestion = false`，自動重試其他歌曲（最多 3 次）
 
-**優勢**:
-- 使用者開始遊戲時間：5-10 秒（vs 一次性載入 100-250 秒）
-- 記憶體使用：僅已出題歌曲佔用記憶體（如 100 首歌玩 20 輪 = 僅 20 首初始化）
-- 失敗容錯：初始化失敗的歌曲不影響整體遊戲
+**v1.1 優勢**（相較 v1.0 延遲快取策略）:
+- 記憶體大幅減少：**99% reduction**（100 首歌從 ~1 MB → ~10 KB）
+- AI 政策合規：不快取完整歌詞，符合版權與使用政策
+- 隱私優化：歌詞片段僅暫存於當前題目，答題後即釋放
 
 ---
 
@@ -262,33 +250,34 @@ AIModelConfig (from appsettings.json)
 | 歌曲清單 | `Songs.Count > 0` | 顯示「無法解析歌單」錯誤訊息 |
 | 歌詞片段長度 | 移除空白與標點後至少 5 字 | 重新隨機選擇位置或降級至下一首歌 |
 | 答案輸入 | 不可為空字串 | 顯示「請輸入答案」提示 |
-| 歌曲初始化 | 最多重試 3 次 | 標記 `InitializationFailed = true` 並跳過 |
+| 歌詞片段提取 | 單首歌最多重試 2 次，整體最多嘗試 3 首歌 | 標記 `CanGenerateQuestion = false` 並跳過 |
 
 ---
 
 ## Memory & Performance Considerations
 
-**記憶體估算**:
+**記憶體估算（v1.1 即時提取策略）**:
 ```
 單首歌曲記憶體佔用：
-- 基本資訊（Title + Artist）：~100 bytes
-- 完整歌詞（Lyrics）：~1-3 KB
+- 基本資訊（Title + Artist + CanGenerateQuestion）：~100 bytes
+- 當前題目片段（LyricsSnippet in Question）：~50-200 bytes（僅 1 題暫存）
 
 場景範例（100 首歌，玩 20 輪）：
-- 第一階段（所有歌曲基本資訊）：100 × 100 bytes = 10 KB
-- 第二階段（已初始化歌曲）：20 × 2 KB = 40 KB
-- 總計：~50 KB（可接受）
+- 所有歌曲基本資訊：100 × 100 bytes = 10 KB
+- 當前題目片段：~200 bytes（僅 1 題）
+- 總計：~10.2 KB（**99% reduction vs v1.0**）
 
-極端場景（500 首歌，全部初始化）：
-- 基本資訊：500 × 100 bytes = 50 KB
-- 全部歌詞：500 × 2 KB = 1 MB
-- 總計：~1.05 MB（仍可接受）
+極端場景（500 首歌，玩 100 輪）：
+- 所有歌曲基本資訊：500 × 100 bytes = 50 KB
+- 當前題目片段：~200 bytes（僅 1 題）
+- 總計：~50.2 KB（**vs v1.0 的 1.05 MB，減少 95%+**）
 ```
 
 **效能優化**:
-- 延遲初始化：避免大量歌曲一次性載入
-- HashSet 查找：`UsedSongIndices` 與 `FailedSongIndices` 使用 HashSet 提供 O(1) 查找效能
+- 即時提取：完全避免歌詞快取，記憶體佔用最小化
+- HashSet 查找：`UsedSongIndices` 使用 HashSet 提供 O(1) 查找效能
 - 頁面重新整理清空：避免記憶體洩漏
+- 重試機制：單次提取失敗時，自動嘗試其他可用歌曲（最多 3 次）
 
 ---
 
@@ -305,4 +294,4 @@ AIModelConfig (from appsettings.json)
 
 | 日期 | 版本 | 變更內容 |
 |------|------|---------|
-| 2026-02-11 | v1.0 | 初始版本，定義核心實體與延遲初始化機制 |
+| 2026-02-11 | v1.0 | 初始版本，定義核心實體與延遲初始化機制 || 2026-02-14 | v1.1 | 策略變更：從「延遲歌詞快取」改為「即時片段提取」<br/>- 移除 Song.Lyrics、Song.InitializationFailed<br/>- 新增 Song.CanGenerateQuestion<br/>- 移除 GameState.FailedSongIndices<br/>- 記憶體減少 99%（100 首歌：1 MB → 10 KB） |

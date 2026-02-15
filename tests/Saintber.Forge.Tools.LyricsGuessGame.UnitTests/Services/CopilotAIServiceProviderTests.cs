@@ -61,18 +61,4 @@ public class CopilotAIServiceProviderTests
         result.Should().Be("hello world");
     }
 
-    [Fact]
-    public async Task ValidateAnswerAsync_ShouldReturnParsedResult()
-    {
-        // Arrange
-        var json = "{\"SimilarityType\":\"AlmostCorrect\",\"Feedback\":\"差一點\"}";
-        var service = new FakeCopilotAIServiceProvider(json);
-
-        // Act
-        var result = await service.ValidateAnswerAsync("foo", "bar", "gpt-4o", 1);
-
-        // Assert
-        result.SimilarityType.Should().Be(SimilarityType.AlmostCorrect);
-        result.Feedback.Should().Be("差一點");
-    }
 }

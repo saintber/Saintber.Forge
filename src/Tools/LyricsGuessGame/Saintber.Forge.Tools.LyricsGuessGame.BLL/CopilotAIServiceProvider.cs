@@ -4,7 +4,6 @@ using System.Text.Json.Serialization;
 using GitHub.Copilot.SDK;
 using Saintber.Forge.Tools.LyricsGuessGame.Abstractions;
 using Saintber.Forge.Tools.LyricsGuessGame.Abstractions.Exceptions;
-using Saintber.Forge.Tools.LyricsGuessGame.Abstractions.Models;
 
 namespace Saintber.Forge.Tools.LyricsGuessGame.BLL;
 
@@ -54,30 +53,6 @@ public class CopilotAIServiceProvider : IAIServiceProvider
             modelId: modelId,
             timeoutSeconds: timeoutSeconds,
             cancellationToken: cancellationToken);
-    }
-
-    public async Task<AnswerValidationResult> ValidateAnswerAsync(
-        string userAnswer,
-        string correctAnswer,
-        string modelId,
-        int timeoutSeconds,
-        CancellationToken cancellationToken = default)
-    {
-        var prompt = $@"請比較使用者答案與正確答案的相似度。請以 JSON 格式回應：
-{{
-  ""SimilarityType"": ""Exact|AlmostCorrect|SimilarButWrong|Wrong"",
-  ""Feedback"": ""給使用者的回饋訊息（繁體中文）""
-}}
-
-正確答案：{correctAnswer}
-使用者答案：{userAnswer}";
-
-        return await ParseStructuredDataAsync<AnswerValidationResult>(
-            prompt,
-            string.Empty,
-            modelId,
-            timeoutSeconds,
-            cancellationToken);
     }
 
     protected virtual async Task<string> SendPromptAsync(

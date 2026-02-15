@@ -63,6 +63,11 @@
 - 快速啟動：`specs/002-lyrics-guess-game/quickstart.md`
 - Gate 驗證紀錄：`docs/plan/verification/`
 
+**v1.1 變更摘要**:
+- 即時節錄歌詞片段（不快取完整歌詞）
+- 記憶體使用大幅下降（100 首歌約 10 KB）
+- AI 法規合規：避免保存完整歌詞內容
+
 ---
 
 ## 建議閱讀順序

@@ -1,5 +1,3 @@
-using Saintber.Forge.Tools.LyricsGuessGame.Abstractions.Models;
-
 namespace Saintber.Forge.Tools.LyricsGuessGame.Abstractions;
 
 /// <summary>
@@ -39,19 +37,4 @@ public interface IAIServiceProvider
         int timeoutSeconds,
         CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// 使用 AI 驗證使用者答案
-    /// </summary>
-    /// <param name="userAnswer">使用者答案</param>
-    /// <param name="correctAnswer">正確答案</param>
-    /// <param name="modelId">AI 模型識別碼</param>
-    /// <param name="timeoutSeconds">逾時秒數</param>
-    /// <param name="cancellationToken">取消權杖</param>
-    /// <returns>答案驗證結果</returns>
-    Task<AnswerValidationResult> ValidateAnswerAsync(
-        string userAnswer,
-        string correctAnswer,
-        string modelId,
-        int timeoutSeconds,
-        CancellationToken cancellationToken = default);
 }

@@ -14,21 +14,21 @@ public class LyricsGuessGameServiceTests
     private static LyricsGuessGameConfig CreateConfig() => new()
     {
         ParsePlaylistTimeoutSeconds = 10,
-        FetchLyricsTimeoutSeconds = 5,
+        GenerateLyricsSnippetTimeoutSeconds = 5,
         ValidateAnswerTimeoutSeconds = 5,
         MinSnippetLength = 10,
         MaxSnippetLength = 50
     };
 
     [Fact]
-    public async Task ParsePlaylistBasicInfoAsync_ShouldReturnSongs_WithResetLyrics()
+    public async Task ParsePlaylistBasicInfoAsync_ShouldReturnSongs_WithCanGenerateQuestion()
     {
         // Arrange
         var aiService = new Mock<IAIServiceProvider>();
         var config = CreateConfig();
         var expected = new List<Song>
         {
-            new() { Title = "晴天", Artist = "周杰倫", Lyrics = "should be cleared", InitializationFailed = true }
+            new() { Title = "晴天", Artist = "周杰倫", CanGenerateQuestion = false }
         };
 
         aiService
@@ -49,8 +49,7 @@ public class LyricsGuessGameServiceTests
         result.Should().HaveCount(1);
         result[0].Title.Should().Be("晴天");
         result[0].Artist.Should().Be("周杰倫");
-        result[0].Lyrics.Should().BeNull();
-        result[0].InitializationFailed.Should().BeFalse();
+        result[0].CanGenerateQuestion.Should().BeTrue();
     }
 
     [Fact]
@@ -68,7 +67,7 @@ public class LyricsGuessGameServiceTests
     }
 
     [Fact]
-    public async Task InitializeSongLyricsAsync_ShouldSetLyrics_WhenValid()
+    public async Task GenerateLyricsSnippetAsync_ShouldReturnSnippet_WhenValid()
     {
         // Arrange
         var aiService = new Mock<IAIServiceProvider>();
@@ -80,20 +79,20 @@ public class LyricsGuessGameServiceTests
             .Setup(x => x.GenerateTextAsync(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
-                config.FetchLyricsTimeoutSeconds,
+                config.GenerateLyricsSnippetTimeoutSeconds,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new string('a', 60));
+            .ReturnsAsync("雨一直下 氣氛不算融洽");
 
         // Act
-        await service.InitializeSongLyricsAsync(song, "gpt-4o");
+        var snippet = await service.GenerateLyricsSnippetAsync(song, "gpt-4o");
 
         // Assert
-        song.Lyrics.Should().NotBeNull();
-        song.InitializationFailed.Should().BeFalse();
+        snippet.Should().NotBeNullOrWhiteSpace();
+        song.CanGenerateQuestion.Should().BeTrue();
     }
 
     [Fact]
-    public async Task InitializeSongLyricsAsync_ShouldMarkFailed_WhenNotFound()
+    public async Task GenerateLyricsSnippetAsync_ShouldMarkFailed_WhenTooShort()
     {
         // Arrange
         var aiService = new Mock<IAIServiceProvider>();
@@ -102,23 +101,24 @@ public class LyricsGuessGameServiceTests
         var song = new Song { Title = "晴天", Artist = "周杰倫" };
 
         aiService
-            .Setup(x => x.GenerateTextAsync(
+            .SetupSequence(x => x.GenerateTextAsync(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
-                config.FetchLyricsTimeoutSeconds,
+                config.GenerateLyricsSnippetTimeoutSeconds,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync("LYRICS_NOT_FOUND");
+            .ReturnsAsync("太短")
+            .ReturnsAsync("還是短");
 
         // Act
-        await service.InitializeSongLyricsAsync(song, "gpt-4o");
+        var snippet = await service.GenerateLyricsSnippetAsync(song, "gpt-4o");
 
         // Assert
-        song.InitializationFailed.Should().BeTrue();
-        song.Lyrics.Should().BeNull();
+        snippet.Should().BeNull();
+        song.CanGenerateQuestion.Should().BeFalse();
     }
 
     [Fact]
-    public async Task InitializeSongLyricsAsync_ShouldThrowAndMarkFailed_OnAIError()
+    public async Task GenerateLyricsSnippetAsync_ShouldMarkFailed_OnAIError()
     {
         // Arrange
         var aiService = new Mock<IAIServiceProvider>();
@@ -130,55 +130,64 @@ public class LyricsGuessGameServiceTests
             .Setup(x => x.GenerateTextAsync(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
-                config.FetchLyricsTimeoutSeconds,
+                config.GenerateLyricsSnippetTimeoutSeconds,
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new AIServiceException("boom"));
 
         // Act
-        var act = async () => await service.InitializeSongLyricsAsync(song, "gpt-4o");
+        var snippet = await service.GenerateLyricsSnippetAsync(song, "gpt-4o");
 
         // Assert
-        await act.Should().ThrowAsync<AIServiceException>();
-        song.InitializationFailed.Should().BeTrue();
+        snippet.Should().BeNull();
+        song.CanGenerateQuestion.Should().BeFalse();
     }
 
     [Fact]
-    public void GenerateQuestion_ShouldThrow_WhenLyricsNotInitialized()
+    public async Task GenerateRandomQuestionAsync_ShouldReturnQuestion_WhenSnippetAvailable()
     {
         // Arrange
         var aiService = new Mock<IAIServiceProvider>();
-        var service = new LyricsGuessGameService(aiService.Object, CreateConfig());
-        var song = new Song { Title = "晴天", Artist = "周杰倫" };
+        var config = CreateConfig();
+        var service = new LyricsGuessGameService(aiService.Object, config);
+        var gameState = new GameState
+        {
+            Songs = new List<Song> { new() { Title = "晴天", Artist = "周杰倫" } }
+        };
+
+        aiService
+            .Setup(x => x.GenerateTextAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                config.GenerateLyricsSnippetTimeoutSeconds,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync("雨一直下 氣氛不算融洽");
 
         // Act
-        var act = () => service.GenerateQuestion(song, 0);
+        var question = await service.GenerateRandomQuestionAsync(gameState, "gpt-4o", 1);
 
         // Assert
-        act.Should().Throw<InvalidOperationException>();
+        question.Should().NotBeNull();
+        gameState.UsedSongIndices.Should().Contain(0);
+        question!.LyricsSnippet.Should().NotBeNullOrWhiteSpace();
+        question.CorrectSongTitle.Should().Be("晴天");
     }
 
     [Fact]
-    public void GenerateQuestion_ShouldReturnQuestion_WithSnippet()
+    public async Task GenerateRandomQuestionAsync_ShouldReturnNull_WhenNoAvailableSongs()
     {
         // Arrange
         var aiService = new Mock<IAIServiceProvider>();
         var service = new LyricsGuessGameService(aiService.Object, CreateConfig());
-        var song = new Song
+        var gameState = new GameState
         {
-            Title = "晴天",
-            Artist = "周杰倫",
-            Lyrics = "第一行歌詞\n第二行歌詞\n第三行歌詞\n第四行歌詞"
+            Songs = new List<Song> { new() { Title = "晴天", Artist = "周杰倫", CanGenerateQuestion = false } }
         };
 
         // Act
-        var question = service.GenerateQuestion(song, 2);
+        var question = await service.GenerateRandomQuestionAsync(gameState, "gpt-4o", 1);
 
         // Assert
-        question.LyricsSnippet.Should().NotBeNullOrWhiteSpace();
-        question.CorrectSongTitle.Should().Be("晴天");
-        question.CorrectArtist.Should().Be("周杰倫");
-        question.SongIndex.Should().Be(2);
-        question.QuestionState.Should().Be(QuestionState.Unanswered);
+        question.Should().BeNull();
     }
 
     [Fact]
@@ -209,7 +218,7 @@ public class LyricsGuessGameServiceTests
         };
 
         aiService
-            .Setup(x => x.ValidateAnswerAsync(
+            .Setup(x => x.ParseStructuredDataAsync<AnswerValidationResult>(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),

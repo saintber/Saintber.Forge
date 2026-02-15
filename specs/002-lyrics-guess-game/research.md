@@ -80,23 +80,6 @@ public interface IAIServiceProvider
         TimeSpan? timeout = null,
         CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// 使用 AI 進行語意判定（如答案正確性）
-    /// </summary>
-    /// <param name="question">問題描述</param>
-    /// <param name="userAnswer">使用者答案</param>
-    /// <param name="correctAnswer">正確答案</param>
-    /// <param name="modelId">AI 模型識別碼</param>
-    /// <param name="timeout">逾時設定（預設 5 秒）</param>
-    /// <param name="cancellationToken">取消標記</param>
-    /// <returns>true: 正確 / false: 錯誤</returns>
-    Task<bool> ValidateAnswerAsync(
-        string question,
-        string userAnswer, 
-        string correctAnswer, 
-        string modelId, 
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default);
 }
 ```
 
@@ -1052,7 +1035,7 @@ public class GameState
 
 | 研究項目 | 決策 | 主要產出 | 連結 |
 |----------|------|----------|------|
-| **R1** | AI 整合方式 | 自訂 IAIServiceProvider | 契約介面（ParseStructuredDataAsync、GenerateTextAsync、ValidateAnswerAsync）、OpenAI 實作範例、錯誤處理矩陣 | [R1 詳細](#r1-copilotsdk-使用模式研究) |
+| **R1** | AI 整合方式 | 自訂 IAIServiceProvider | 契約介面（ParseStructuredDataAsync、GenerateTextAsync）、OpenAI 實作範例、錯誤處理矩陣 | [R1 詳細](#r1-copilotsdk-使用模式研究) |
 | **R2** | AI 模型清單 | appsettings.json | 設定結構、DI 註冊、多 Tool 共用策略 | [R2 詳細](#r2-ai-模型清單管理方式) |
 | **R3** | 前端資料儲存策略 | Component 狀態 + 延遲初始化 | 兩階段 AI 處理：第一階段僅解析歌名/演唱者（5-10 秒），第二階段隨機選中時延遲載入歌詞（2-5 秒），等待時間分散至遊戲過程 | [R3 詳細](#r3-前端資料儲存策略) |
 | **R4** | SignalR 連線 | 使用預設設定（30 秒逾時） | 逾時保護策略、重連機制說明 | [R4 詳細](#r4-blazor-server-signalr-連線穩定性) |

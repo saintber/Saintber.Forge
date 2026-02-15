@@ -91,13 +91,13 @@ Task<string> GenerateTextAsync(
 ```
 
 **使用場景**:
-- 取得歌曲完整歌詞（第二階段延遲載入）
+- 取得歌曲歌詞片段（出題時即時節錄）
 
 **範例呼叫**:
 ```csharp
-var prompt = $"請提供歌曲「晴天」（演唱者：周杰倫）的完整歌詞。";
+var prompt = $"請提供歌曲「晴天」（演唱者：周杰倫）的歌詞片段（完整句子，10 字以上）。";
 
-var lyrics = await _aiService.GenerateTextAsync(
+var snippet = await _aiService.GenerateTextAsync(
     prompt,
     "gpt-4-turbo",
     TimeSpan.FromSeconds(5));
@@ -105,73 +105,26 @@ var lyrics = await _aiService.GenerateTextAsync(
 
 ---
 
-### 1.3 ValidateAnswerAsync（驗證答案正確性）
+### 1.3 領域邏輯說明（答案判定）
 
-**用途**: 使用 AI 進行語意比對，判定答案是否正確
-
-```csharp
-/// <summary>
-/// 使用 AI 進行語意判定（如答案正確性）
-/// </summary>
-/// <param name="question">問題描述（歌詞片段）</param>
-/// <param name="userAnswer">使用者答案</param>
-/// <param name="correctAnswer">正確答案（歌名 - 演唱者）</param>
-/// <param name="modelId">AI 模型識別碼</param>
-/// <param name="timeout">逾時設定（預設 5 秒）</param>
-/// <param name="cancellationToken">取消標記</param>
-/// <returns>判定結果（正確性 + 提示訊息）</returns>
-/// <exception cref="AIServiceException">AI 呼叫失敗</exception>
-/// <exception cref="TimeoutException">逾時</exception>
-Task<AnswerValidationResult> ValidateAnswerAsync(
-    string question,
-    string userAnswer, 
-    string correctAnswer, 
-    string modelId, 
-    TimeSpan? timeout = null,
-    CancellationToken cancellationToken = default);
-```
-
-**AnswerValidationResult 結構**:
-```csharp
-public class AnswerValidationResult
-{
-    /// <summary>
-    /// 答案是否正確
-    /// </summary>
-    public bool IsCorrect { get; set; }
-    
-    /// <summary>
-    /// AI 提供的回饋訊息
-    /// </summary>
-    public string Feedback { get; set; } = string.Empty;
-    
-    /// <summary>
-    /// 相似度類型（用於不同提示訊息）
-    /// </summary>
-    public SimilarityType Similarity { get; set; }
-}
-
-public enum SimilarityType
-{
-    Exact,           // 完全正確
-    CloseMatch,      // 只差一個字
-    SameArtist,      // 同歌手其他歌曲
-    Unrelated        // 完全無關
-}
-```
+**說明**: IAIServiceProvider 僅提供共通 AI 能力，答案判定屬於 Lyrics Guess Game 領域邏輯，應由 `ILyricsGuessGameService` 組合提示詞並解析回應。
 
 **範例呼叫**:
 ```csharp
-var result = await _aiService.ValidateAnswerAsync(
-    "故事的小黃花\n從出生那年就飄著...",
-    "晴天",
-    "晴天 - 周杰倫",
-    "gpt-4-turbo",
-    TimeSpan.FromSeconds(5));
+var prompt = $@"請比較使用者答案與正確答案的相似度。請以 JSON 格式回應：
+{{
+  ""SimilarityType"": ""Exact|AlmostCorrect|SimilarButWrong|Wrong"",
+  ""Feedback"": ""給使用者的回饋訊息（繁體中文）""
+}}
 
-// result.IsCorrect = true
-// result.Feedback = "答對了！"
-// result.Similarity = SimilarityType.Exact
+正確答案：{correctAnswer}
+使用者答案：{userAnswer}";
+
+var result = await _aiService.ParseStructuredDataAsync<AnswerValidationResult>(
+    prompt,
+    string.Empty,
+    modelId,
+    TimeSpan.FromSeconds(5));
 ```
 
 ---
@@ -189,7 +142,7 @@ var result = await _aiService.ValidateAnswerAsync(
 /// <param name="playlistText">使用者輸入的歌單文字</param>
 /// <param name="modelId">AI 模型識別碼</param>
 /// <param name="cancellationToken">取消標記</param>
-/// <returns>歌曲清單（Lyrics 皆為 null）</returns>
+/// <returns>歌曲清單（僅 Title/Artist，CanGenerateQuestion 預設 true）</returns>
 /// <exception cref="InvalidOperationException">無法解析歌單</exception>
 Task<List<Song>> ParsePlaylistBasicInfoAsync(
     string playlistText, 
@@ -199,17 +152,17 @@ Task<List<Song>> ParsePlaylistBasicInfoAsync(
 
 ---
 
-### 2.2 InitializeSongLyricsAsync（初始化歌曲歌詞）
+### 2.2 GenerateLyricsSnippetAsync（即時節錄歌詞片段）
 
 ```csharp
 /// <summary>
-/// 延遲載入歌曲的完整歌詞（第二階段）
+/// 出題時即時節錄歌曲歌詞片段（不保存完整歌詞）
 /// </summary>
-/// <param name="song">待初始化的歌曲</param>
+/// <param name="song">待節錄的歌曲</param>
 /// <param name="modelId">AI 模型識別碼</param>
 /// <param name="cancellationToken">取消標記</param>
-/// <returns>初始化是否成功</returns>
-Task<bool> InitializeSongLyricsAsync(
+/// <returns>歌詞片段（失敗則回傳 null）</returns>
+Task<string?> GenerateLyricsSnippetAsync(
     Song song, 
     string modelId, 
     CancellationToken cancellationToken = default);
@@ -235,19 +188,19 @@ Task<Question?> GenerateRandomQuestionAsync(
 
 ---
 
-### 2.4 ValidateUserAnswerAsync（驗證使用者答案）
+### 2.4 ValidateAnswerAsync（驗證使用者答案）
 
 ```csharp
 /// <summary>
 /// 驗證使用者輸入的答案是否正確
 /// </summary>
 /// <param name="userAnswer">使用者答案</param>
-/// <param name="currentQuestion">當前題目</param>
+/// <param name="correctAnswer">正確答案（歌名）</param>
 /// <param name="modelId">AI 模型識別碼</param>
 /// <returns>驗證結果</returns>
-Task<AnswerValidationResult> ValidateUserAnswerAsync(
+Task<AnswerValidationResult> ValidateAnswerAsync(
     string userAnswer,
-    Question currentQuestion,
+    string correctAnswer,
     string modelId);
 ```
 
@@ -325,8 +278,8 @@ ILyricsGuessGameService.ParsePlaylistBasicInfoAsync()
 IAIServiceProvider.ParseStructuredDataAsync<List<Song>>()
     ↓ (Copilot SDK 跨廠商呼叫)
 OpenAI / Anthropic / 其他廠商
-    ↓
-回傳 List<Song> (Lyrics = null)
+     ↓
+回傳 List<Song> (僅 Title/Artist，CanGenerateQuestion = true)
     ↓
 GameState.Songs = [...], IsPlaylistParsed = true
 ```
@@ -335,20 +288,16 @@ GameState.Songs = [...], IsPlaylistParsed = true
 
 ---
 
-### 4.2 歌詞初始化流程（第二階段）
+### 4.2 歌詞片段節錄流程（第二階段）
 
 ```
-隨機選中歌曲 (Songs[index])
+使用者觸發出題
     ↓
-檢查 song.IsInitialized
-    ↓ (false)
-ILyricsGuessGameService.InitializeSongLyricsAsync(song, modelId)
+ILyricsGuessGameService.GenerateLyricsSnippetAsync(song, modelId)
     ↓
 IAIServiceProvider.GenerateTextAsync(prompt, modelId)
     ↓ (Copilot SDK)
-AI 回傳完整歌詞
-    ↓
-song.Lyrics = "...", song.IsInitialized = true
+AI 回傳歌詞片段
     ↓
 生成題目 (Question)
 ```
@@ -362,9 +311,9 @@ song.Lyrics = "...", song.IsInitialized = true
 ```
 使用者輸入答案
     ↓
-ILyricsGuessGameService.ValidateUserAnswerAsync(answer, question, modelId)
+ILyricsGuessGameService.ValidateAnswerAsync(answer, correctAnswer, modelId)
     ↓
-IAIServiceProvider.ValidateAnswerAsync(...)
+IAIServiceProvider.ParseStructuredDataAsync<AnswerValidationResult>(...)
     ↓ (Copilot SDK)
 AI 語意比對
     ↓

@@ -16,17 +16,7 @@ public class Song
     public required string Artist { get; set; }
 
     /// <summary>
-    /// 完整歌詞（第二階段延遲載入，預設為 null）
+    /// 標記該歌曲是否可出題（AI 節錄失敗時設為 false）
     /// </summary>
-    public string? Lyrics { get; set; }
-
-    /// <summary>
-    /// 標記該歌曲是否初始化失敗（AI 無法取得歌詞），預設 false
-    /// </summary>
-    public bool InitializationFailed { get; set; } = false;
-
-    /// <summary>
-    /// 計算屬性：歌詞是否已初始化（Lyrics 不為 null）
-    /// </summary>
-    public bool IsInitialized => Lyrics != null;
+    public bool CanGenerateQuestion { get; set; } = true;
 }

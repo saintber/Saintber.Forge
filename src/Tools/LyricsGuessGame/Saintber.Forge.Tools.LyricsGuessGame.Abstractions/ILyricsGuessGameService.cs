@@ -13,30 +13,37 @@ public interface ILyricsGuessGameService
     /// <param name="playlistText">歌單文字（使用者輸入）</param>
     /// <param name="modelId">AI 模型識別碼</param>
     /// <param name="cancellationToken">取消權杖</param>
-    /// <returns>歌曲清單（僅包含 Title 和 Artist，Lyrics 為 null）</returns>
+    /// <returns>歌曲清單（僅包含 Title 和 Artist）</returns>
     Task<List<Song>> ParsePlaylistBasicInfoAsync(
         string playlistText,
         string modelId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 初始化歌曲歌詞（延遲載入）
+    /// 即時節錄歌曲歌詞片段
     /// </summary>
-    /// <param name="song">歌曲物件（將更新 Lyrics 或 InitializationFailed 屬性）</param>
+    /// <param name="song">歌曲物件（節錄失敗時會標記 CanGenerateQuestion = false）</param>
     /// <param name="modelId">AI 模型識別碼</param>
     /// <param name="cancellationToken">取消權杖</param>
-    Task InitializeSongLyricsAsync(
+    /// <returns>歌詞片段（若無法節錄則為 null）</returns>
+    Task<string?> GenerateLyricsSnippetAsync(
         Song song,
         string modelId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 生成新題目（隨機選取歌詞片段）
+    /// 生成新題目（隨機選歌並即時節錄歌詞片段）
     /// </summary>
-    /// <param name="song">歌曲物件（必須已初始化歌詞）</param>
-    /// <param name="songIndex">歌曲在清單中的索引</param>
-    /// <returns>題目物件</returns>
-    Question GenerateQuestion(Song song, int songIndex);
+    /// <param name="gameState">遊戲狀態</param>
+    /// <param name="modelId">AI 模型識別碼</param>
+    /// <param name="maxRetries">節錄失敗時的重試次數</param>
+    /// <param name="cancellationToken">取消權杖</param>
+    /// <returns>題目物件（若無法出題則為 null）</returns>
+    Task<Question?> GenerateRandomQuestionAsync(
+        GameState gameState,
+        string modelId,
+        int maxRetries = 3,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 驗證使用者答案
@@ -51,4 +58,14 @@ public interface ILyricsGuessGameService
         string correctAnswer,
         string modelId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 取得已啟用的 AI 模型清單
+    /// </summary>
+    List<AIModelConfig> GetAvailableModels();
+
+    /// <summary>
+    /// 取得預設 AI 模型識別碼
+    /// </summary>
+    string GetDefaultModelId();
 }

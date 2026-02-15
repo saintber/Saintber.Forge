@@ -120,18 +120,21 @@ dotnet restore
         "IsEnabled": true,
         "IsDefault": false
       },
-      {
-        "ModelId": "claude-3-sonnet",
-        "DisplayName": "Claude 3 Sonnet（精準理解）",
-        "Provider": "Anthropic",
-        "IsEnabled": true,
-        "IsDefault": false
-      }
-    ],
-    "Timeouts": {
-      "ParsePlaylistSeconds": 10,
-      "ValidateAnswerSeconds": 5
-    }
+            {
+                "ModelId": "claude-3-5-sonnet",
+                "DisplayName": "Claude 3.5 Sonnet（創意推理）",
+                "Provider": "Anthropic",
+                "IsEnabled": true,
+                "IsDefault": false
+            }
+        ],
+        "DefaultModelId": "gpt-4o",
+        "ParsePlaylistTimeoutSeconds": 10,
+        "GenerateLyricsSnippetTimeoutSeconds": 5,
+        "ValidateAnswerTimeoutSeconds": 5,
+        "MinSnippetLength": 10,
+        "MaxSnippetLength": 50,
+        "InitializationRetryCount": 3
   }
 }
 ```
@@ -202,14 +205,6 @@ public interface IAIServiceProvider
 
     Task<string> GenerateTextAsync(
         string prompt, 
-        string modelId, 
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default);
-
-    Task<AnswerValidationResult> ValidateAnswerAsync(
-        string question,
-        string userAnswer, 
-        string correctAnswer, 
         string modelId, 
         TimeSpan? timeout = null,
         CancellationToken cancellationToken = default);

@@ -19,7 +19,6 @@ public class GameStateTests
         gameState.Songs.Should().NotBeNull().And.BeEmpty();
         gameState.CurrentQuestion.Should().BeNull();
         gameState.UsedSongIndices.Should().NotBeNull().And.BeEmpty();
-        gameState.FailedSongIndices.Should().NotBeNull().And.BeEmpty();
         gameState.IsPlaylistParsed.Should().BeFalse();
         gameState.IsGameActive.Should().BeFalse();
         gameState.SelectedModelId.Should().NotBeNull();
@@ -75,22 +74,6 @@ public class GameStateTests
         gameState.IsGameActive.Should().BeTrue();
         gameState.CurrentQuestion.Should().NotBeNull();
         gameState.UsedSongIndices.Should().Contain(0);
-    }
-
-    [Fact]
-    public void GameState_UsedSongIndices_ShouldNotOverlap_WithFailedIndices()
-    {
-        // Arrange
-        var gameState = new GameState();
-
-        // Act
-        gameState.FailedSongIndices.Add(0);
-        gameState.FailedSongIndices.Add(1);
-        gameState.UsedSongIndices.Add(2);
-        gameState.UsedSongIndices.Add(3);
-
-        // Assert
-        gameState.UsedSongIndices.Intersect(gameState.FailedSongIndices).Should().BeEmpty();
     }
 
     [Fact]

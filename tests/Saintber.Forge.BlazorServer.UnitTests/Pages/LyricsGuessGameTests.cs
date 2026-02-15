@@ -30,18 +30,24 @@ public class LyricsGuessGameTests : TestContext
         var mockService = new Mock<ILyricsGuessGameService>();
         var songs = new List<Song> { new() { Title = "晴天", Artist = "周杰倫" } };
 
+        mockService.Setup(x => x.GetAvailableModels()).Returns(config.AvailableModels);
+        mockService.Setup(x => x.GetDefaultModelId()).Returns(config.DefaultModelId);
+
         mockService
             .Setup(x => x.ParsePlaylistBasicInfoAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(songs);
 
         mockService
-            .Setup(x => x.InitializeSongLyricsAsync(It.IsAny<Song>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Callback<Song, string, CancellationToken>((song, _, _) => song.Lyrics = "歌詞內容")
-            .Returns(Task.CompletedTask);
-
-        mockService
-            .Setup(x => x.GenerateQuestion(It.IsAny<Song>(), It.IsAny<int>()))
-            .Returns(new Question
+            .Setup(x => x.GenerateRandomQuestionAsync(
+                It.IsAny<GameState>(),
+                It.IsAny<string>(),
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<GameState, string, int, CancellationToken>((state, _, _, _) =>
+            {
+                state.UsedSongIndices.Add(0);
+            })
+            .ReturnsAsync(new Question
             {
                 LyricsSnippet = "片段",
                 CorrectSongTitle = "晴天",
@@ -71,6 +77,9 @@ public class LyricsGuessGameTests : TestContext
         var config = CreateConfig();
         var mockService = new Mock<ILyricsGuessGameService>();
 
+        mockService.Setup(x => x.GetAvailableModels()).Returns(config.AvailableModels);
+        mockService.Setup(x => x.GetDefaultModelId()).Returns(config.DefaultModelId);
+
         mockService
             .Setup(x => x.ParsePlaylistBasicInfoAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("boom"));
@@ -96,14 +105,20 @@ public class LyricsGuessGameTests : TestContext
         var mockService = new Mock<ILyricsGuessGameService>();
         var song = new Song { Title = "晴天", Artist = "周杰倫" };
 
-        mockService
-            .Setup(x => x.InitializeSongLyricsAsync(It.IsAny<Song>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Callback<Song, string, CancellationToken>((s, _, _) => s.Lyrics = "第一行\n第二行\n第三行")
-            .Returns(Task.CompletedTask);
+        mockService.Setup(x => x.GetAvailableModels()).Returns(config.AvailableModels);
+        mockService.Setup(x => x.GetDefaultModelId()).Returns(config.DefaultModelId);
 
         mockService
-            .Setup(x => x.GenerateQuestion(It.IsAny<Song>(), It.IsAny<int>()))
-            .Returns(new Question
+            .Setup(x => x.GenerateRandomQuestionAsync(
+                It.IsAny<GameState>(),
+                It.IsAny<string>(),
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<GameState, string, int, CancellationToken>((state, _, _, _) =>
+            {
+                state.UsedSongIndices.Add(0);
+            })
+            .ReturnsAsync(new Question
             {
                 LyricsSnippet = "片段",
                 CorrectSongTitle = "晴天",
@@ -148,14 +163,20 @@ public class LyricsGuessGameTests : TestContext
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(validationResult);
 
-        mockService
-            .Setup(x => x.InitializeSongLyricsAsync(It.IsAny<Song>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Callback<Song, string, CancellationToken>((s, _, _) => s.Lyrics = "歌詞")
-            .Returns(Task.CompletedTask);
+        mockService.Setup(x => x.GetAvailableModels()).Returns(config.AvailableModels);
+        mockService.Setup(x => x.GetDefaultModelId()).Returns(config.DefaultModelId);
 
         mockService
-            .Setup(x => x.GenerateQuestion(It.IsAny<Song>(), It.IsAny<int>()))
-            .Returns(new Question
+            .Setup(x => x.GenerateRandomQuestionAsync(
+                It.IsAny<GameState>(),
+                It.IsAny<string>(),
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<GameState, string, int, CancellationToken>((state, _, _, _) =>
+            {
+                state.UsedSongIndices.Add(1);
+            })
+            .ReturnsAsync(new Question
             {
                 LyricsSnippet = "片段",
                 CorrectSongTitle = "晴天",
@@ -214,6 +235,9 @@ public class LyricsGuessGameTests : TestContext
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(validationResult);
 
+        mockService.Setup(x => x.GetAvailableModels()).Returns(config.AvailableModels);
+        mockService.Setup(x => x.GetDefaultModelId()).Returns(config.DefaultModelId);
+
         Services.AddSingleton(config);
         Services.AddSingleton(mockService.Object);
 
@@ -252,6 +276,9 @@ public class LyricsGuessGameTests : TestContext
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("AI service error"));
+
+        mockService.Setup(x => x.GetAvailableModels()).Returns(config.AvailableModels);
+        mockService.Setup(x => x.GetDefaultModelId()).Returns(config.DefaultModelId);
 
         Services.AddSingleton(config);
         Services.AddSingleton(mockService.Object);
