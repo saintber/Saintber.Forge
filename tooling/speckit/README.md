@@ -23,13 +23,11 @@
 | 位置 | 內容 | 整合 |
 |---|---|---|
 | Hub 根目錄 | 上游 v1.1.0 | claude、codex |
-| `projects/forge-explorer/` | 上游 v1.1.0，憲章保留 | 目前仍是 copilot，見下方「待處理」 |
+| `projects/forge-explorer/` | 上游 v1.1.0，憲章保留 | claude、codex |
 
 `.specify/`、`.claude/skills`、`.agents/skills` 由 `specify` CLI 管理，**不要手動編輯**。升級用 `specify integration upgrade`。
 
 ## 待處理
 
-- forge-explorer 目前仍是 **copilot** 整合；使用者決定改用 claude 與 codex（copilot 短期內不用）。需要在 `projects/forge-explorer/` 執行：
-  `specify integration install claude`、`specify integration install codex`、`specify integration uninstall copilot`。
 - 本專案的擴充（`context`、`adopt`、`archive`、Policy 載入）**尚未實作**。依 `design.md` §13.2，建議以上游的 preset 與 extension 機制承載，放在這個目錄下；做成之前不要宣稱它們可用。
 - `design.md` §13.5 的驗收項目尚未執行。

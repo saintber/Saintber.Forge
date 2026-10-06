@@ -145,7 +145,12 @@ Saintber.Forge/
 │  │  ├─ sync-speckit.mjs         # 把 tooling/speckit 部署到各專案
 │  │  ├─ build-catalog.mjs        # 由各專案的 manifest 產生 catalog 中的本地項目
 │  │  └─ graduate-project.mjs     # 協助工具遷出（§14.3）
-│  └─ ci/                         # CI 用：依變動路徑派送、打包入口包、一致性檢查
+│  ├─ ci/                         # CI 用（唯讀、可在 PR 上跑）：依變動路徑派送、一致性檢查、打包的 dry-run
+│  └─ release/                    # 發佈用（有副作用、需要憑證、只在 tag 觸發）：打包入口包、產生 descriptor、上傳（§14.2）
+│     ├─ pack-entry.mjs           # 依 manifest 為某工具產生入口包與完整性雜湊
+│     ├─ pack-shared.mjs          # 在 Shared 套件目錄執行 npm pack，產生 release tarball
+│     ├─ update-catalog.mjs       # 產生 catalog descriptor 的變更，交由審查，不自動推到主線
+│     └─ verify-release.mjs       # 下載已發佈的檔案，重新驗證雜湊與 manifest
 │
 ├─ tooling/
 │  ├─ speckit/                    # ★ Spec Kit 客製化的唯一正本（§13.6）
@@ -185,7 +190,8 @@ Saintber.Forge/
 | `workspace.json` | 開發腳本、Spec Kit、代理 | 「哪些專案在本 repo 內開發」 |
 | `schemas/` | Hub 與工具 | 共同契約格式；工具自己的內部 metadata 不在這裡 |
 | `scripts/bootstrap/` | 使用者 | 唯一不依賴 Node 的區域：只負責準備 Node 和取得 saintber |
-| `scripts/dev/`、`scripts/ci/` | 開發者、CI | 一般使用 Node `.mjs`，以便跨平台 |
+| `scripts/dev/`、`scripts/ci/` | 開發者、CI | 一般使用 Node `.mjs`，以便跨平台。`ci/` 唯讀，可以在 PR 上執行 |
+| `scripts/release/` | 發佈流程（tag 觸發） | 有副作用（建立 release、上傳檔案）、需要憑證，**不得**在 PR 上執行。只負責「產出並發佈入口包」，**不部署任何工具**：工具的部署由工具自己決定，所以 Hub 沒有 `cd/` |
 | `tooling/` | 開發者 | Spec Kit 客製化與專案骨架的正本 |
 | `archive/` | 追溯用 | 預設不被當成現行需求讀取 |
 
@@ -1077,7 +1083,16 @@ archive/changes/002-selective-install/
 - Shared 以 `npm pack` 產生的 release tarball 提供（§6）。不使用指向本 monorepo 的 npm git dependency。
 - 工具需要從原始碼建置時，由工具自己說明並執行；Hub 不依賴工具的內部目錄或建置步驟。
 - 開發期可以把本地專案以 `local-dev` 來源註冊到 catalog，一般使用者則使用已發佈、可固定版本的入口包。
-- CI：
+- **發佈流程**（`scripts/release/`，由 tag `<tool-id>@x.y.z` 觸發）：
+  1. `pack-entry.mjs`：依該版本的 manifest 產生入口包，計算完整性雜湊。Shared 用 `pack-shared.mjs`（§6）。
+  2. 建立 GitHub release，上傳入口包。入口包的下載網址由 tag 與檔名決定，可以在上傳前算出。
+  3. `update-catalog.mjs`：把 `{url, integrity, manifestPath}` 寫成 catalog descriptor 的變更（§7.6），**交由審查**，不自動推到主線。catalog 是使用者取得工具的唯一來源，變更必須被看過。
+  4. `verify-release.mjs`：從發佈的位置重新下載，驗證雜湊與 manifest，確認使用者實際拿到的就是發佈的內容。
+  - 發佈需要憑證，只在 tag 觸發的流程中提供，**不在 PR 上提供**。
+  - **不部署工具**：Hub 只發佈入口包。工具如何部署（例如 forge-explorer 的 Blazor 放到哪裡）由工具自己決定，不屬於 Hub 的 CI/CD。
+  - 發佈到 npm 是**以後**的事（只有 Hub）；做的時候再新增腳本，不預先建立。
+- CI（`scripts/ci/`，唯讀）：
+  - 發佈流程中的 `pack-*` 在 CI 以 `--dry-run` 執行，確認每個工具與 Shared 都**可以被打包**，但不上傳。
   - 依變動路徑只建置與測試相關的專案；`src/`、`schemas/`、`packages/`、`tooling/` 變動時擴大範圍。
   - 必跑檢查：
     - manifest 符合 schema。

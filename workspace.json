@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "workspace": "saintber-forge",
+  "projects": [
+    {
+      "id": "hub",
+      "path": ".",
+      "status": "active",
+      "owner": "saintber"
+    },
+    {
+      "id": "forge-explorer",
+      "path": "projects/forge-explorer",
+      "status": "incubating",
+      "owner": "saintber"
+    }
+  ]
+}
