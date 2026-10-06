@@ -4,16 +4,22 @@
 
 ## 繼承的 Hub Policy
 
-forge-explorer 在 workspace 內開發，繼承 Hub 的下列 Policy：
+forge-explorer 在 workspace 內開發，繼承 Hub 的下列 Policy（Hub 憲章已於 2026-10-06 批准，Active v1.0.0）：
 
 | Hub Policy | scope | 說明 |
 |---|---|---|
-| POL-SEC-001 Security Baseline | distribution | 適用本專案的 `[tool]` 與 `[hub, tool]` 規則 |
+| POL-STRUCT-001 Project Structure | workspace | |
+| POL-DOC-001 Documentation Governance | workspace | |
+| POL-SPEC-001 Specification Lifecycle | workspace | |
+| POL-SPECKIT-001 Spec Kit Workflow | workspace | |
+| POL-INVOKE-001 Invocation Contract | distribution | 只適用 `[tool]` 與 `[hub, tool]` 規則；forge-explorer **目前還沒有 saintber 入口**，所以尚無可套用的操作 |
+| POL-SEC-001 Security Baseline | distribution | 適用 `[tool]` 與 `[hub, tool]` 規則 |
 | POL-TEST-001 Testing Governance | workspace | |
-| POL-DOD-001 Implementation Definition of Done | workspace | |
+| POL-DOD-001 Implementation Definition of Done | workspace | R6a 來自已批准的憲章原則 VI |
 
-- **繼承基線**：Hub 在 `hub/000-restructure` 分支的提煉版本（Hub 憲章與標籤尚未建立，之後補上 commit 或 tag）。
-- Hub Policy 位置：`../../../../../docs/governance/policy/`（workspace 模式，見 採納時的設計（快照）§11.4、§13.4）。
+- **繼承基線**：Hub 在 `hub/000-restructure` 分支的版本（尚未建立 commit 或 tag；有了之後補上）。
+- Hub Policy 位置：`../../../../../docs/governance/policy/`（workspace 模式，見採納時設計（快照）§11.4、§13.4）。
+- **與 Hub 憲章的潛在衝突**：見 [`conflicts-with-hub.md`](conflicts-with-hub.md)。**舊憲章與本目錄的 Policy 原封不動，仍然有效**；是否修訂待 owner 裁決。
 
 ## 本專案的專屬 Policy
 

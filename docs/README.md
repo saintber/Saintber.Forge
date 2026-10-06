@@ -41,7 +41,7 @@ docs/
 
 ## 憲章
 
-Hub 的憲章**尚未撰寫**（遷移步驟 9）。
+Hub 的憲章已起草：[`.specify/memory/constitution.md`](../.specify/memory/constitution.md)，狀態 **Active（v1.0.0，2026-10-06 由使用者批准）**。
 
 舊的 Saintber.Forge 憲章是 .NET 探索性工具集的治理文件，已隨專案搬到 [`projects/forge-explorer/.specify/memory/constitution.md`](../projects/forge-explorer/.specify/memory/constitution.md)。它只適用 forge-explorer，不是整個 Hub 的憲章。
 

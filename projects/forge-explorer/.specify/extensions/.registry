@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "extensions": {
+    "hub": {
+      "version": "0.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:15687c9c1f1ea45ac4f242d095c7dc29e3ade0b2f24ed8475b01659f989dade0",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "codex": [
+          "speckit.hub.context",
+          "speckit.hub.adopt",
+          "speckit.hub.archive"
+        ],
+        "claude": [
+          "speckit.hub.context",
+          "speckit.hub.adopt",
+          "speckit.hub.archive"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-10-06T08:18:31.290393+00:00"
+    }
+  }
+}

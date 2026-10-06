@@ -147,8 +147,10 @@ Verification Record 用於保證 Gate A/Gate B 在**每一次可交付變更**�
 每次可交付變更需新增一份文件：
 
 ```text
-docs/plan/verification/<change-id>.verify.md
+specs/<NNN-name>/verification.md
 ```
+
+> **路徑修訂（2026-10-06，遷移 `hub/000-restructure`）**：原文為 `docs/plan/verification/<change-id>.verify.md`。該目錄在遷移後不再存在，與現行的 Hub 正本 POL-DOD-001 R7 衝突，故改為上方路徑；封存後隨工作包移到 `archive/changes/<NNN-name>/work/verification.md`。這是**路徑修訂**，規則本身不變。**依已採納設計（Hub 設計 §12.3、§12.5、§15.2）調整路徑，已授權**，不是新決策。
 
 其中 `<change-id>` 需能辨識本次變更，例如：
 

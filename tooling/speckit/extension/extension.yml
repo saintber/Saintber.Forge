@@ -1,0 +1,29 @@
+schema_version: "1.0"
+
+extension:
+  id: hub
+  name: "Saintber Hub Governance"
+  version: "0.1.0"
+  description: "Context loading, adopt and archive for the Saintber Hub specification lifecycle (POL-SPEC-001, POL-SPECKIT-001)"
+  author: saintber
+  repository: https://github.com/saintber/Saintber.Forge
+  license: MIT
+
+requires:
+  speckit_version: ">=1.1.0"
+
+provides:
+  commands:
+    - name: speckit.hub.context
+      file: commands/speckit.hub.context.md
+      description: "Resolve the target project and load constitution, Policy index and effective-spec index"
+    - name: speckit.hub.adopt
+      file: commands/speckit.hub.adopt.md
+      description: "Merge a verified work package into the effective specification (baseline-checked, no auto-commit)"
+    - name: speckit.hub.archive
+      file: commands/speckit.hub.archive.md
+      description: "Archive a work package (adopted, cancelled or superseded); retry-safe, never overwrites"
+
+tags:
+  - "governance"
+  - "lifecycle"

@@ -1,0 +1,25 @@
+schema_version: "1.0"
+
+preset:
+  id: "hub-policy-check"
+  name: "Hub Policy Check"
+  version: "0.1.0"
+  description: "Wraps /plan so the plan contains a Constitution & Policy Check against active Hub and project Policy (design §11.3, POL-SPECKIT-001 R5)"
+  author: "saintber"
+  repository: "https://github.com/saintber/Saintber.Forge"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=1.1.0"
+
+provides:
+  templates:
+    - type: "command"
+      name: "speckit.plan"
+      file: "commands/speckit.plan.md"
+      description: "Core /plan plus a mandatory Constitution & Policy Check"
+      strategy: "wrap"
+
+tags:
+  - "governance"
+  - "policy"

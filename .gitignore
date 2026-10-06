@@ -17,6 +17,9 @@ artifacts/
 .vs/
 .vscode/
 *.code-workspace
+# 專案設計的可共用 workspace（design: Saintber.code-workspace、<id>.code-workspace）
+!Saintber.code-workspace
+!projects/*/*.code-workspace
 *.sln.docstates
 
 # Entity Framework
@@ -26,7 +29,9 @@ artifacts/
 Migrations/
 
 # NuGet
-packages/
+# NuGet 還原目錄只在 .NET 專案內；根目錄 packages/ 是 Hub 的 Shared（design §6），不可忽略
+**/packages/
+!/packages/
 *.nupkg
 *.snupkg
 project.fragment.lock.json
@@ -42,6 +47,8 @@ artifacts/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
+# scripts/release/ 是發佈腳本（design §4），不是建置輸出
+!/scripts/release/
 [Rr]eleases/
 x64/
 x86/
@@ -115,3 +122,13 @@ $RECYCLE.BIN/
 playwright-report/
 test-results/
 playwright/.cache/
+
+# --- Hub / Node（採納設計：入口包、Shared tarball、npm、adopt/archive 暫存區）---
+# 打包輸出與測試覆蓋率（設計 §14.2：入口包以 release 提供，不提交產物）
+dist/
+coverage/
+*.tgz
+# npm 設定可能含 registry token（設計 §6.9、POL-SEC-001 R4：秘密不得進版控）
+.npmrc
+# adopt / archive 的暫存區（設計 §12.5：先在暫存區產生並驗證，不提交）
+.specify/tmp/

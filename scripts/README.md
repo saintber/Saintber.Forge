@@ -8,12 +8,16 @@
 |---|---|---|---|
 | `bootstrap/` | 使用者 | 有（安裝到使用者的機器） | `install.ps1`、`install.sh`。唯一不依賴 Node 的地方：只負責準備 Node 和取得 saintber |
 | `dev/` | 開發者 | 只改本 repo | `new-project.mjs`、`sync-speckit.mjs`、`build-catalog.mjs`、`graduate-project.mjs` |
-| `ci/` | CI | **無**（唯讀） | 一致性檢查、依變動路徑派送、打包的 dry-run。**可以在 PR 上跑** |
-| `release/` | 發佈流程 | **有**（建立 release、上傳檔案） | `pack-entry.mjs`、`pack-shared.mjs`、`update-catalog.mjs`、`verify-release.mjs`。需要憑證，**只在 tag 觸發**，**不得在 PR 上跑** |
+| `ci/` | CI | 建置、測試、產生暫存與 artifact | 一致性檢查、依變動路徑派送、打包的 dry-run。**禁止**對外發布、部署，以及使用發佈憑證 |
+| `release/` | 發佈流程 | 對外發布（建立 release、上傳檔案） | 預計 `pack-entry`、`pack-shared`、`update-catalog`、`verify-release`。**目錄與責任已核准**（ADR-0001 決策 10）；腳本尚未實作 |
 
 ## 為什麼 `release/` 與 `ci/` 要分開
 
-兩者的**副作用與憑證**不同：`ci/` 在每次 PR 都會執行，必須唯讀；`release/` 會建立 release 並上傳檔案，需要憑證，只能在明確的 tag 上執行。放在一起，容易讓需要憑證的腳本被 PR 觸發。
+兩者的**風險不同**：`ci/` 每次 PR 都會跑，會建置、測試並產生暫存與 artifact，但**禁止**對外發布、部署與使用發佈憑證；`release/` 會對外建立 release 並上傳檔案。分開放，責任才清楚。
+
+**核准範圍**（ADR-0001 決策 10）：只有「目錄與責任分工」。下列**尚未決定**，不是已採納的規則：
+- 發佈的觸發策略（例如是否僅由 tag 觸發）。
+- pack 與 verify 是否一律需要憑證（它們可以在 CI 本機驗證，不一定需要）。
 
 ## 為什麼沒有 `cd/`
 

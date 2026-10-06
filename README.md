@@ -62,7 +62,7 @@ dotnet test tests/Saintber.Forge.BlazorServer.UnitTests
 | 文件總導覽 | [`docs/README.md`](docs/README.md) |
 | 為什麼這樣設計 | [`ADR-0001`](docs/architecture/decisions/0001-hub-and-project-split.md) |
 | 規範（Policy） | [`docs/governance/policy/`](docs/governance/policy/README.md) |
-| 憲章（**草稿，待審閱**） | [`.specify/memory/constitution.md`](.specify/memory/constitution.md) |
+| 憲章（**Active v1.0.0**） | [`.specify/memory/constitution.md`](.specify/memory/constitution.md) |
 | 給 AI 代理的指引 | [`AGENTS.md`](AGENTS.md) |
 
 ## 授權

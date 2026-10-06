@@ -1,5 +1,8 @@
-<!-- 唯讀快照：這是 2026-10-05 採納時的原始設計（含 2026-10-06 補上的 scripts/release/）。
-     不再更新。現況請看 docs/architecture/ 與 Policy；被取代的章節見 ../0001-hub-and-project-split.md 的「被取代紀錄」。-->
+<!-- 唯讀快照。來源：commit 8fb3bcf 的 design.md（blob c8ceddc6fd8a0576fed90c9ffd9664d13026a78c）。
+     不再更新。現況請看 docs/architecture/ 與 Policy。
+     來源、核准範圍與與 8875efd 的差異，見 ../0001-hub-and-project-split.md 的「快照來源」。
+     注意：本文中「一律僅由 tag 觸發」「CI 完全唯讀」「pack 一律憑證」等字句未經核准，不具約束力。
+     不得修改本檔的正文。-->
 
 # Saintber.Forge 工具集入口重整設計
 

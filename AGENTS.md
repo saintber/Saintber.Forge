@@ -1,10 +1,10 @@
 # AGENTS.md
 
 - All conversations MUST be conducted in Traditional Chinese (zh-TW)
-- Spec Kit 的 slash command 是**技能形式**，用連字號呼叫，例如 `/speckit-specify`、`/speckit-plan`（不是舊版的 `/speckit.specify`）。
-  - Claude Code：`.claude/skills/speckit-*`
-  - Codex：`.agents/skills/speckit-*`
-  - 這些由 Spec Kit v1.1.0 的 CLI 產生，**不要手動編輯**；要升級請用 `specify integration upgrade`。
+- Spec Kit 的指令是**技能形式**，用連字號（不是舊版的 `/speckit.specify`）：
+  - Claude Code：`/speckit-specify` 等；技能在 `.claude/skills/speckit-*`
+  - Codex：`$speckit-specify` 等；技能在 `.agents/skills/speckit-*`
+  - 這些由 Spec Kit v1.1.0 的 CLI 產生，**不要手動編輯**；要升級請用 `specify integration upgrade`，升級後重跑 `node tooling/speckit/install.mjs --project-dir <專案>`。
 
 ## 專案結構
 
@@ -19,9 +19,12 @@
 - 以該目錄內的 `.specify/`、憲章與 `docs/governance/policy/` 為準，**不要**把工作包建立在 Hub 的 `specs/`。
 - Spec Kit v1.1.0 會往上找最近的 `.specify/`，所以**在該專案目錄內執行**指令即可。要從別處指定專案，設環境變數 `SPECIFY_INIT_DIR` 指向專案目錄；路徑無效時它會報錯，不會退回 Hub。
 - 目前各專案的憲章與 Policy：
-  - Hub：憲章**尚未撰寫**（目前是空白模板）；Policy 在 `docs/governance/policy/`。
+  - Hub：憲章 `.specify/memory/constitution.md`，**Active（v1.0.0，2026-10-06 由使用者批准）**；Policy 在 `docs/governance/policy/`（三份已撰寫，其餘尚未）。
   - forge-explorer：憲章 `projects/forge-explorer/.specify/memory/constitution.md`；Policy 在其 `docs/governance/policy/`。
 
-## 尚未實作的指令
+## Hub 擴充指令（context、adopt、archive）
 
-採納時的設計（快照）§13.4 規劃的 `context`、`adopt`、`archive` 指令**還不存在**。在它們完成之前，完成並驗證一個工作包後，依 採納時的設計（快照）§12.5、§12.6 手動合併有效規格並封存；不要自動 stage 或 commit。
+- 開始工作前先執行 `speckit-hub-context`（可帶專案 ID），確認目標專案與模式，並讀它列出的憲章與 Policy 索引。**它報錯時就停止**，不要改用別的專案或 Hub 根目錄。
+- 工作包驗證完成後用 `speckit-hub-adopt <NNN-name>` 合併進有效規格，再用 `speckit-hub-archive <NNN-name>` 封存。被拒絕時照錯誤訊息處理，**不要手動改有效規格來繞過**。
+- 這些指令都**不會** stage 或 commit；你也不要。
+- 已知限制（plan 的 Policy Check、編號掃描）見 `docs/developer-guide/speckit-workflow.md` 的「已知限制」。

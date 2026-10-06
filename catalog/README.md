@@ -35,5 +35,5 @@ forge-explorer 雖然在 `workspace.json` 登錄，但**不在**這裡：它還�
 
 - 命令前綴必須唯一，拒絕有歧義的重疊前綴，也不得與 Hub 自身的命令名稱（`list`、`info`、`status`、`profile`、`cache`、`alias`、`self-*`、`doctor`）重疊。
 - `local-dev` 項目必須對應到 `workspace.json` 登錄的專案；已遷出的工具可以只在這裡。
-- 這是使用者取得工具的唯一來源，**變更必須經過審查**（`scripts/release/update-catalog.mjs` 只產生變更，不自動推到主線）。
+- 這是使用者取得工具的唯一來源，**變更必須經過審查**（`scripts/release/` 的目錄與責任已核准，ADR-0001 決策 10；預計的 `update-catalog` 只產生變更、不自動推到主線，該腳本尚未實作）。
 - `profiles/`：官方提供的 Profile 範例（尚未建立，等 CLI 的 `profile run` 實作後再放）。

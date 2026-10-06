@@ -3,7 +3,7 @@
 > 狀態：遷移（`hub/000-restructure`）時，由舊的 `docs/intent/README.md` 併入並更新到新結構。
 > 完整設計見 [`採納時的設計（快照）`](../architecture/decisions/0001-attachments/design-2026-10-adopted.md) §10–§13。
 >
-> **重要**：下方標示「⏳ 尚未實作」的指令與腳本，目前**還不存在**。在它們完成之前，請手動依本文的規則操作，不要假設可以呼叫。
+> **重要**：下方標示「⏳」的項目目前**還不存在或尚未驗收**，不要假設可以使用。
 
 本文說明 Hub 與各專案如何使用 Spec Kit 與 SDD（規格驅動開發）文件，不定義任何業務規則或技術決策。
 
@@ -20,7 +20,7 @@
 | **封存** | `archive/changes/<NNN-name>/` | 已完成、取消或被取代的工作包與其輸入，唯讀歷史 |
 | **架構** | `docs/architecture/` | 現在系統怎麼運作。ADR 在 `decisions/` |
 
-Plan、Spec、Verification 屬於實作與交付層，**不是**需求定義文件。
+**Intent** 是需求的來源（為什麼要做）。**工作包的 `spec.md`** 是可驗收的需求規格，但在驗證並採納（adopt）之前，它是**候選與實作基準，仍是 pending**，不是現況。**有效規格**才是「現在」的行為。Plan、Tasks、Verification 屬於實作與交付層。
 
 ## 2. Intent 的規則
 
@@ -90,25 +90,41 @@ Intent **不是**規格書、實作說明或 Release Note。
 
 ### 指令現況
 
+**呼叫方式**：Claude Code 用 `/speckit-xxx`；Codex 用 `$speckit-xxx`（上游 v1.1.0 對 Codex 的技能呼叫格式）。
+
 | 指令 | 狀態 |
 |---|---|
-| `/speckit.constitution`、`specify`、`clarify`、`plan`、`tasks`、`analyze`、`implement`、`checklist`、`taskstoissues` | ✅ 既有（本地舊版，尚未依新設計客製化） |
-| `speckit.context`（共同上下文載入） | ⏳ 尚未實作 |
-| `speckit.adopt` | ⏳ 尚未實作 |
-| `speckit.archive` | ⏳ 尚未實作 |
+| `speckit-constitution`、`specify`、`clarify`、`plan`、`tasks`、`analyze`、`implement`、`checklist`、`taskstoissues`、`converge` | ✅ 上游 Spec Kit v1.1.0（CLI 產生，不手改） |
+| `speckit-hub-context` | ✅ 已安裝（hub 擴充）：解析目標專案、模式，並列出要讀的憲章與 Policy 索引；目標無效時報錯，**不建立任何檔案**、不退回 Hub |
+| `speckit-hub-adopt` | ✅ 已安裝：已驗證的工作包合併進有效規格；基線檢查（committed / staged / 未提交 / 新建）、暫存區、套用前再檢查、失敗只回復觸及的檔案；**不 stage、不 commit** |
+| `speckit-hub-archive` | ✅ 已安裝：adopted / cancelled / superseded；可重試、不覆蓋 |
 
-**尚未實作期間的手動做法**：完成並驗證後，由人依 [`採納時的設計（快照）`](../architecture/decisions/0001-attachments/design-2026-10-adopted.md) §12.5、§12.6 手動合併有效規格並封存；adopt 與 archive 都不要自動 stage 或 commit，交給一般的提交流程審查。
+- 指令名稱是 `speckit.hub.*`（技能名 `speckit-hub-*`），不是設計快照寫的 `speckit.context` 等簡寫：上游要求擴充指令必須是 `speckit.<擴充>.<指令>`。見 `specs/001-stage1-speckit-extension/plan.md` 的偏離紀錄。
+- 邏輯在 `tooling/speckit/extension/scripts/`（Node），有 38 個自動化測試（`node tooling/speckit/extension/tests/run-all.mjs`）。
+- **安裝或升級**：執行 `node tooling/speckit/install.mjs --project-dir <專案>`。上游 v1.1.0 的 `specify extension add` 一次只安裝給**一個**代理，這個腳本會依序裝給每個整合，並把預設整合還原。**升級 Spec Kit 後要重跑。**
 
-### 使用既有指令時的注意事項
-本地舊版 Spec Kit **還不支援**多專案：
-- 在 `projects/<id>/` 底下執行時，它仍會把根目錄當成專案根目錄，工作包會建立在 Hub 的 `specs/`。
-- 分支編號掃描所有分支，且要求 `^[0-9]{3}-` 格式。
+### 已知限制（第一階段）
 
-在 `hub/000-restructure` 的後續步驟完成客製化（採納時的設計（快照）§13）之前，請**不要**在 `projects/<id>/` 中直接執行 `/speckit.specify`。
+| 代號 | 限制 | 目前的處理 |
+|---|---|---|
+| G-PC | plan 的 **Constitution & Policy Check** 沒有自動機制保證。以 preset 包裝 `speckit.plan` 會**改寫 CLI 受管理的檔案**且只作用在一個代理（已在隔離副本驗證），所以**不採用** | 依 POL-SPECKIT-001 R5，由人或代理在 plan 中加入；`analyze` 時檢查 |
+| G-NUM | 上游 `create-new-feature` 的編號**只掃 `specs/`**，不掃 `archive/changes/` | `speckit-hub-context` 會輸出 `nextChange`（兩者都掃）；specify 時以 `-Number <nextChange>` 傳入。**依賴代理照做** |
+
+### 代理驗收（設計 §13.5）
+
+在隔離副本以**實際的代理**執行（步驟見 `specs/001-stage1-speckit-extension/acceptance/run.md`），以 `check.mjs` 客觀判定（2026-10-06）：
+
+| 情境 | Claude Code | Codex |
+|---|---|---|
+| S3 指定不存在的專案：報錯、不產生任何檔案 | ✅ PASS | ✅ PASS |
+| S2 從 Hub 指定 `ai-queue` 執行 specify：產出只在該專案 | ✅ PASS | ✅ PASS |
+| SA 沒有父 repo 的副本：standalone、不讀父路徑 | ✅ PASS | ✅ PASS |
+
+**範圍**：S2 只證明產出被隔離在目標專案，**不含**上游 `create-new-feature.ps1`、編號、branch、hooks 的全流程；SA 只證明 standalone 解析，**不等於**治理內化或遷出演練。升級 Spec Kit 或代理後，請重跑這套驗收。
 
 ## 5. 呼叫指令時要提供的上下文（手動）
 
-在自動載入完成之前，呼叫 `/speckit.specify` 時，請在訊息中明確列出：
+在自動載入完成之前，呼叫 `/speckit-specify` 時，請在訊息中明確列出下列上下文。**這是人工的輔助檢查，不是有效規格，也不會自動強制 Policy**；新產生的 spec 在驗證並採納之前仍是 pending：
 
 ```text
 目標專案：<project-id>

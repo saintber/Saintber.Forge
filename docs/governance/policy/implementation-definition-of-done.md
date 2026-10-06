@@ -15,7 +15,11 @@ supersedes: []
 
 本文由 `projects/forge-explorer/docs/governance/policy/implementation-definition-of-done.md` 中的通用部分提煉而來。
 
-> 與原文的唯一差異：Verification Record 的存放位置。原文指定 `docs/plan/verification/`，該目錄在遷移後不再存在，改為放在工作包內（R7）。
+> **與原文的差異（兩處）**
+> 1. **R7 的 Verification Record 位置**：原文指定 `docs/plan/verification/`，該目錄在遷移後不再存在，改為工作包內 `specs/<NNN-name>/verification.md`。**依已採納設計（§12.3、§12.5、§15.2）調整路徑，已授權**，不是新決策。
+> 2. **新增 R6a「設計先於實作；文件與事實相符」及 Docs Consistency 欄位**：來自 **Hub 憲章原則 VI**。憲章已於 2026-10-06 由使用者批准（Active v1.0.0），因此 R6a **具約束力**，屬已核准的規則（Policy 索引的 A 類），也呼應使用者「禁止實作違背文件，先改設計再實作」的明確指示。
+>
+> 其餘各條提煉自舊 Policy，屬既有已核准的規則，**仍須遵守**。
 
 ## 規則
 
@@ -73,12 +77,17 @@ supersedes: []
 - 缺少本次變更的 Verification Record。
 - 跳過驗證流程，直接宣告 Done。
 
-### R6a 文件與事實相符（憲章原則 VI）
-完成一項變更時，必須檢查它是否讓任何文件失效：架構文件、Policy、有效規格、使用手冊、ADR。
+### R6a 設計先於實作；文件與事實相符（憲章原則 VI）
+完成一項變更時，必須檢查兩件事：
 
-- 發現實作偏離了已採納的設計或文件時，依憲章原則 VI 處理：**新增 ADR** 記錄偏離與理由；正本存在就更新正本，不存在就在 ADR 寫明現況並加入「建立正本」的任務。
-- 這項檢查的結果記在該變更的 Verification Record（R7）。**沒有檢查，不得宣告 Done。**
-- 此條由 Hub 憲章要求；其餘規則不變。
+1. **是否偏離了已核准的設計**（憲章、Policy、有效規格、已採納的 ADR、公開契約）。
+2. **是否讓任何描述性文件失效**（`docs/architecture/`、使用手冊）。
+
+- **未經核准的偏離是缺陷**：停止該部分的交付與採納，修正實作。**不得**因為現有實作已經如此，就更新規範來配合它。要改設計，必須先依憲章原則 VI 取得相應 owner 的核准。
+- 一般的錯誤修正**不需要**新增 ADR；只有變更已採納的架構或決策才需要。ADR 是記錄，**不是核准**。
+- 描述性文件在**驗證完成並採納（adopt）後**更新，不得描述尚未實作的能力。
+- 檢查結果記在該變更的 Verification Record（R7）。**沒有檢查，不得宣告 Done。**
+- 此條來自 Hub 憲章原則 VI（已批准，具約束力）；其餘規則不變。
 
 ### R7 Verification Record
 **目的**：確保 Gate A、Gate B 在**每一次可交付的變更**都被重新執行與記錄，避免「之前做過一次」就被誤判為這次也完成。
@@ -125,7 +134,7 @@ supersedes: []
 
 ## Docs Consistency (R6a)
 - Documents checked:
-- Deviations found (ADR ids, or "none"):
+- Deviations from approved design (and their approval / defect status), or "none":
 
 ## Final Status
 - Done / Blocked: Manual Verification / Not Done

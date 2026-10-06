@@ -25,7 +25,11 @@
 | Hub 根目錄 | 上游 v1.1.0 | claude、codex |
 | `projects/forge-explorer/` | 上游 v1.1.0，憲章保留 | claude、codex |
 
-`.specify/`、`.claude/skills`、`.agents/skills` 由 `specify` CLI 管理，**不要手動編輯**。升級用 `specify integration upgrade`。
+**CLI 產生、不得直接手改**：`.claude/skills/`、`.agents/skills/`，以及 `.specify/` 內由 Spec Kit 管理的共同 scripts 與 templates（清單見各專案 `.specify/integrations/speckit.manifest.json`）。升級用 `specify integration upgrade`。
+
+**人維護、依其修訂流程**：`.specify/memory/constitution.md`（憲章）與專案的 Policy、有效規格等治理內容；它們不是 CLI 產生的，不受上述限制。
+
+本專案的客製化**不直接改上述 CLI 產生的檔案**，而是用上游的 preset 與 extension 機制承載（見下方「待處理」）。
 
 ## 待處理
 
