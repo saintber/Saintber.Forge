@@ -147,17 +147,17 @@ pwsh bin/Debug/net8.0/playwright.ps1 install
   inputs:
     command: 'custom'
     custom: 'build'
-    projects: 'tests/Saintber.Forge.BlazorServer.IntegrationTests/Saintber.Forge.BlazorServer.IntegrationTests.csproj'
+    projects: 'projects/forge-explorer/tests/Saintber.Forge.BlazorServer.IntegrationTests/Saintber.Forge.BlazorServer.IntegrationTests.csproj'
 
 - script: |
-    pwsh tests/Saintber.Forge.BlazorServer.IntegrationTests/bin/Debug/net8.0/playwright.ps1 install --with-deps
+    pwsh projects/forge-explorer/tests/Saintber.Forge.BlazorServer.IntegrationTests/bin/Debug/net8.0/playwright.ps1 install --with-deps
   displayName: 'Install Playwright'
 
 - task: DotNetCoreCLI@2
   displayName: 'Run E2E Tests'
   inputs:
     command: 'test'
-    projects: 'tests/Saintber.Forge.BlazorServer.IntegrationTests/Saintber.Forge.BlazorServer.IntegrationTests.csproj'
+    projects: 'projects/forge-explorer/tests/Saintber.Forge.BlazorServer.IntegrationTests/Saintber.Forge.BlazorServer.IntegrationTests.csproj'
     arguments: '--filter "Category=E2E" --logger trx --results-directory $(Build.ArtifactStagingDirectory)/TestResults'
 ```
 
