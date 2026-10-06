@@ -1,9 +1,9 @@
 # Hub Policy 索引
 
-本目錄是 Hub 的 Policy。格式與規則見 `design.md` §11。
+本目錄是 Hub 的 Policy。格式與規則見 採納時的設計（快照）§11。
 
 > 目前狀態：遷移（`hub/000-restructure`）時，先從舊的 Forge Policy 提煉出**三份通用 Policy**。
-> Hub 憲章（含「Policy 具約束力」的引用原則，`design.md` §11.3）**尚未撰寫**，會在遷移步驟 9 完成。
+> Hub 憲章（含「Policy 具約束力」的引用原則，採納時的設計（快照）§11.3）**尚未撰寫**，會在遷移步驟 9 完成。
 
 ## Policy 清單
 
@@ -49,7 +49,7 @@ Hub 憲章
 
 ## 尚未撰寫的 Hub Policy
 
-`design.md` §11.7 列出的其餘 Policy 會隨對應的工作包逐步撰寫：
+採納時的設計（快照）§11.7 列出的其餘 Policy 會隨對應的工作包逐步撰寫：
 
 | 優先 | ID 前綴 | 範圍 |
 |---|---|---|
@@ -58,6 +58,6 @@ Hub 憲章
 | ★ | POL-SPEC | 有效規格、工作包、基線、adopt、archive |
 | ★ | POL-SPECKIT | 專案選擇、必讀上下文、模板、上游版本、客製化 |
 | ★ | POL-INVOKE | 巢狀路由、入口包、呼叫契約 |
-| | POL-INSTALL、POL-TECH、POL-RELEASE、POL-SHARED | 見 `design.md` §11.7 |
+| | POL-INSTALL、POL-TECH、POL-RELEASE、POL-SHARED | 見 採納時的設計（快照）§11.7 |
 
-在 POL-SPEC 寫成之前，工作包與封存的規則以 `design.md` §12 為準。
+在 POL-SPEC 寫成之前，工作包與封存的規則以 採納時的設計（快照）§12 為準。

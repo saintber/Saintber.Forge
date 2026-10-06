@@ -1,7 +1,7 @@
 # Spec Kit 工作流程
 
 > 狀態：遷移（`hub/000-restructure`）時，由舊的 `docs/intent/README.md` 併入並更新到新結構。
-> 完整設計見 [`design.md`](../../design.md) §10–§13。
+> 完整設計見 [`採納時的設計（快照）`](../architecture/decisions/0001-attachments/design-2026-10-adopted.md) §10–§13。
 >
 > **重要**：下方標示「⏳ 尚未實作」的指令與腳本，目前**還不存在**。在它們完成之前，請手動依本文的規則操作，不要假設可以呼叫。
 
@@ -86,7 +86,7 @@ Intent **不是**規格書、實作說明或 Release Note。
 取消或被取代：直接 archive（cancelled / superseded），不 adopt
 ```
 
-完整規則（驗證關卡、基線衝突、套用失敗的處理、不覆蓋與可重試）見 [`design.md`](../../design.md) §12。
+完整規則（驗證關卡、基線衝突、套用失敗的處理、不覆蓋與可重試）見 [`採納時的設計（快照）`](../architecture/decisions/0001-attachments/design-2026-10-adopted.md) §12。
 
 ### 指令現況
 
@@ -97,14 +97,14 @@ Intent **不是**規格書、實作說明或 Release Note。
 | `speckit.adopt` | ⏳ 尚未實作 |
 | `speckit.archive` | ⏳ 尚未實作 |
 
-**尚未實作期間的手動做法**：完成並驗證後，由人依 [`design.md`](../../design.md) §12.5、§12.6 手動合併有效規格並封存；adopt 與 archive 都不要自動 stage 或 commit，交給一般的提交流程審查。
+**尚未實作期間的手動做法**：完成並驗證後，由人依 [`採納時的設計（快照）`](../architecture/decisions/0001-attachments/design-2026-10-adopted.md) §12.5、§12.6 手動合併有效規格並封存；adopt 與 archive 都不要自動 stage 或 commit，交給一般的提交流程審查。
 
 ### 使用既有指令時的注意事項
 本地舊版 Spec Kit **還不支援**多專案：
 - 在 `projects/<id>/` 底下執行時，它仍會把根目錄當成專案根目錄，工作包會建立在 Hub 的 `specs/`。
 - 分支編號掃描所有分支，且要求 `^[0-9]{3}-` 格式。
 
-在 `hub/000-restructure` 的後續步驟完成客製化（`design.md` §13）之前，請**不要**在 `projects/<id>/` 中直接執行 `/speckit.specify`。
+在 `hub/000-restructure` 的後續步驟完成客製化（採納時的設計（快照）§13）之前，請**不要**在 `projects/<id>/` 中直接執行 `/speckit.specify`。
 
 ## 5. 呼叫指令時要提供的上下文（手動）
 

@@ -1,3 +1,6 @@
+<!-- 唯讀快照：這是 2026-10-05 採納時的原始設計（含 2026-10-06 補上的 scripts/release/）。
+     不再更新。現況請看 docs/architecture/ 與 Policy；被取代的章節見 ../0001-hub-and-project-split.md 的「被取代紀錄」。-->
+
 # Saintber.Forge 工具集入口重整設計
 
 | 項目 | 內容 |

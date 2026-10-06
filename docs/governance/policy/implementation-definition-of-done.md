@@ -73,6 +73,13 @@ supersedes: []
 - 缺少本次變更的 Verification Record。
 - 跳過驗證流程，直接宣告 Done。
 
+### R6a 文件與事實相符（憲章原則 VI）
+完成一項變更時，必須檢查它是否讓任何文件失效：架構文件、Policy、有效規格、使用手冊、ADR。
+
+- 發現實作偏離了已採納的設計或文件時，依憲章原則 VI 處理：**新增 ADR** 記錄偏離與理由；正本存在就更新正本，不存在就在 ADR 寫明現況並加入「建立正本」的任務。
+- 這項檢查的結果記在該變更的 Verification Record（R7）。**沒有檢查，不得宣告 Done。**
+- 此條由 Hub 憲章要求；其餘規則不變。
+
 ### R7 Verification Record
 **目的**：確保 Gate A、Gate B 在**每一次可交付的變更**都被重新執行與記錄，避免「之前做過一次」就被誤判為這次也完成。
 
@@ -115,6 +122,10 @@ supersedes: []
 - Expected:
 - Actual:
 - Result: Pass/Fail
+
+## Docs Consistency (R6a)
+- Documents checked:
+- Deviations found (ADR ids, or "none"):
 
 ## Final Status
 - Done / Blocked: Manual Verification / Not Done

@@ -10,7 +10,7 @@
 
 這個 repo 是 **Hub**（`saintber` 工具集入口），各工具在 `projects/<id>/` 底下，各自有自己的 `.specify/`、文件與憲章。
 
-- 設計與遷移計畫：[`design.md`](design.md)（已採納，遷移進行中，分支 `hub/000-restructure`）
+- 設計與遷移計畫：[`採納時的設計（快照）`](docs/architecture/decisions/0001-attachments/design-2026-10-adopted.md)（已採納，遷移進行中，分支 `hub/000-restructure`）
 - 文件導覽：[`docs/README.md`](docs/README.md)
 - Spec Kit 與 SDD 文件的使用方式：[`docs/developer-guide/speckit-workflow.md`](docs/developer-guide/speckit-workflow.md)
 
@@ -24,4 +24,4 @@
 
 ## 尚未實作的指令
 
-`design.md` §13.4 規劃的 `context`、`adopt`、`archive` 指令**還不存在**。在它們完成之前，完成並驗證一個工作包後，依 `design.md` §12.5、§12.6 手動合併有效規格並封存；不要自動 stage 或 commit。
+採納時的設計（快照）§13.4 規劃的 `context`、`adopt`、`archive` 指令**還不存在**。在它們完成之前，完成並驗證一個工作包後，依 採納時的設計（快照）§12.5、§12.6 手動合併有效規格並封存；不要自動 stage 或 commit。

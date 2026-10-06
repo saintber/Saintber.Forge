@@ -1,6 +1,6 @@
 # forge-explorer Policy 索引
 
-本目錄是 forge-explorer 專案的 Policy。格式與規則見 Hub 的 `design.md` §11。
+本目錄是 forge-explorer 專案的 Policy。格式與規則見 Hub 的採納時設計（快照）§11。
 
 ## 繼承的 Hub Policy
 
@@ -13,7 +13,7 @@ forge-explorer 在 workspace 內開發，繼承 Hub 的下列 Policy：
 | POL-DOD-001 Implementation Definition of Done | workspace | |
 
 - **繼承基線**：Hub 在 `hub/000-restructure` 分支的提煉版本（Hub 憲章與標籤尚未建立，之後補上 commit 或 tag）。
-- Hub Policy 位置：`../../../../../docs/governance/policy/`（workspace 模式，見 `design.md` §11.4、§13.4）。
+- Hub Policy 位置：`../../../../../docs/governance/policy/`（workspace 模式，見 採納時的設計（快照）§11.4、§13.4）。
 
 ## 本專案的專屬 Policy
 

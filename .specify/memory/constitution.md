@@ -1,50 +1,121 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
 
-## Core Principles
+Version Change: (Initial) → v1.0.0
+Ratification Date: 待審閱通過後填入
+Last Amended: 2026-10-06
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+Modified Principles: N/A（初次建立）
+Added Sections: 全部
+Removed Sections: N/A
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Templates Consistency Status:
+⚠️ .specify/templates/plan-template.md — 需加入「Constitution & Policy Check」（採納時設計 §11.3），尚未修改
+⚠️ speckit 指令 — 尚未載入 Policy 索引（採納時設計 §13.4），尚未實作
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+Follow-up TODOs:
+- 審閱通過後填入批准日期，並將狀態由 Draft 改為 Active
+- 原則 VI 的檢查已加入 POL-DOD-001 的 R6a 與 Verification Record 模板；待審閱確認措辭
+- 撰寫 POL-STRUCT、POL-DOC、POL-SPEC、POL-SPECKIT、POL-INVOKE（採納時設計 §11.7）
+-->
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+# Saintber.Forge Hub 憲章
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+> **狀態：Draft，待使用者審閱。** 審閱通過前，本文不具約束力。
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+本憲章只定義 **Hub**（`saintber` 工具集入口）的**不可退讓的原則**。具體規範（目錄配置、版本、平台矩陣、契約格式、測試規則）放在 [Policy](../../docs/governance/policy/README.md)，不放在這裡。
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+各專案（`projects/<id>/`）有自己的憲章。專案憲章**可以加嚴，不得牴觸**本憲章。
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## 核心原則
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### I. 工具自主，Hub 與工具互不知道對方的內部
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+- 每個工具自己持有 install / configure / run、狀態、安裝範圍、PATH 與技術選擇。
+- 工具可以被直接呼叫，也可以經由 Hub 委派；兩種方式必須走同一套實作與同一份狀態。
+- Hub 只知道「工具在哪裡、怎麼呼叫」；工具只知道「收到什麼操作與參數」。
+- Hub **不持有**工具的安裝狀態，也不替工具決定安裝位置或範圍。
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+### II. 工具必須可遷出
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+- 工具目錄本身是一個完整的專案：文件、治理、Spec Kit、套件定義都在其中。
+- 遷出時需要處理的項目必須被明確列出；**不得**假設單靠 `git subtree split` 就能獨立。
+- 工具遷出後，使用者對它的命令前綴與呼叫方式維持不變。
+
+### III. 只透過公開契約互動
+
+- 工具不得依賴 Hub 的內部實作，也不得載入其他工具的目錄中的程式。
+- 合法的互動只有兩種：**公開的 CLI / API 契約**，以及**有版本的 Shared 套件**。
+- 開發期的連結也必須遵守同一份契約，不得因為在同一個 repo 就走捷徑。
+
+### IV. 規格唯一
+
+- 唯一的是**同一 capability 與 requirement ID 的有效定義**。
+- 有效規格以 capability 劃分，每個 capability 只有一個 owner；requirement ID 穩定、不重用。
+- 進行中的工作包是**提案**，不是現況；封存的內容預設不被讀作需求。
+- 有效規格只能經過**驗證後的採納**更新，不得直接以未驗證的提案取代。
+
+### V. Policy 具約束力
+
+`docs/governance/policy/` 中 status 為 active 的 Policy 具約束力。
+
+- 各階段依 Policy 的 `applies-to` 讀取並檢核適用的 Policy。
+- 任何違反都必須取得該 Policy 的 **owner 核准**的例外；在 plan 中記錄理由**不等於核准**。
+- **代理不得自行核准例外。**
+- 專案可以加嚴 Policy，不得放寬。
+
+### VI. 設計文件必須與事實相符
+
+開發過程中，實作可能違背或補充原本的設計。發生時：
+
+- **必須調整文件**，使其與事實相符；**不得**讓文件與實際行為並存而互相矛盾。
+- 調整依性質分流，各自更新**自己的正本**：
+  - 「現在怎麼運作」→ `docs/architecture/`
+  - 「必須遵守什麼」→ Policy
+  - 「現在的行為要求」→ 有效規格（經採納流程）
+  - 「為什麼這樣決定」→ 新增 ADR，記錄變更與理由
+- 原始設計與已採納的 ADR **不改寫**。決策被推翻時，新增 ADR 並將舊的標示為被取代（superseded），保留歷史。
+- **發現違背時至少做兩件事，不能只做其一**：
+  1. **新增一篇 ADR**，記錄偏離了什麼、為什麼，並在被偏離的 ADR 的「被取代紀錄」新增一列，指向原設計的對應章節。
+  2. **正本存在就更新正本**；**正本還不存在**（例如該領域的 architecture 文件或 Policy 還沒寫）時，在 ADR 中寫明現況，並在當下的工作包加入「建立正本」的任務，**不得**拖著不補。
+- 如果實作與設計不一致，在更正前，應以**實際行為**為事實，並**明確標出**這個不一致；**不得**悄悄以其中一方為準。
+- 採納時的原始設計是**歷史快照**，不是持續維護的文件：開發中發現違背它，是正常的，處理方式就是上述流程，**不是**回頭修改快照。
+- 完成一項變更時，必須檢查它是否讓任何文件失效（POL-DOD 的完成條件）。
+
+### VII. 誠實的狀態
+
+- 尚未實作的能力，文件必須明確標示「尚未實作」，**不得**寫得像已經存在。
+- 驗證不足的地方，必須記為已知缺口，**不得**宣稱已驗證。
+- 「完成」必須有該次變更自己的驗證紀錄，**不得**以先前的結果推論。
+
+## 治理
+
+### 憲章與其他文件的關係
+
+- 憲章**優先於** Policy、架構文件、ADR 與規格。衝突時，依憲章處理。
+- 憲章**不描述實作細節**。目錄配置、技術版本、平台、格式等寫在 Policy 或契約文件。
+- 本憲章與專案憲章衝突時，必須明確解決，**不採**「離得近的優先」悄悄裁決。
+
+### 修訂程序
+
+1. **提案**：說明修正原因、影響範圍與版本變更類型。
+2. **影響評估**：檢視所有 Policy、架構文件、規格與實作是否相容。
+3. **版本決策**：依下方的版本規則決定。
+4. **修正執行**：更新憲章與版本號，並在檔頭的 Sync Impact Report 記錄。
+5. **傳播更新**：更新所有受影響的相依文件，包括各專案的繼承基線。
+6. **核准**：由憲章 owner 核准。目前 owner 是 `saintber`。
+
+### 版本規則
+
+語義化版本：
+- **MAJOR**：移除或重新定義核心原則，產生不相容的變更。
+- **MINOR**：新增原則、章節，或實質擴充治理指引。
+- **PATCH**：澄清用語、修正錯字、非語義性的精煉。
+
+### 合規檢視
+
+- **時機**：每次重大變更交付前。
+- **範圍**：新增或修改的內容是否違反本憲章。
+- **產出**：列出發現的問題與修正計畫。
+
+**Version**: v1.0.0 (Draft) | **Ratified**: 待審閱 | **Last Amended**: 2026-10-06

@@ -4,14 +4,14 @@
 
 本 README 只作為**導覽**，不定義治理規則，也不重述其他文件的內容。
 
-> 狀態：專案正在依 [`design.md`](../design.md) 重整（分支 `hub/000-restructure`）。
+> 狀態：專案正在依 [`採納時的設計（快照）`](architecture/decisions/0001-attachments/design-2026-10-adopted.md) 重整（分支 `hub/000-restructure`）。
 > 下方標示 ⏳ 的文件**尚未撰寫**，連結還不存在。
 
 ## 從哪裡開始
 
 | 想知道 | 看這裡 |
 |---|---|
-| 整體設計、目錄、責任邊界、遷移計畫 | [`design.md`](../design.md) |
+| 整體設計、目錄、責任邊界、遷移計畫 | [`採納時的設計（快照）`](architecture/decisions/0001-attachments/design-2026-10-adopted.md) |
 | 各專案在哪裡 | [`projects/`](../projects/) |
 | 舊的 .NET 探索性工具集 | [`projects/forge-explorer/`](../projects/forge-explorer/) |
 
@@ -47,7 +47,7 @@ Hub 的憲章**尚未撰寫**（遷移步驟 9）。
 
 ## 建議閱讀順序
 
-1. [`design.md`](../design.md)：了解 Hub、Tool、Shared 的分工。
+1. [`採納時的設計（快照）`](architecture/decisions/0001-attachments/design-2026-10-adopted.md)：了解 Hub、Tool、Shared 的分工。
 2. [`governance/policy/README.md`](governance/policy/README.md)：目前的共同規範。
 3. [`developer-guide/speckit-workflow.md`](developer-guide/speckit-workflow.md)：開始新的變更之前。
 4. 要看舊工具：`projects/forge-explorer/` 底下的 `docs/`。

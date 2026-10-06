@@ -1,6 +1,6 @@
 # schemas
 
-Hub 與工具之間共同契約的 JSON Schema。見 `design.md` §7.4、§4.1。
+Hub 與工具之間共同契約的 JSON Schema。見 採納時的設計（快照）§7.4、§4.1。
 
 ## 目前狀態
 

@@ -9,7 +9,7 @@
 | baseline-commit | `b5c7239`（PR #1：001 portal home - 開發完成） |
 | 交付版本 | 無（尚未發佈版本） |
 
-> 這是遷移（`hub/000-restructure`）時建立的**補記封存**，依 `design.md` §15.4 處理：保存既有的完成紀錄，不重新驗證。
+> 這是遷移（`hub/000-restructure`）時建立的**補記封存**，依 採納時的設計（快照）§15.4 處理：保存既有的完成紀錄，不重新驗證。
 > 依 §12.5，本檔不記錄 adopt 所在的 commit；需要時以 change ID 從 git history 查詢。
 
 ## 來源路徑（遷移前）
