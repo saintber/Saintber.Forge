@@ -1,3 +1,13 @@
+---
+id: POL-FE-TEST-001
+title: Testing Governance (forge-explorer)
+status: active
+scope: project
+applies-to: [plan, tasks, analyze, implement]
+owner: saintber
+supersedes: []
+---
+
 # Testing Governance
 
 本文件定義 Saintber.Forge 專案中之測試治理原則，  

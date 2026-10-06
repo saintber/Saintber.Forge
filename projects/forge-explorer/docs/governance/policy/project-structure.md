@@ -1,3 +1,13 @@
+---
+id: POL-FE-STRUCT-001
+title: Project Structure (forge-explorer)
+status: active
+scope: project
+applies-to: [specify, plan, tasks, analyze, implement]
+owner: saintber
+supersedes: []
+---
+
 # Project Structure — Saintber.Forge
 
 > Purpose  

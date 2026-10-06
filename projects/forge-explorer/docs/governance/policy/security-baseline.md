@@ -1,3 +1,13 @@
+---
+id: POL-FE-SEC-001
+title: Security Baseline (forge-explorer)
+status: active
+scope: project
+applies-to: [plan, tasks, analyze, implement]
+owner: saintber
+supersedes: []
+---
+
 # Security Baseline — Saintber.Forge
 
 > Purpose  

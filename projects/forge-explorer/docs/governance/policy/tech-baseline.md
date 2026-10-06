@@ -1,3 +1,13 @@
+---
+id: POL-FE-TECH-001
+title: Tech Baseline (forge-explorer)
+status: active
+scope: project
+applies-to: [plan, tasks, implement]
+owner: saintber
+supersedes: []
+---
+
 # Tech Baseline — Saintber.Forge
 
 > Purpose  

@@ -1,72 +1,53 @@
-# Documentation — Saintber.Forge
+# Documentation — Saintber.Forge Hub
 
-本目錄包含 Saintber.Forge 專案的所有正式文件。
+本目錄是 **Hub**（`saintber` 工具集入口）的文件。各專案在 `projects/<id>/docs/` 有自己的文件，結構相同。
 
-本 README 僅作為**文件導覽與閱讀指引**，  
-不定義治理規則、不描述實作細節，也不重述其他文件內容。
+本 README 只作為**導覽**，不定義治理規則，也不重述其他文件的內容。
 
----
+> 狀態：專案正在依 [`design.md`](../design.md) 重整（分支 `hub/000-restructure`）。
+> 下方標示 ⏳ 的文件**尚未撰寫**，連結還不存在。
 
-## 文件結構導覽
+## 從哪裡開始
 
-### Constitution
-- **主要文件**: `.specify/memory/constitution.md`
-- **文件副本**: `docs/constitution/constitution.md`（唯讀副本，供文件瀏覽）
-- Forge 的最高治理文件  
-- 定義不可退讓的原則與裁決  
-- 任何結構、技術或流程文件皆不得違反本文件
+| 想知道 | 看這裡 |
+|---|---|
+| 整體設計、目錄、責任邊界、遷移計畫 | [`design.md`](../design.md) |
+| 各專案在哪裡 | [`projects/`](../projects/) |
+| 舊的 .NET 探索性工具集 | [`projects/forge-explorer/`](../projects/forge-explorer/) |
 
----
+## 文件結構
 
-### Policy
-描述在遵守憲章前提下的實務規範與最低要求。
+```text
+docs/
+├─ README.md                  ← 你在這裡
+├─ developer-guide/           開發者手冊
+│  └─ speckit-workflow.md     Spec Kit 與 SDD 文件的使用方式
+├─ governance/
+│  └─ policy/                 Hub Policy（長期規範）
+├─ intent/                    Spec Kit 的人類輸入（進行中的變更）
+├─ user-guide/                ⏳ 使用手冊
+├─ architecture/              ⏳ 現行架構與 ADR
+└─ specifications/            ⏳ 有效規格（capability）
+```
 
-- `docs/policy/project-structure.md`  
-  - 描述專案與目錄的實際結構配置  
-  - 包含入口專案（InnerApi / OuterApi / Frontend）、Tools、Persistence 的安排方式  
-  - 為「結構與參考關係」的唯一真相來源
+| 類別 | 回答的問題 | 位置 |
+|---|---|---|
+| 使用手冊 | 怎麼安裝、設定、執行？ | ⏳ `user-guide/` |
+| 開發者手冊 | 怎麼開發、發佈、遷出？ | [`developer-guide/`](developer-guide/) |
+| 架構 | 系統**現在**怎麼運作？為什麼這樣選？ | ⏳ `architecture/` |
+| Policy | **必須**遵守什麼？ | [`governance/policy/`](governance/policy/README.md) |
+| Intent | **為什麼**要做這次變更？ | `intent/` |
+| 有效規格 | 系統**應該**有什麼行為（現行）？ | ⏳ `specifications/` |
 
-- `docs/policy/security-baseline.md`  
-  - 定義安全相關的最低基線  
-  - 包含身份識別、授權、API 邊界與前端信任假設  
-  - 安全為可選能力，非所有功能的強制要求
+## 憲章
 
-- `docs/policy/tech-baseline.md`  
-  - 定義技術層面的最低基線  
-  - 僅涵蓋語言、平台、版本與相容性假設  
-  - 不描述結構、不描述責任、不描述安全機制
+Hub 的憲章**尚未撰寫**（遷移步驟 9）。
 
-- `docs/policy/implementation-definition-of-done.md`  
-  - 定義功能或工具在工程層面「完成」的最低標準  
-  - 用於檢視交付品質與可維護性
-
----
-
-### Intent
-- `docs/intent/`
-- 描述 Forge 或個別工具「為什麼存在」「要解決什麼問題」
-- 用於承載動機、假設與背景，不定義實作方式
-
----
-
-### Plan
-- `docs/plan/`
-- 描述特定階段、特定目標下的執行計畫與拆解結果
-- 內容具有時效性，可能隨進度調整或淘汰
-
----
+舊的 Saintber.Forge 憲章是 .NET 探索性工具集的治理文件，已隨專案搬到 [`projects/forge-explorer/.specify/memory/constitution.md`](../projects/forge-explorer/.specify/memory/constitution.md)。它只適用 forge-explorer，不是整個 Hub 的憲章。
 
 ## 建議閱讀順序
 
-1. `.specify/memory/constitution.md`（或 `docs/constitution/constitution.md`）
-2. `docs/policy/project-structure.md`
-3. 視需求閱讀：
-   - `docs/policy/security-baseline.md`
-   - `docs/policy/tech-baseline.md`
-4. 對應的 `docs/intent/*`
-5. 相關的 `docs/plan/*`
-
----
-
-本 README 僅提供導覽用途。  
-所有治理與裁決以 `constitution.md` 為最終依據。
+1. [`design.md`](../design.md)：了解 Hub、Tool、Shared 的分工。
+2. [`governance/policy/README.md`](governance/policy/README.md)：目前的共同規範。
+3. [`developer-guide/speckit-workflow.md`](developer-guide/speckit-workflow.md)：開始新的變更之前。
+4. 要看舊工具：`projects/forge-explorer/` 底下的 `docs/`。

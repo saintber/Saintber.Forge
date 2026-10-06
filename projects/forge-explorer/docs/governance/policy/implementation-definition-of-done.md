@@ -1,3 +1,13 @@
+---
+id: POL-FE-DOD-001
+title: Implementation Definition of Done (forge-explorer)
+status: active
+scope: project
+applies-to: [tasks, implement, analyze]
+owner: saintber
+supersedes: []
+---
+
 # Implementation Definition of Done — Saintber.Forge
 
 > Purpose  
