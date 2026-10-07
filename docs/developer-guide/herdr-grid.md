@@ -3,7 +3,7 @@
 在 Herdr 的同一個 tab 內，每呼叫一次就新增一個 pane，並維持欄:列約 1:1 的網格。腳本只負責版面，不啟動 agent、不派工。
 
 - 腳本：`tooling/herdr/grid.cjs`（離線序列模擬：`tooling/herdr/grid-simulate.cjs`）
-- 舊規格與設計：[OpenSpec 歷史紀錄](../../archive/changes/2026-10-02-herdr-grid-layout/archive.md)（不是 Hub 已採納有效規格）
+- 舊規格與設計：[OpenSpec 歷史紀錄](../../archive/changes/legacy-herdr-grid-layout-2026-10-02/archive.md)（不是 Hub 已採納有效規格）
 - 工具總覽：`tooling/herdr/README.md`
 - 需求：Node.js、Herdr CLI（在 Herdr 內執行，`HERDR_ENV=1`）
 

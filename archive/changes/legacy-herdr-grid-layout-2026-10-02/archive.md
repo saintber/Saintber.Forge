@@ -16,7 +16,18 @@
 | `herdr/grid.md` | [`inputs/grid.md`](inputs/grid.md)，原文保留；更新路徑後的使用手冊在 [`docs/developer-guide/herdr-grid.md`](../../../docs/developer-guide/herdr-grid.md) |
 | `herdr/2026-10-02-herdr-grid-layout/` | [`work/`](work/)，五份原始 OpenSpec 檔案完整保留 |
 
-原始資料的 SHA-256 見 [`inputs/source-manifest.json`](inputs/source-manifest.json)。這個日期目錄沿用舊封存名稱，不配置新的 Spec Kit 工作包編號。`work/verification.md` 是本次新增的歸檔驗證紀錄，其他 `work/` 內容與 `inputs/` 原文不改寫。
+原始資料的 SHA-256 見 [`inputs/source-manifest.json`](inputs/source-manifest.json)。目錄加上 `legacy-` 前綴以辨識外部歷史，日期不當作 Spec Kit 工作包編號。`work/verification.md` 是匯入時新增的歸檔驗證紀錄，其他 `work/` 內容與 `inputs/` 原文不改寫。
+
+2026-10-07 更正：原匯入名稱 `2026-10-02-herdr-grid-layout` 會被既有 context 編號掃描當作第 2026 號 change，因此更名為 `legacy-herdr-grid-layout-2026-10-02` 並更新導覽。搬移時十份檔案的 SHA-256 全部一致；沒有修改上游或 Hub 擴充程式。更正後 context 回報下一號為 `002`，原始 `work/` 與 `inputs/` 內容仍保留。
+
+### Verification Record — legacy-name-correction-2026-10-07
+
+- Scope：修正外部歷史名稱造成的編號誤判；基線 `1e3094c`。
+- Environment：本機 Windows／PowerShell，Node.js v24.19.0。
+- Gate A：無新增相依或程式變更，不需還原／建置；搬移前後十份檔案 SHA-256 核對一致。執行 `node .specify/extensions/hub/scripts/context.mjs --json --project hub`，exit 0，`nextChange` 從 `2027` 回到 `002`；目前唯一編號工作包仍為 `001-stage1-speckit-extension`。更新的三份導覽與本紀錄相對連結均存在，`git diff --check` 通過。
+- Gate B：本次沒有 Herdr 互動變更，不需重新操作 pane；原手冊與原工作包保留原文。
+- Docs Consistency：archive 索引、Herdr 手冊與 tooling/herdr README 指向新名稱；不改變能力或治理，也不手改有效規格。
+- Final Status：Done，限名稱與引用更正。
 
 ## 判定與規格狀態
 

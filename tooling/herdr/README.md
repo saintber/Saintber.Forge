@@ -23,6 +23,6 @@ node tooling/herdr/grid-simulate.cjs
 ## 維護與歷史
 
 - 目前由 Hub 的開發工具目錄維護，適用 Hub 憲章與 Policy；不建立自己的 `.specify/`、project descriptor 或 workspace 登錄。
-- [匯入紀錄與原始 OpenSpec 文件](../../archive/changes/2026-10-02-herdr-grid-layout/archive.md) 保留舊設計、規格、任務與人工驗證陳述。本次只驗證歸檔與離線序列，沒有重新驗證真實 Herdr 互動，也沒有採納為 Hub 有效規格。
+- [匯入紀錄與原始 OpenSpec 文件](../../archive/changes/legacy-herdr-grid-layout-2026-10-02/archive.md) 保留舊設計、規格、任務與人工驗證陳述。本次只驗證歸檔與離線序列，沒有重新驗證真實 Herdr 互動，也沒有採納為 Hub 有效規格。
 - 本次沿用 `.cjs` 與兩支腳本的相鄰位置，保留 CommonJS 載入方式與既有功能。後續維護依工作大小選流程，不沿用原專案的開發指令。
 - 若未來要提供使用者安裝，再於 Node.js 或 AI 工具集專案中討論產品歸屬、公開契約與安裝需求；依使用者指示，不把 Herdr 輔助腳本獨立成 project。
