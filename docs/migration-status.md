@@ -1,6 +1,6 @@
 # 遷移交付狀態
 
-> **主要遷移與基本目錄已完成；正在完成最後文件檢查與提交。** 更新：2026-10-07。
+> **本次主要遷移交付已完成。** 基本目錄、文件、必要驗證與提交已收尾，可從交付基準開出 worktree 並行開發。更新：2026-10-07。
 > 本次範圍依 [ADR-0002](architecture/decisions/0002-migration-delivery-scope.md)：先交付可供 worktree 並行開發的基準，不以全部前景功能或完整 Spec Kit 擴充完成為條件，也不安排第二階段。
 > 分支：`backlogs/hub-restructure`（原名 `hub/000-restructure`）；不 push、不開 PR。
 

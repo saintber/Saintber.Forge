@@ -17,7 +17,7 @@ forge-explorer 在 workspace 內開發，繼承 Hub 的下列 Policy（Hub 憲�
 | POL-TEST-001 Testing Governance | workspace | |
 | POL-DOD-001 Implementation Definition of Done | workspace | R6a 來自已批准的憲章原則 VI |
 
-- **已提交的繼承基線**：Hub commit `44dfc96`（2026-10-07）；workspace 開發時讀取 Hub 的工作目錄。正在審閱的治理更正尚未包含於此基線，驗證並提交後再更新。
+- **已提交的繼承基線**：Hub commit `f3541a8`（2026-10-07）；已包含本次治理引用更正與 ADR-0002 的遷移範圍、小型工作流程補充。workspace 開發時讀取所屬 worktree 的 Hub 文件，不引用其他 worktree 的實際路徑。
 - Hub Policy 位置：`../../../../../docs/governance/policy/`（workspace 模式，見採納時設計（快照）§11.4、§13.4）。
 - **與 Hub 憲章的衝突**：已由 owner 於 2026-10-07 裁決（**同意 A+B**）並套用到 forge-explorer 憲章，**v1.0.0 → v1.1.0**（原則 1–10 未修改）。依據紀錄見 [`conflicts-with-hub.md`](conflicts-with-hub.md)。本目錄專屬 Policy 除下方註記的 Verification Record 路徑修訂外，內文保留。
 
