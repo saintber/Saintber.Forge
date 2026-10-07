@@ -27,7 +27,7 @@
 | # | 項目 | 來源 | 阻擋或前提 |
 |---|---|---|---|
 | U1 | ~~forge-explorer 的有效規格~~ | — | ✅ **已完成**（2026-10-06）：三個 capability、穩定 requirement ID、索引、Change Log、證據等級與已知缺口。Token（原 FR-007）未實作，列為未達成 |
-| U2 | ~~五份★Policy~~ | — | ✅ **已完成**：`POL-STRUCT/DOC/SPEC/SPECKIT/INVOKE-001`，每條標出處；目前沒有 Proposed 條文。forge-explorer 與 Hub 憲章的潛在衝突列在 `conflicts-with-hub.md`，**待 owner 裁決**，舊文未改 |
+| U2 | ~~五份★Policy~~ | — | ✅ **已完成**：`POL-STRUCT/DOC/SPEC/SPECKIT/INVOKE-001`，每條標出處；目前沒有 Proposed 條文。forge-explorer 與 Hub 憲章的衝突已由 owner 裁決（A+B，2026-10-07）並套用，forge-explorer 憲章 **v1.1.0** |
 | U3 | ~~§13.5 代理驗收~~ | §13.5、§15.5 #2、#3 | ✅ **已完成**：Claude Code 與 Codex 各自在隔離副本**實際執行** S2、S3、SA，以 `check.mjs` 客觀判定**全部 PASS**（Codex 的結果另由 Claude 獨立重跑確認）。**範圍限制**：S2 只證明產出被隔離在目標專案，**不含**上游 `create-new-feature.ps1`、編號、branch、hooks 的全流程（Codex 的 S2 因終端無法啟動，以檔案工具等效建立）；SA 只證明 standalone 解析，**不等於** §11.6 治理內化或 §14.3 遷出演練（驗收 11）。見 `specs/001-stage1-speckit-extension/verification.md` |
 | U5 | §15.5 驗收 4、5、5a | §15.5、§16 階段 1 | ✅ 以腳本的**自動化測試**通過（38 個測試，含變異測試）；**沒有**代理端到端的 adopt / archive 驗收。驗收 6–12 屬階段 2 以後，**不在本次範圍** |
 | U6 | ~~憲章的 owner 批准~~ | — | ✅ **憲章已批准**（2026-10-06，Active v1.0.0）。Policy 依 Policy 索引的 A / B 類判斷效力；目前 B 類沒有需裁決的規範條文 |
@@ -124,7 +124,7 @@
 |---|---|
 | 上游 `create-new-feature.ps1`、編號、branch、hooks 的全流程代理驗收 | **未驗證**：兩個代理的 S2 都沒有走完這段（Codex 以檔案工具等效建立；兩者都沒建 branch、沒有 hooks）。需要時另開工作 |
 | adopt / archive 的代理端到端驗收（G-AGENT-ADOPT） | **未驗證**：目前只有腳本的自動化測試 |
-| forge-explorer 與 Hub 憲章的潛在衝突（C1–C7） | **待 owner 裁決**：見 `projects/forge-explorer/docs/governance/policy/conflicts-with-hub.md` 的提案 A、B |
+| ~~forge-explorer 與 Hub 憲章的潛在衝突（C1–C7）~~ | ✅ **已裁決並套用**（2026-10-07，A+B）：forge-explorer 憲章 v1.0.0 → **v1.1.0**（MINOR），新增「五、與 Hub 的關係」、Amendment Authority 改為 owner（`saintber`）；原則 1–10 位元組相同（已驗證）；Ratification Date 保留 2026-02-07。依據見 `projects/forge-explorer/docs/governance/policy/conflicts-with-hub.md` |
 | 已知缺口 G-PC（plan 的 Policy Check 沒有自動機制） | preset 方式經實測會改寫 CLI 受管理的檔案，不採用；目前靠 Policy 規範與 analyze 檢查 |
 | 已知缺口 G-NUM（上游編號只掃 `specs/`） | 由 `speckit-hub-context` 提供 `nextChange`；依賴代理照做 |
 | 遷出準備（§11.6 治理內化、distribution 快照）與遷出演練（驗收 11） | **未做**。standalone 驗收只證明解析與產出隔離；forge-explorer 的 AGENTS 與 Policy README 仍以 `../../` 指向 Hub |

@@ -1,13 +1,29 @@
 <!--
-Sync Impact Report — Constitution v1.0.0
+Sync Impact Report — Constitution v1.1.0
 
-Version Change: (Initial) → v1.0.0
-Ratification Date: 2026-02-07
-Last Amended: 2026-02-08
+Version Change: v1.0.0 → v1.1.0（MINOR：新增章節；原則 1–10 未修改）
+Ratification Date: 2026-02-07（保留原日期）
+Last Amended: 2026-10-07
+Amendment Approved By: saintber（owner），2026-10-07 — 使用者裁決「同意 A+B」
+  （提案內容見 docs/governance/policy/conflicts-with-hub.md）
 
-Modified Principles: N/A (Initial establishment)
-Added Sections: All core governance principles
+Modified Principles: None（原則 1–10 的文字與意義未動）
+Added Sections:
+  - 「五、與 Hub 的關係」（提案 A；說明性條文，不改任何既有原則）
+Renumbered Sections:
+  - 原「五、結語」順延為「六、結語」（內容未動）
+Modified Sections:
+  - Constitution Metadata：Amendment Authority 由「Project Constitution Committee」改為「owner（saintber）」（提案 B）
+  - 四、治理合規性與修正程序：補上修正的核准者（提案 B）
 Removed Sections: None
+
+Not changed on purpose:
+  - .NET 命名空間（Saintber.Forge.*）與 Saintber.Forge.sln 檔名
+  - 原則 1–10 的任何文字（含「每個 Tool 一個 Solution」「Tool 不得包含 Razor 元件」等：它們仍然只約束本專案「內部」的 Tool 模組）
+
+--- 以下是 v1.0.0 初次建立時的紀錄（保留）---
+Version Change: (Initial) → v1.0.0
+Added Sections: All core governance principles
 
 Templates Consistency Status:
 ✅ plan-template.md — Constitution Check section references governance principles
@@ -32,9 +48,9 @@ Deferred Items:
 
 # Constitution — Saintber.Forge
 
-> **Governance Document Version**: v1.0.0  
+> **Governance Document Version**: v1.1.0  
 > **Ratification Date**: 2026-02-07  
-> **Last Amended**: 2026-02-08
+> **Last Amended**: 2026-10-07
 
 > Purpose  
 > 本文件定義 Saintber.Forge 專案的**治理憲章**，  
@@ -51,11 +67,11 @@ Deferred Items:
 | Property | Value |
 |----------|-------|
 | Project Name | Saintber.Forge |
-| Version | v1.0.0 |
+| Version | v1.1.0 |
 | Ratification Date | 2026-02-07 |
-| Last Amended | 2026-02-08 |
+| Last Amended | 2026-10-07 |
 | Status | Active |
-| Amendment Authority | Project Constitution Committee |
+| Amendment Authority | owner（`saintber`） |
 
 ---
 
@@ -285,7 +301,7 @@ Implementation (實際程式碼)
 
 ### Amendment Procedure
 
-憲章修正需遵循以下程序：
+憲章修正需遵循以下程序，**核准者為 Amendment Authority（owner，`saintber`）**：
 
 1. **提案階段**: 明確說明修正原因、影響範圍與版本變更類型
 2. **影響評估**: 檢視所有 policy、plan 與實作的相容性
@@ -306,7 +322,26 @@ Implementation (實際程式碼)
 
 ---
 
-## 五、結語
+## 五、與 Hub 的關係
+
+> 本章為 v1.1.0 新增，屬**說明性**條文，**不修改**上述任何原則。
+
+本專案（forge-explorer）位於 Hub（`Saintber.Forge`）之下，在 Hub 的語彙中是**一個專案（一個工具）**。
+
+**用詞範圍**：
+- 本憲章與本專案 Policy 中的「**Tool**」，指**本專案內部的模組**（例如 `tools/<ToolName>` 之下的 BLL / DAL），**不是** Hub 的工具。
+- Hub 的工具是 `projects/<id>/` 這個單位；forge-explorer **整體**就是其中一個。
+- 因此「每個 Tool 必須有獨立的 Solution」「Tool 不得包含 Razor 元件、Controllers 或 API Endpoints」等條文，只約束**本專案內部**的 Tool 模組，**不得**讀成對 Hub 之下其他工具的要求。
+
+**與 Hub 憲章的關係**：
+- Hub 對本專案的要求（Hub 憲章與適用的 Hub Policy）依 Hub 憲章處理。
+- 兩者衝突時，依 Hub 憲章「專案憲章可以加嚴、不得牴觸」處理；**不採**「離得近的優先」。
+
+**來源與核准**：本章依 `docs/governance/policy/conflicts-with-hub.md` 的提案 A，由 owner 於 2026-10-07 核准。
+
+---
+
+## 六、結語
 
 本憲章的存在目的是確保 Saintber.Forge 在演進過程中，  
 能夠維持工具集合的本質特性：隔離性、可回收性與可替換性。

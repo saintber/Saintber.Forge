@@ -8,7 +8,7 @@
 
 | 內容 | 位置 |
 |---|---|
-| 本專案的憲章 | `.specify/memory/constitution.md` |
+| 本專案的憲章 | `.specify/memory/constitution.md`（**v1.1.0**，2026-10-07 修訂；「Tool」一詞的範圍見其「五、與 Hub 的關係」） |
 | 本專案的 Policy | `docs/governance/policy/`（先讀其 `README.md`：繼承了哪些 Hub Policy、哪些是專屬、有哪些尚待核准） |
 | Hub 的 Policy（繼承） | `../../docs/governance/policy/` |
 | Hub 的憲章 | `../../.specify/memory/constitution.md`（**Active v1.0.0**，2026-10-06 批准） |

@@ -19,7 +19,7 @@ forge-explorer 在 workspace 內開發，繼承 Hub 的下列 Policy（Hub 憲�
 
 - **繼承基線**：Hub 在 `hub/000-restructure` 分支的版本（尚未建立 commit 或 tag；有了之後補上）。
 - Hub Policy 位置：`../../../../../docs/governance/policy/`（workspace 模式，見採納時設計（快照）§11.4、§13.4）。
-- **與 Hub 憲章的潛在衝突**：見 [`conflicts-with-hub.md`](conflicts-with-hub.md)。**舊憲章與本目錄的 Policy 原封不動，仍然有效**；是否修訂待 owner 裁決。
+- **與 Hub 憲章的衝突**：已由 owner 於 2026-10-07 裁決（**同意 A+B**）並套用到 forge-explorer 憲章，**v1.0.0 → v1.1.0**（原則 1–10 未修改）。依據紀錄見 [`conflicts-with-hub.md`](conflicts-with-hub.md)。本目錄五份專屬 Policy 的內文**沒有更動**。
 
 ## 本專案的專屬 Policy
 

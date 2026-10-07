@@ -71,7 +71,7 @@ Hub 憲章
 
 | 專案 | 繼承的 Hub Policy | 基線 | 與 Hub 憲章的衝突 |
 |---|---|---|---|
-| forge-explorer | POL-STRUCT-001、POL-DOC-001、POL-SPEC-001、POL-SPECKIT-001、POL-INVOKE-001（`[tool]` 規則）、POL-SEC-001、POL-TEST-001、POL-DOD-001 | 見該專案的 README | 見 [`conflicts-with-hub.md`](../../../projects/forge-explorer/docs/governance/policy/conflicts-with-hub.md)（待 owner 裁決，**舊文原封不動**） |
+| forge-explorer | POL-STRUCT-001、POL-DOC-001、POL-SPEC-001、POL-SPECKIT-001、POL-INVOKE-001（`[tool]` 規則）、POL-SEC-001、POL-TEST-001、POL-DOD-001 | 見該專案的 README | 已裁決（A+B，2026-10-07），forge-explorer 憲章 v1.1.0；依據見 [`conflicts-with-hub.md`](../../../projects/forge-explorer/docs/governance/policy/conflicts-with-hub.md) |
 
 ## 例外
 
