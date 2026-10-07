@@ -16,6 +16,10 @@
 
 專案可以加嚴 Hub 的規則，不得放寬。**設計先於實作**：實作必須依照已核准的設計，不得先偏離再改文件合理化。
 
+設計快照提供方向，不是詳細需求的完整正本；後續功能以新的 Spec Kit change 討論並確立範圍。本次只完成遷移與已開始工作的交付，不安排第二階段（workspace 模式參考 Hub 的 ADR-0002）。
+
+小粒度且需求清楚的工作可直接開發與驗證，不強迫使用 Spec Kit。目錄與 worktree 操作見 Hub 的 `docs/developer-guide/parallel-development.md`；適用治理、設計先於實作與規格唯一仍須遵守。
+
 ## 執行 Spec Kit
 
 - 開始前先執行 hub context（Claude：`/speckit-hub-context`；Codex：`$speckit-hub-context`），確認專案與模式並讀它列出的文件；報錯時停止，不改用 Hub 或其他專案。

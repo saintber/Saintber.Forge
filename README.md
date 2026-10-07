@@ -2,12 +2,12 @@
 
 一個**工具集的入口專案**：用 `saintber` 命令發現、安裝、設定、啟動各種工具。各工具的初期開發也在這個 repo 進行，規模變大後會遷到獨立專案，但仍然可以透過 `saintber` 取得。
 
-> ## ⚠️ 目前狀態：遷移中，`saintber` 尚未可用
+> ## 目前狀態：主要遷移完成，`saintber` 尚未可用
 >
-> 這個 repo 正在從「.NET 探索性小工具集合」改為上述的入口專案（分支 `hub/000-restructure`）。
+> 舊 .NET 內容已搬到 forge-explorer，Hub 的基本目錄、治理與文件位置已建立（遷移分支 `backlogs/hub-restructure`）。後續可以開出 worktree 平行開發；交付證據與保留事項見 [遷移狀態](docs/migration-status.md)。
 > **`saintber` CLI、安裝腳本、各工具的入口都還沒有實作。** 下方標示 ⏳ 的章節是待補的說明，不是遺漏。
 >
-> 現在能做的：閱讀設計、使用既有的 forge-explorer（.NET）、依 Spec Kit 流程開發。
+> 現在能做的：使用既有的 forge-explorer（.NET），從遷移基準開 worktree 開發。需要完整需求流程時使用 Spec Kit；小粒度 skill 可直接開發與驗證。
 
 ## 工具
 
@@ -21,6 +21,19 @@
 | `node-tools` | Node.js 工具 | 規劃中 |
 
 「規劃中」的工具**沒有目錄**，只是計畫。
+
+## 並行開發的目錄基準
+
+| 位置 | 責任 |
+|---|---|
+| `src/`、`tests/` | Hub 入口與測試，骨架已建立，尚無 CLI |
+| `projects/<id>/` | 各工具自己的程式、文件、治理與測試 |
+| `packages/` | 版本化 Shared 的位置，目前沒有套件 |
+| `scripts/{bootstrap,dev,ci,release}/` | 使用者引導、開發、CI、入口發佈；已建立目錄，尚無腳本 |
+| `tooling/speckit/`、`tooling/skills/`、`tooling/scaffold/` | 開發工具、repo 自製 skill 正本與 Tool 靜態範本 |
+| `docs/`、`specs/`、`archive/changes/` | Hub 文件、候選工作包與歷史；Tool 在自己目錄有相同邊界 |
+
+操作見 [worktree 並行開發](docs/developer-guide/parallel-development.md)。總體設計快照提供方向；每次詳細需求重新討論，不把快照當成完整需求。完整 Spec Kit 擴充仍有未完事項，不阻擋其他開發。
 
 ## ⏳ 安裝
 
@@ -37,7 +50,7 @@
 
 ## ⏳ 使用手冊
 
-> **待補。** `docs/user-guide/` 尚未建立。
+> **目錄已建立，產品手冊待補。** 見 [`docs/user-guide/`](docs/user-guide/README.md)；待功能可用時新增實際操作說明。
 
 ## 現在可以做什麼
 
@@ -53,7 +66,7 @@ dotnet test tests/Saintber.Forge.BlazorServer.UnitTests
 
 ### 使用 Spec Kit 開發
 
-在**專案目錄內**執行 slash command，例如在 `projects/forge-explorer/` 內執行 `/speckit-specify`。細節見 [`docs/developer-guide/speckit-workflow.md`](docs/developer-guide/speckit-workflow.md)。
+在**專案目錄內**執行技能，例如 Claude 的 `/speckit-specify`、Codex 的 `$speckit-specify`。小粒度 skill 可直接開發，不強迫建立工作包；適用治理與必要驗證仍須遵守。細節見 [`docs/developer-guide/speckit-workflow.md`](docs/developer-guide/speckit-workflow.md)。
 
 ## 文件
 

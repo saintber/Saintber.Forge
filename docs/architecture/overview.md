@@ -10,9 +10,13 @@
 ├─ workspace.json          登錄專案（hub、forge-explorer）
 ├─ catalog/index.json      工具索引，目前 tools 為空
 ├─ docs/                   Hub 的文件、Policy、ADR
-├─ specs/                  Hub 的工作包（001-stage1-speckit-extension 驗收中）
+├─ src/、tests/            Hub 程式與測試的骨架，尚無 CLI
+├─ packages/               Shared 位置，目前沒有套件
+├─ specs/                  Hub 的工作包（001-stage1-speckit-extension 尚未採納）
+├─ archive/changes/        Hub 工作包歷史位置，目前沒有封存包
 ├─ tooling/speckit/        上游 v1.1.0 版本紀錄、hub 擴充原始碼與安裝／驗證工具
-├─ scripts/、schemas/      只有 README，尚無腳本與 schema
+├─ scripts/                bootstrap、dev、ci、release 分類與說明；尚無腳本
+├─ schemas/                契約 schema 的位置與說明；尚無 schema
 ├─ .specify/               Hub 的 Spec Kit
 └─ projects/
    └─ forge-explorer/      唯一的專案（.NET / Blazor Server）
@@ -21,9 +25,9 @@
 ## 專案
 
 ### Hub
-已有憲章（Active v1.0.0）、八份 Policy、ADR-0001 與 Spec Kit 設定，也有 `tooling/speckit/` 下的 Node 開發腳本、擴充原始碼與測試。擴充的修正與驗收仍在進行中，結果以 [`migration-status.md`](../migration-status.md) 為準。
+已有憲章（Active v1.0.0）、八份 Policy、ADR-0001／0002 與 Spec Kit 設定，也有 `tooling/speckit/` 下的 Node 開發腳本、擴充原始碼與測試。三個擴充指令完成必要安全修正與本輪腳本驗證；完整設計仍待確認，工作包未採納，結果見 [`migration-status.md`](../migration-status.md)。
 
-**saintber CLI 尚未實作**：根目錄沒有 CLI 的 `src/`、`tests/`、`package.json`。開發工具腳本的存在不代表安裝／設定／啟動入口已完成。
+**saintber CLI 尚未實作**：`src/`、`tests/` 已建立骨架，根目錄沒有 CLI 的 `package.json`。開發工具腳本的存在不代表安裝／設定／啟動入口已完成。Tool 靜態範本在 `tooling/scaffold/project/`，repo skill 正本位置在 `tooling/skills/`。
 
 ### forge-explorer
 - 原 Saintber.Forge 的 .NET 內容，整體搬到 `projects/forge-explorer/`，**路徑以外沒有修改**（命名空間 `Saintber.Forge.*` 與 `Saintber.Forge.sln` 檔名不變）。

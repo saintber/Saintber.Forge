@@ -15,12 +15,14 @@
 |---|---|
 | 採納時的設計 | [`decisions/0001-attachments/design-2026-10-adopted.md`](decisions/0001-attachments/design-2026-10-adopted.md)（**唯讀快照**） |
 | 為什麼這樣設計、已核准的決策、待裁決事項 | [`decisions/0001-hub-and-project-split.md`](decisions/0001-hub-and-project-split.md) |
+| 本次遷移交付範圍與後續需求確立方式 | [`decisions/0002-migration-delivery-scope.md`](decisions/0002-migration-delivery-scope.md)（使用者於 2026-10-07 核准） |
+| Spec Kit 擴充完整構想、實作狀態與待確認取捨 | [`proposals/speckit-extension-design.md`](proposals/speckit-extension-design.md)（**待使用者確認**，不是現況或已批准需求） |
 
 ## 規則（憲章原則 VI）
 
 **設計先於實作。** 實作必須依照已核准的設計；不得先偏離，再回頭改文件合理化。
 
-- 本目錄的架構概觀等文件是**描述性**的：只描述**已完成**的實作，**不得把尚未實作的能力描述成現況**。`decisions/` 的 ADR 與設計附件記錄提案、決策及其核准狀態，依下列 ADR 規則處理。
+- 本目錄的架構概觀等文件是**描述性**的：只描述**已完成**的實作，**不得把尚未實作的能力描述成現況**。`decisions/` 的 ADR 與設計附件記錄提案、決策及其核准狀態，依下列 ADR 規則處理；`proposals/` 明確標示待確認的設計，不具有有效規格或 Policy 的效力。
 - 它們在變更**驗證並採納（adopt）後**更新。
 - 發現實作偏離已核准的設計時，那是**缺陷**，要修正實作；要改設計，必須先依憲章原則 VI 取得相應 owner 的核准，**不得因為現有實作已經如此，就更新文件來配合它**。
 - ADR 是記錄，不是核准。只有變更**已採納的架構或決策**才需要新 ADR；一般錯誤修正不需要。

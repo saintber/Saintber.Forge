@@ -11,6 +11,8 @@ source: 採納時的設計 §12.1–§12.6；憲章原則 IV、VI
 
 # Specification Lifecycle
 
+本文件描述 Spec Kit 工作包的生命週期；依 owner 指示（[ADR-0002](../../architecture/decisions/0002-migration-delivery-scope.md)），小型直接開發不強迫建立整套工作包。若影響有效規格，仍須經驗證與相應採納紀錄更新現況，不能用未驗證提案取代。
+
 > 目的：規範**有效規格、工作包與封存**的生命週期。
 > 本文是對**已採納設計 §12** 與 **Hub 憲章原則 IV、VI** 的忠實展開，每條規則標示出處。出處不在設計或憲章內的條文，標為 **Proposed**，集中列在文末。
 

@@ -1,6 +1,8 @@
 <!--
 Sync Impact Report
 
+此報告保留 2026-10-06 初次批准時的同步狀態；目前 Policy、擴充與遷移進度見 docs/migration-status.md。2026-10-07 的交付範圍與小型工作流程補充見 docs/architecture/decisions/0002-migration-delivery-scope.md，不修改下列已批准原則或憲章版本。
+
 Version Change: (Initial) → v1.0.0
 Ratification Date: 2026-10-06（使用者 saintber 批准）
 Last Amended: 2026-10-06

@@ -11,8 +11,10 @@
 這個 repo 是 **Hub**（`saintber` 工具集入口），各工具在 `projects/<id>/` 底下，各自有自己的 `.specify/`、文件與憲章。
 
 - 設計與遷移計畫：[`採納時的設計（快照）`](docs/architecture/decisions/0001-attachments/design-2026-10-adopted.md)（已採納）；目前進度見 [`遷移狀態`](docs/migration-status.md)。
+- 快照提供方向，**不是後續開發的完整需求**；詳細需求以新的 Spec Kit change 討論並確立。本次遷移交付範圍依 [`ADR-0002`](docs/architecture/decisions/0002-migration-delivery-scope.md)，未完成功能列後續事項，不安排第二階段。
 - 文件導覽：[`docs/README.md`](docs/README.md)
 - Spec Kit 與 SDD 文件的使用方式：[`docs/developer-guide/speckit-workflow.md`](docs/developer-guide/speckit-workflow.md)
+- 並行開發與目錄範本：[`worktree 開發指引`](docs/developer-guide/parallel-development.md)。小粒度 skill 可直接開發，不強迫建立 Spec Kit 工作包；適用治理與必要驗證仍須遵守（ADR-0002）。
 
 ## 處理 `projects/<id>/` 的工作時
 
@@ -24,7 +26,7 @@
 
 ## Hub 擴充指令（context、adopt、archive）
 
-- 開始工作前先執行 `speckit-hub-context`（可帶專案 ID），確認目標專案與模式，並讀它列出的憲章與 Policy 索引。**它報錯時就停止**，不要改用別的專案或 Hub 根目錄。
-- 工作包驗證完成後用 `speckit-hub-adopt <NNN-name>` 合併進有效規格，再用 `speckit-hub-archive <NNN-name>` 封存。被拒絕時照錯誤訊息處理，**不要手動改有效規格來繞過**。
+- 使用 Spec Kit 流程時，先執行 `speckit-hub-context`（可帶專案 ID），確認目標專案與模式，並讀它列出的憲章與 Policy 索引。**它報錯時就停止**，不要改用別的專案或 Hub 根目錄。直接開發的小型工作自行確認同樣的目標與適用治理，不必為此啟動整套 Spec Kit。
+- `speckit-hub-adopt`／`speckit-hub-archive` 已有實作，但完整設計與格式仍待確認，見 [`擴充設計稿`](docs/architecture/proposals/speckit-extension-design.md)。使用這些腳本時，被拒絕就照錯誤處理，**不要手動改有效規格來繞過**；小型工作不因此被強迫使用它們，仍須有驗證與相應規格採納紀錄。
 - 這些指令都**不會自行** stage 或 commit；提交由另外取得使用者授權的提交流程處理。
 - 已知限制（plan 的 Policy Check、編號掃描）見 `docs/developer-guide/speckit-workflow.md` 的「已知限制」。

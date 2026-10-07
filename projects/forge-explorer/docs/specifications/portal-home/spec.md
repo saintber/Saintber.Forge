@@ -3,6 +3,7 @@ capability: portal-home
 owner: forge-explorer
 status: active
 last-adopted: 001-portal-home
+last-evidence-review: 2026-10-07
 evidence-note: 補建（遷移 hub/000-restructure）；無自動化行為測試，見 ../README.md 的「證據等級」
 ---
 
@@ -21,7 +22,7 @@ Portal Home 是各工具的**導覽入口**，不實作任何工具的業務邏�
 - 來源：原 FR-001
 
 ### REQ-PH-002 卡片內容
-每張卡片包含工具標題與簡要功能描述。
+每張卡片包含工具標題；工具描述非空白時顯示簡要功能描述。
 
 - 證據：**S**（`Components/ToolCard.razor` 渲染 `ToolName`；`Description` 非空白時才渲染）
 - 來源：原 FR-002
@@ -72,27 +73,23 @@ Portal Home 是各工具的**導覽入口**，不實作任何工具的業務邏�
 - 狀態：行為由程式碼實現，**未經驗證**
 - 來源：原邊界條件
 
-### REQ-PH-009 工具 URL 直接存取與卡片導向一致
-直接輸入工具 URL 與從卡片點擊進入，結果應一致。
-
-- 證據：**—**（首頁只輸出 `href`；是否一致取決於工具本身，**這個專案裡沒有任何工具實作**）
-- 來源：原 FR-010
-
 ## 與原提案的差異
 
-- **FR-007（Access / ID Token）**：移到 `portal-authentication`，且**未達成**，見該規格。
+- **FR-007（Access / ID Token）**：移到 `portal-authentication`，列為**證據不足**，不由缺少持久化欄位推論全部未實作，見該規格。
 - **FR-009、FR-012（工具部分）**：移到 `tool-registry`。
 - 樣式檔名：原 `tasks.md`（T027、T038）寫 `wwwroot/css/app.css`，**實際樣式在 `wwwroot/css/site.css`**（`_Layout.cshtml` 也引用它）。這是檔名差異，對應的樣式存在；它**不**是遺失的檔案。
 - **原規格 SC-001、SC-002、SC-006**（3 秒載入、90% 使用者能找到工具）：**沒有任何證據**，歷史驗證紀錄沒有量測載入時間或使用者行為，**不列為本規格的 requirement**，也不宣稱達成。
+- **FR-010／原補建 REQ-PH-009**（直接 URL 與卡片導向一致）：只有 `href` 的靜態證據，沒有工具實作或完整操作證據，改列缺口。REQ-PH-009 已從有效條款移除並保留歷史 ID，不重用；這不是改寫程式來滿足新需求。
 
 ## 已知缺口
 
 | # | 缺口 | 影響的 requirement |
 |---|---|---|
-| G1 | 種子資料的工具 URL 無對應實作，點擊顯示 404；SC-003「100% 成功」**未達成** | REQ-PH-003、REQ-PH-009 |
+| G1 | 種子資料的工具 URL 無對應實作，點擊顯示 404；SC-003「100% 成功」**未達成** | REQ-PH-003 |
 | G2 | 空清單情境從未被實際測試（備註「尚未移除 Seed Data」卻標 PASS） | REQ-PH-008 |
 | G3 | 沒有任何自動化行為測試；唯一的單元測試是空方法 | 全部 |
 | G4 | Playwright RWD 測試遷移時未執行（需 `https://localhost:7289`、PostgreSQL 與設定） | REQ-PH-006 |
+| G5 | FR-010／歷史 REQ-PH-009 沒有足夠交付證據，不列為現行有效條款；保留為後續需討論的需求 | —（REQ-PH-009 已移除，不重用） |
 
 來源與詳細核對：[`archive/changes/001-portal-home/archive.md`](../../../archive/changes/001-portal-home/archive.md)。
 
@@ -101,3 +98,4 @@ Portal Home 是各工具的**導覽入口**，不實作任何工具的業務邏�
 | Date | Change | Requirements | Summary | Archive |
 |---|---|---|---|---|
 | 2026-10-06 | 001-portal-home（補建） | REQ-PH-001 – 009 | 依 §15.4 比對封存 spec、程式碼與驗證紀錄後補建；**不是**複製候選規格 | `archive/changes/001-portal-home` |
+| 2026-10-07 | 遷移證據核對 | MODIFIED REQ-PH-002；REMOVED REQ-PH-009 | 更正條件式描述；將無交付證據的 FR-010 留為缺口；已驗證並採納此補建更正 | [核對與採納紀錄](../../developer-guide/migration-evidence-review.md) |

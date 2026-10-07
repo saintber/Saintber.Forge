@@ -5,7 +5,7 @@
 >
 > **重要**：「已知限制」與「尚未完成」列出的項目目前**還不存在或尚未驗收**，不要假設可以使用。
 >
-> **不是所有工作都要走 Spec Kit**：粒度小的修改（例如一個小 skill）可以直接開發，仍須遵守適用的治理並完成必要驗證；需要討論詳細需求或要把結果採納進有效規格時，才開 Spec Kit change。
+> **不是所有工作都要走 Spec Kit**：粒度小的修改（例如一個小 skill）可以直接開發，仍須遵守適用治理並完成必要驗證；需要完整需求、計畫與工作包時才開 Spec Kit change。直接開發若影響有效規格，仍須驗證並留下採納紀錄，不把 Spec Kit 工作包或自動擴充當成所有工作的前置依賴（ADR-0002）。
 
 本文說明 Hub 與各專案如何使用 Spec Kit 與 SDD（規格驅動開發）文件，不定義任何業務規則或技術決策。
 
@@ -112,7 +112,7 @@ Intent **不是**規格書、實作說明或 Release Note。
 | 代號 | 限制 | 目前的處理 |
 |---|---|---|
 | G-PC | plan 的 **Constitution & Policy Check** 沒有自動機制保證。以 preset 包裝 `speckit.plan` 會**改寫 CLI 受管理的檔案**且只作用在一個代理（已在隔離副本驗證），所以**不採用** | 依 POL-SPECKIT-001 R5，由人或代理在 plan 中加入；`analyze` 時檢查 |
-| G-NUM | 上游 `create-new-feature` 的編號**只掃 `specs/`**，不掃 `archive/changes/` | `speckit-hub-context` 會輸出 `nextChange`（兩者都掃）；specify 時以 `-Number <nextChange>` 傳入。**依賴代理照做** |
+| G-NUM | 上游自動編號只掃 `specs/`，不掃 `archive/changes/` | `speckit-hub-context` 會輸出 `nextChange`（兩者都掃），但不強制或預留；原生技能可指定 `SPECIFY_FEATURE_DIRECTORY`，若另用 PowerShell 建檔腳本則依其 `-Number` 介面。不可把後者當成原生技能必跑的步驟；目前仍依賴人／代理核對 |
 
 | G-AGENT | adopt／archive 沒有**代理端到端**驗收；原生 specify→plan→archive 全流程的雙代理驗收也未做 | 腳本層有自動化測試；後續 change 再處理 |
 | 其他 | standalone 治理內化與遷出演練、舊 Change Log／封存的相容方案、跨程序鎖與崩潰復原 | 未完成，留待後續 change；見 `tooling/speckit/README.md` |

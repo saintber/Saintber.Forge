@@ -29,7 +29,9 @@
 
 ## 狀態說明
 
-`active` 的意思是「這是目前被採納的規格」，**不代表**每條 requirement 都已驗證。未達成或未驗證的 requirement 明確標示，並指向 `archive/changes/001-portal-home/archive.md` 的已知證據缺口。
+`active` 的意思是「這是遷移時依明確證據補建並採納的現況」，證據可能是 S 或 H，**不代表執行時全部已重新驗證**。沒有足夠交付證據的原提案條款列為缺口，不藉 active 標示推定已完成。
+
+2026-10-07 的 [遷移證據核對與採納紀錄](../developer-guide/migration-evidence-review.md) 更正 FR-007 的過度推論、REQ-PH-002／PA-004 的靜態範圍，並把歷史 REQ-PH-009 從有效條款移到缺口。舊封存與既有 Change Log 紀錄保留，不新增產品功能。
 
 ## 與歷史工作包的關係
 

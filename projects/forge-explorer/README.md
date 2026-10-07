@@ -14,6 +14,7 @@
 | `src/Persistence/Saintber.Forge.Persistence.EF.Postgres/` | EF Core / PostgreSQL |
 | `tests/` | 單元測試、整合測試（Playwright E2E） |
 | `docs/governance/policy/` | 本專案的 Policy（見其 `README.md`） |
+| `docs/`、`specs/`、`scripts/`、`CHANGELOG.md` | 文件入口、候選工作包、工具腳本位置與 Unreleased 變更 |
 | `.specify/memory/constitution.md` | 本專案的憲章 |
 | `archive/changes/001-portal-home/` | 已完成工作包的封存（含輸入與驗證紀錄） |
 
@@ -58,7 +59,7 @@ dotnet run
 
 ## 使用 Spec Kit 開發
 
-**在這個目錄內**執行 slash command（例如 `/speckit-specify`），Spec Kit 會往上找最近的 `.specify/`，解析到本專案，而不是 Hub 根目錄。細節與限制見 Hub 的 [`docs/developer-guide/speckit-workflow.md`](../../docs/developer-guide/speckit-workflow.md)。
+**在這個目錄內**執行技能（Claude 的 `/speckit-specify`、Codex 的 `$speckit-specify`），Spec Kit 會往上找最近的 `.specify/`，解析到本專案，而不是 Hub 根目錄。小型工作可直接開發與驗證，不強迫建立工作包。細節與限制見 Hub 的 [`docs/developer-guide/speckit-workflow.md`](../../docs/developer-guide/speckit-workflow.md)，worktree 操作見 [`並行開發指引`](../../docs/developer-guide/parallel-development.md)。
 
 ## 進一步
 

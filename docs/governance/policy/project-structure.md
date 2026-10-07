@@ -32,7 +32,7 @@ source: 採納時的設計 §1.3、§3、§4、§5、§6、§14.3
 - 套件與 solution 定義檔（`package.json`、`.sln`）放在**工具根目錄**；`src/` 內部的配置由工具依技術自訂。
 - 沒有開始開發的工具只列在路線圖，**不預先建立空目錄**（§1.2）。
 
-> **過渡期說明（事實，不是例外）**：forge-explorer 目前**沒有** `saintber.project.json` 與 `CHANGELOG.md`，因為它還沒有 saintber 入口，也還沒發佈版本。這兩項在有入口、有第一個版本時補上，見 `docs/migration-status.md`。
+> **現況**：forge-explorer 尚無 `saintber.project.json`，因為還沒有 saintber 入口；`CHANGELOG.md` 已建立，只記 Unreleased 的實際遷移變更，不虛構產品版本。Hub 的責任目錄與靜態 Tool 範本已建立；未開始的工具仍只列規劃，見 ADR-0002。
 
 ### R4 `workspace.json` 與 `catalog/index.json` 分工（§4.2）
 - `workspace.json`：原始碼**在哪裡開發**（專案 ID、路徑、狀態、owner）。

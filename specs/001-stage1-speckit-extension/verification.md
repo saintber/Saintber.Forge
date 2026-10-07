@@ -77,7 +77,7 @@ SA **只驗證**：context 在沒有父 repo 時解析為 standalone、不讀父
 | 代號 | 缺口 | 影響 |
 |---|---|---|
 | G-PC | plan 的 Constitution & Policy Check 沒有自動機制。preset 包裝 `speckit.plan` 經實測會**改寫 CLI 受管理的檔案**（status modified 1）且只作用在一個代理；移除後仍未復原，須以 `specify integration upgrade --force` 修復。**不採用** | §13.5「修改憲章或升級後 plan 仍含 Policy Check」**未達成**；改由 POL-SPECKIT-001 R5 規範、`analyze` 檢查 |
-| G-NUM | 上游 `create-new-feature` 編號只掃 `specs/`；`speckit-hub-context` 提供 `nextChange`（含 `archive/changes/`），但要代理以 `-Number` 傳入 | 編號不重用**依賴代理照做**；只有 context 的計算有自動化測試 |
+| G-NUM | 上游自動編號只掃 `specs/`；context 提供活動＋封存的 `nextChange`。原生技能可指定 `SPECIFY_FEATURE_DIRECTORY`，`-Number` 是另用 PowerShell 建檔腳本時的介面，並非原生技能必跑流程 | 沒有強制接軌與碰撞保護；編號不重用依賴人／代理核對；只有 context 計算有自動化測試 |
 | G-MA | 上游 extension 一次只安裝給一個代理；以 `install.mjs` 依序安裝並還原預設 | **升級 Spec Kit 後必須重跑** `install.mjs` |
 | G-AGENT-ADOPT | adopt / archive 沒有代理端到端驗收 | 見上方「證據等級」 |
 

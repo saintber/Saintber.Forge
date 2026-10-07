@@ -3,6 +3,7 @@ capability: portal-authentication
 owner: forge-explorer
 status: active
 last-adopted: 001-portal-home
+last-evidence-review: 2026-10-07
 evidence-note: 補建（遷移 hub/000-restructure）；無自動化行為測試，且未用真實 Azure AD 驗證登入，見 ../README.md 的「證據等級」
 ---
 
@@ -35,29 +36,29 @@ Portal 以 Microsoft Identity / OpenID Connect 登入，並記錄使用者身分
 - **資料庫結構的可重現性缺少證據**：repo 沒有 EF Migration 檔案，見「已知缺口」G2
 - 來源：原 FR-012
 
-### REQ-PA-004 登入狀態失效時視為未登入
-登入狀態失效時，系統將使用者視為未登入，只顯示公開工具。
+### REQ-PA-004 未通過驗證時走公開工具路徑
+首頁讀取的身分未通過驗證時，只顯示公開工具。
 
-- 證據：**S**（首頁以 `AuthenticationState` 的 `IsAuthenticated` 決定行為，失效則走公開路徑）；**H**（歷史紀錄自述「Token 過期 → 自動降級為公開模式」PASS）
-- 本次無法重現，沒有自動化證據
+- 證據：**S**（首頁以 `AuthenticationState` 的 `IsAuthenticated` 決定行為，false 時走公開路徑）；**H**（歷史紀錄自述「Token 過期 → 自動降級為公開模式」PASS）
+- 靜態碼只證明 false 的分支，不證明 Token 過期時會自動刷新該狀態；本次沒有重現過期流程，沒有自動化證據
 - 來源：原邊界條件、US2 情境 4
 
-## 未達成：Access Token 與 ID Token 的核發與保存
+## 證據不足：Access Token 與 ID Token 的核發
 
 原提案的 **FR-007**：「登入成功後系統 MUST 核發 Access Token 與 ID Token」。
 
-**這一條在現況中不能宣稱已實現或已驗證，所以不列為 requirement。**
+原提案沒有要求將 Token 保存到資料庫。**現有證據不足以判定整條 FR-007 已達成或全部未實作，因此不把它補建為已交付 requirement。**
 
-- 程式碼中**沒有任何** Token 取得、保存或使用的實作：`AccessToken`、`IdToken`、`SaveTokens`、`GetTokenAsync`、`EnableTokenAcquisition` 都沒有出現。
-- `UserIdentity` 實體**只有**`UserId`、`DisplayName`、`Email`、`LastLoginAt`，**沒有 Token 欄位**。
-- Token 是 Microsoft Identity 平台在登入流程中簽發的；是否被 Portal 接收、保存，取決於設定，而這個專案沒有做。因此「系統核發並保存 Token」**沒有被實現**，也沒有被驗證。
+- `Program.cs` 已註冊 Microsoft Identity Web / OIDC，框架處理協定，不必在應用程式中出現自製 Token 取得方法。字串搜尋沒有命中，不能證明框架沒有接收 Token。
+- `UserIdentity` 沒有 Token 欄位，只能支持「此身分實體不保存 Token」；不能把保存擴張成原需求，或用它判斷核發未達成。
+- OIDC 的 ID Token 由認證伺服器簽發，詳見 [Microsoft 官方說明](https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc)。Portal 的角色、實際授權設定與 Access Token 流程沒有足夠執行證據；AzureAd 設定為占位值，本次未以真實服務驗證。
 
-此項若仍是需求，要走新的工作包。
+後續若要補足此功能，重新釐清需求與驗收，不自行新增 Token 持久化要求。本次只是更正補建時的證據判讀，沒有修改程式。
 
 ## 與原提案的差異
 
-- FR-007 未達成（見上）。
-- 原提案提到「登入成功後」的 Token 行為；實作只讀取 claims 並記錄身分。
+- FR-007 證據不足（見上），不因沒有持久化欄位就判定整條未實作。
+- 應用程式目前顯式讀取 claims 並記錄身分；框架層 OIDC 與完整 Token 流程不以此靜態碼單獨判定。
 
 ## 已知缺口
 
@@ -66,7 +67,7 @@ Portal 以 Microsoft Identity / OpenID Connect 登入，並記錄使用者身分
 | G1 | 登入流程只有歷史手動驗證的**自述**（H）；本次無法重現（設定為占位值），也沒有自動化證據 | REQ-PA-001、REQ-PA-002、REQ-PA-004 |
 | G2 | EF Migration 不在版本控制中；資料庫結構的可重現性缺少證據 | REQ-PA-003 |
 | G3 | 沒有任何自動化行為測試 | 全部 |
-| G4 | **FR-007（Token）未實現**，且歷史驗證紀錄沒有證明它 | — |
+| G4 | **FR-007（Token）證據不足**；核發與持久化是不同要求，不能由沒有保存欄位推論核發未實作 | — |
 
 來源與詳細核對：[`archive/changes/001-portal-home/archive.md`](../../../archive/changes/001-portal-home/archive.md)。
 
@@ -75,3 +76,4 @@ Portal 以 Microsoft Identity / OpenID Connect 登入，並記錄使用者身分
 | Date | Change | Requirements | Summary | Archive |
 |---|---|---|---|---|
 | 2026-10-06 | 001-portal-home（補建） | REQ-PA-001 – 004 | 依 §15.4 補建；FR-007 因無實作與證據，未納入 requirement，列為未達成 | `archive/changes/001-portal-home` |
+| 2026-10-07 | 遷移證據核對 | REQ-PA-004 | 更正靜態碼可支持的範圍；FR-007 改列證據不足，不新增保存需求；已驗證並採納此補建更正 | [核對與採納紀錄](../../developer-guide/migration-evidence-review.md) |

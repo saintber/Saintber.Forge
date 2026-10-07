@@ -80,21 +80,21 @@
 | 快照章節 | 狀態 | 說明 |
 |---|---|---|
 | §13（Spec Kit） | 已依決策 9 實現；§13.4 新增指令已實作為擴充 | 上游 v1.1.0；擴充 `hub`：指令全名為 `speckit.hub.context / adopt / archive`（上游要求 `speckit.<擴充>.<指令>`，快照的簡寫無法載入；**命名細節，不改架構與決策**）。多代理安裝以 `tooling/speckit/install.mjs`。見 [`specs/001-stage1-speckit-extension`](../../../specs/001-stage1-speckit-extension/verification.md) |
-| §4、§14.2（`scripts/release/` 目錄與責任） | 已核准（決策 10）；**目錄與腳本尚未建立** | 範圍限制見決策 10 |
+| §4、§14.2（`scripts/release/` 目錄與責任） | 已核准（決策 10）；目錄與責任說明已建立，**腳本尚未實作** | 範圍限制見決策 10 |
 | §15.3 步驟 3–4（搬移 .NET、重跑 build / 測試） | 已完成 | 證據見 [`docs/migration-status.md`](../../migration-status.md) |
-| §15.3 步驟 5、6、9 | 已完成（待 U1/U2 的 owner 審閱內容） | 有效規格已補建（forge-explorer 三個 capability）；五份★Policy 已撰寫；見 `migration-status.md` |
+| §15.3 步驟 5、6、9 | 遷移整理已完成 | 有效規格已補建並核對證據（forge-explorer 三個 capability）；五份★Policy 已撰寫；憲章已批准、A+B 已套用。未完成擴充不阻擋遷移，範圍見 ADR-0002 |
 
 ## 設計稿拆分的進度
 
-設計稿的內容依性質逐步拆到各自的正本（憲章原則 VI）。**尚未拆出的部分，在拆出之前仍以快照為準**，但快照不會再更新。
+設計稿的內容依性質逐步拆到各自的正本（憲章原則 VI）。依 [ADR-0002](0002-migration-delivery-scope.md)，快照提供方向與歷史，**尚未拆出的部分不自動成為完整詳細需求**；後續逐項討論，快照不改寫。
 
 | 內容 | 目標位置 | 狀態 |
 |---|---|---|
-| 規範：目錄、依賴方向、遷出 | Policy `POL-STRUCT` | 尚未撰寫 |
-| 規範：文件類別、唯一 owner | Policy `POL-DOC` | 尚未撰寫 |
-| 規範：規格生命週期 | Policy `POL-SPEC` | 尚未撰寫 |
-| 規範：Spec Kit 使用 | Policy `POL-SPECKIT` | 尚未撰寫 |
-| 規範：呼叫契約 | Policy `POL-INVOKE` | 尚未撰寫 |
-| 規範：安全、測試、完成條件 | `POL-SEC-001`、`POL-TEST-001`、`POL-DOD-001` | 已撰寫（通用部分提煉；內容待 owner 審閱） |
-| 現況：結構、資料流 | `docs/architecture/overview.md` | 部分可寫（workspace 與工具搬移已完成）；CLI 章節要等 CLI 實作 |
-| 使用手冊 | `docs/user-guide/` | 尚未撰寫 |
+| 規範：目錄、依賴方向、遷出 | Policy `POL-STRUCT` | 已撰寫；骨架與範本已建立 |
+| 規範：文件類別、唯一 owner | Policy `POL-DOC` | 已撰寫 |
+| 規範：規格生命週期 | Policy `POL-SPEC` | 已撰寫；小型工作使用範圍依 ADR-0002 |
+| 規範：Spec Kit 使用 | Policy `POL-SPECKIT` | 已撰寫；自動化仍有明確缺口 |
+| 規範：呼叫契約 | Policy `POL-INVOKE` | 已撰寫；入口尚未實作，詳細需求另行討論 |
+| 規範：安全、測試、完成條件 | `POL-SEC-001`、`POL-TEST-001`、`POL-DOD-001` | 已撰寫（通用部分提煉）；效力與缺口見 Policy 索引 |
+| 現況：結構、資料流 | `docs/architecture/overview.md` | 已描述目前骨架；CLI 章節要等實作 |
+| 使用手冊 | `docs/user-guide/` | 目錄與入口已建立，產品操作內容待實作 |

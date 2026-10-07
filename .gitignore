@@ -131,4 +131,4 @@ coverage/
 # npm 設定可能含 registry token（設計 §6.9、POL-SEC-001 R4：秘密不得進版控）
 .npmrc
 # adopt / archive 的暫存區（設計 §12.5：先在暫存區產生並驗證，不提交）
-.specify/tmp/
+**/.specify/tmp/
