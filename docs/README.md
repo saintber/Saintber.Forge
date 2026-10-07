@@ -14,6 +14,7 @@
 | 整體設計、目錄、責任邊界、遷移計畫 | [`採納時的設計（快照）`](architecture/decisions/0001-attachments/design-2026-10-adopted.md) |
 | 本次遷移交付範圍、設計快照與詳細需求的關係 | [`ADR-0002`](architecture/decisions/0002-migration-delivery-scope.md)；後續詳細需求以新的 Spec Kit change 討論 |
 | 開 worktree、選目錄、新 Tool 或直接撰寫小 skill | [`並行開發指引`](developer-guide/parallel-development.md) |
+| 在 Herdr 新增 pane、整理開發版面 | [`Herdr 網格使用說明`](developer-guide/herdr-grid.md) |
 | 各專案在哪裡 | [`projects/`](../projects/) |
 | 舊的 .NET 探索性工具集 | [`projects/forge-explorer/`](../projects/forge-explorer/) |
 

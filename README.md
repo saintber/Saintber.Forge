@@ -30,7 +30,7 @@
 | `projects/<id>/` | 各工具自己的程式、文件、治理與測試 |
 | `packages/` | 版本化 Shared 的位置，目前沒有套件 |
 | `scripts/{bootstrap,dev,ci,release}/` | 使用者引導、開發、CI、入口發佈；已建立目錄，尚無腳本 |
-| `tooling/speckit/`、`tooling/skills/`、`tooling/scaffold/` | 開發工具、repo 自製 skill 正本與 Tool 靜態範本 |
+| `tooling/speckit/`、`tooling/skills/`、`tooling/scaffold/`、[`tooling/herdr/`](tooling/herdr/README.md) | 開發工具、repo 自製 skill 正本、Tool 靜態範本與 Herdr pane 輔助腳本 |
 | `docs/`、`specs/`、`archive/changes/` | Hub 文件、候選工作包與歷史；Tool 在自己目錄有相同邊界 |
 
 操作見 [worktree 並行開發](docs/developer-guide/parallel-development.md)。總體設計快照提供方向；每次詳細需求重新討論，不把快照當成完整需求。完整 Spec Kit 擴充仍有未完事項，不阻擋其他開發。

@@ -12,6 +12,7 @@
 | 使用者安裝引導 | `scripts/bootstrap/` |
 | repo 開發、CI 與入口發佈腳本 | `scripts/dev/`、`scripts/ci/`、`scripts/release/` |
 | Spec Kit 擴充與測試 | `tooling/speckit/` |
+| Herdr 開發用 pane 版面腳本 | [`tooling/herdr/`](../../tooling/herdr/README.md)；操作見 [使用說明](herdr-grid.md) |
 | repo 自製 skill | `tooling/skills/<name>/`；產品 skill 放在擁有它的 Tool |
 | 新 Tool 的靜態範本 | `tooling/scaffold/project/` |
 | 使用手冊、架構、Policy | 擁有該能力的專案 `docs/` |

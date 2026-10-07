@@ -1,0 +1,38 @@
+[
+  {
+    "path": "grid.md",
+    "sha256": "9bb18fd63239874f55eac5bf3baa11f95caeca1314fe70b2223eb9ffb3222848"
+  },
+  {
+    "path": "2026-10-02-herdr-grid-layout/.openspec.yaml",
+    "sha256": "a761342c8dd282b21794d2711dd7c40a0f3f7303172957be9edd0b0b02ff521b"
+  },
+  {
+    "path": "2026-10-02-herdr-grid-layout/design.md",
+    "sha256": "01c58127866227178e794e12456a0bc6ee3e167adce5b2a2a3a8df89fadd827b"
+  },
+  {
+    "path": "2026-10-02-herdr-grid-layout/proposal.md",
+    "sha256": "d83d6ecca93946edf6097c322d96c55891a4ac5c6bb2d707cdf7b00322e06a76"
+  },
+  {
+    "path": "2026-10-02-herdr-grid-layout/tasks.md",
+    "sha256": "9119427e1d09caeba74e9ff4ad4c49a6efb25ce552d1f14689a7b7628249e533"
+  },
+  {
+    "path": "2026-10-02-herdr-grid-layout/specs/herdr-grid/spec.md",
+    "sha256": "dd4580fe8801e391899202c1aea476428f4cf59cfc2a33c9e4a3db4afc17e75a"
+  },
+  {
+    "path": "herdr/grid-simulate.cjs",
+    "sha256": "cc5014756349541f56fd42496d2598d9e41d68393e9e94a16b66e3ba6b15c62f"
+  },
+  {
+    "path": "herdr/grid.cjs",
+    "sha256": "45fba1181fe524802e28360ba934a19c58946048d51ebfd674fb981172c69d08"
+  },
+  {
+    "path": "herdr/README.md",
+    "sha256": "35a039a0c1e595f070f4afd7b11acfab65a3fe87142e5e10e96272d71d6af1d6"
+  }
+]
