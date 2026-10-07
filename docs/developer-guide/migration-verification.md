@@ -13,7 +13,7 @@
 | Tool 測試入口 | `dotnet test tests/Saintber.Forge.BlazorServer.UnitTests --no-build --no-restore` | 1 通過；空方法，非 Portal 行為證據 |
 | Hub 擴充安裝 | `node tooling/speckit/install.mjs --project-dir .` | Claude／Codex 各 3/3 技能；預設還原；modified 0、missing 0 |
 | Tool 擴充安裝 | `node tooling/speckit/install.mjs --project-dir projects/forge-explorer` | 同上 |
-| 目錄、安裝內容、追蹤與引用 | 最後核對結果見下方 | 24 個必要目錄、52 份修改／新建 Markdown 的 140 個本機連結、16 個 ignore 情境均符合 |
+| 目錄、安裝內容、追蹤與引用 | 最後核對結果見下方 | 24 個必要目錄、最終 54 份本輪 Markdown 的 148 個本機連結、16 個 ignore 情境均符合 |
 | 提交後 worktree | 從 `f3541a8` 建立自己的暫存 detached worktree，核對目錄與專案解析 | PASS；Hub／Tool 解析到各自 worktree 路徑，輸出位置正確；Git root 正確，工作目錄乾淨 |
 
 擴充測試在暫存 Git fixture 中執行，沒有在本 repo 建立測試 feature、切換 branch 或由擴充自動提交。CLI 安裝副本以現有安裝器產生，沒有手改核心產生檔案。
@@ -33,7 +33,7 @@
 Codex 已在本次工作目錄客觀核對：
 
 - 24 個必要目錄全部存在；新增的骨架檔案可以追蹤。
-- 當時 52 份修改／新建 Markdown 的 140 個本機連結沒有缺檔，fence 均成對（不包含唯讀歷史中的舊引用）。
+- 最後以 `9b5e4f3` 起的本輪改動核對，54 份 Markdown 的 148 個本機連結沒有缺檔（不包含唯讀歷史中的舊引用）。先前暫存前的檢查是 52 份／140 連結，屬不同時點；當時 fence 也均成對。
 - 擴充原始碼 20 檔與 Hub／Tool 安裝位置逐檔內容相同，沒有額外舊測試或測試 helper。
 - 16 個代表 ignore 情境全部符合，包含根與 Tool 的 `.specify/tmp/`，以及新的 src／tests／packages／release／範本占位檔可追蹤。
 - `b5c7239` 的 51 個 .NET 檔案全部存在於 Tool；50 個 Git blob 相同，唯一不同仍是整合測試 README 的三處路徑調整。原始碼和 solution 未改。
@@ -50,3 +50,5 @@ Codex 已在本次工作目錄客觀核對：
 - 結果在 `%TEMP%/saintber-review/worktree-smoke-result.json`；暫存 worktree 驗證後移除，沒有動其他 worktree。
 
 本文件與繼承基線的最後同步是交付證據整理，不改變已測試的骨架與程式。主要 worktree 在提交後保持乾淨；不 push、不開 PR。
+
+Claude 於 2026-10-07 最後唯讀核對遷移狀態、並行開發與本文件，確認與 ADR-0002 的範圍一致，同意主要遷移完成，沒有看到會阻擋 worktree 使用的缺陷。這項文件審閱沒有替代 Codex 的實際測試與安裝驗證；沒有要求補做未完功能。
