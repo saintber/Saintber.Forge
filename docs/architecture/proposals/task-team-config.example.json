@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-not-executable",
+  "decisions": {
+    "ownership": "pending-user-decision",
+    "personalFallbackAuthorization": "pending-user-decision",
+    "companyModelAndBudgetStrategy": "pending-user-decision"
+  },
+  "coordination": {
+    "pmRequired": true,
+    "teamSize": "pm-decides",
+    "createMembersOnDemand": true,
+    "maxReviewRoundsPerIssue": 3,
+    "onUnresolvedIssue": "request-user-decision",
+    "onUserDecisionPending": "pause-dependent-work",
+    "preserveUserFocus": true,
+    "workflow": "pm-selects-speckit-or-direct"
+  },
+  "usage": {
+    "pollIntervalSeconds": 60,
+    "maxObservationAgeSeconds": 120,
+    "personalReserveRemainingPercentPerWindow": 50,
+    "personalUnknownQuota": "pause-and-request-user",
+    "companyUnknownQuota": "report-unknown-and-apply-budget-strategy",
+    "taskEstimatedBudgetUsd": null,
+    "monthlyEstimatedBudgetUsd": null,
+    "allowExtraCredits": false,
+    "allowPersonalApiKeyFallback": false,
+    "onNoEligibleCandidate": "pause-and-report",
+    "handoffBeforeReassignment": true
+  },
+  "providers": {
+    "claude": {
+      "enabled": true,
+      "kind": "claude",
+      "billing": "company-api",
+      "authentication": "existing-cli-company-configuration",
+      "quotaPool": "company-claude",
+      "usageSources": ["session-statusline", "optional-company-quota-adapter"],
+      "actualCompanyBillingAvailable": false
+    },
+    "codex": {
+      "enabled": true,
+      "kind": "codex",
+      "billing": "personal-subscription",
+      "authentication": "chatgpt-subscription",
+      "quotaPool": "personal-codex",
+      "usageSources": ["app-server-account-rate-limits"],
+      "modelAccess": "must-verify-current-account"
+    },
+    "gemini": {
+      "enabled": false,
+      "kind": "gemini",
+      "billing": "personal-subscription",
+      "authentication": "google-subscription",
+      "quotaPool": "personal-gemini",
+      "usageSources": ["unverified-adapter-or-explicit-usage-report"],
+      "modelAccess": "must-verify-current-account",
+      "adapterStatus": "planned-not-verified"
+    }
+  },
+  "profiles": {
+    "claude-sonnet55": { "provider": "claude", "model": "azuer_ai/sonnet-5-5[1m]", "enabled": true, "tier": "standard" },
+    "claude-haiku45": { "provider": "claude", "model": "azuer_ai/haiku-4-5", "enabled": true, "tier": "simple" },
+    "claude-opus55": { "provider": "claude", "model": "azuer_ai/opus-5-5[1m]", "enabled": true, "tier": "advanced" },
+    "claude-opus5": { "provider": "claude", "model": "azuer_ai/opus-5[1m]", "enabled": true, "tier": "advanced" },
+    "claude-sonnet5": { "provider": "claude", "model": "azuer_ai/sonnet-5[1m]", "enabled": true, "tier": "standard" },
+    "codex-sol": { "provider": "codex", "model": "gpt-6.1-sol", "enabled": true, "tier": "standard" },
+    "codex-luna": { "provider": "codex", "model": "gpt-6-luna", "enabled": true, "tier": "simple" },
+    "gemini-pro": { "provider": "gemini", "model": "gemini-3-pro-preview", "enabled": false, "tier": "standard" },
+    "gemini-flash": { "provider": "gemini", "model": "gemini-3-flash-preview", "enabled": false, "tier": "simple" }
+  },
+  "roles": {
+    "PM": {
+      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
+      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+    },
+    "SA1": {
+      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
+      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+    },
+    "SA2": {
+      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
+      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+    },
+    "SD1": {
+      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
+      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+    },
+    "SD2": {
+      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
+      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+    },
+    "PG": {
+      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
+      "simplePriority": ["claude-haiku45", "claude-sonnet55", "codex-luna", "gemini-flash"],
+      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+    }
+  }
+}
