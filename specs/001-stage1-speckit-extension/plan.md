@@ -1,11 +1,11 @@
 # Implementation Plan：第一階段 Spec Kit 擴充
 
-**Spec**: [spec.md](spec.md) | **Research**: [research.md](research.md) | **Status**: pending
+**Spec**: [spec.md](spec.md) | **Research**: [research.md](research.md) | **Status**: pending（active；2026-10-07 起以遷移完成為收尾範圍，P5 與 G-NUM 留待後續）
 **Branch**: 沿用目前分支（**不為本工作包切換分支**；POL-SPECKIT-001 R8）
 
 ## Summary
 
-以上游 Spec Kit v1.1.0 的 **extension** 機制，新增三個指令（context、adopt、archive）與其測試；以 **preset** 在 plan 加入 Policy Check。邏輯放在 **Node 腳本**並以 `node:test` 測試，指令 `.md` 只負責呼叫。
+以上游 Spec Kit v1.1.0 的 **extension** 機制新增三個指令（context、adopt、archive）與測試，邏輯放在 Node 腳本，指令 `.md` 負責呼叫。原先的 preset Policy Check 試驗不可直接採用，沒有在本 repo 啟用；G-PC／G-NUM 保留未完成，完整擴充不阻擋本次遷移，不排第二階段。
 
 ## Technical Context
 
@@ -49,15 +49,18 @@ tooling/speckit/
    │  ├─ speckit.hub.adopt.md
    │  └─ speckit.hub.archive.md
    ├─ scripts/
-   │  ├─ lib/                        # 共用：解析專案、讀 git 狀態、requirement ID、暫存區
+   │  ├─ lib/                        # 共用：專案解析、git 狀態、markdown fence、requirement 與 Delta、路徑／ID 安全、索引更新
    │  ├─ context.mjs
    │  ├─ adopt.mjs
    │  └─ archive.mjs
    └─ tests/
-      ├─ fixtures/                   # 於測試時建立暫存 git repo，不放大型檔案
-      ├─ context.test.mjs
-      ├─ adopt.test.mjs
-      └─ archive.test.mjs
+      ├─ helpers.mjs                 # 暫存 git repo 與工作包建構
+      ├─ run-all.mjs                 # unit | integration | all；檢查命名，單元測試不得碰檔案系統
+      ├─ requirements.unit.test.mjs
+      ├─ context.integration.test.mjs
+      ├─ adopt.integration.test.mjs
+      ├─ archive.integration.test.mjs
+      └─ hardening.integration.test.mjs
 ```
 
 - 腳本以 `--root <dir>` 指定專案根目錄，**不依賴 cwd**。
@@ -83,3 +86,8 @@ tooling/speckit/
 | extension 不能同步指令到 Codex 的 `.agents/skills` | P0 先驗證；若不行，列為**阻擋**回報，不自行手改 CLI 產生的檔案 |
 | 腳本的行為靠代理轉述，代理可能不照做 | 邏輯與**所有失敗關卡**在腳本內（非提示詞）；P6 以實際代理驗證 |
 | 在隔離副本與本 repo 的行為不同 | 隔離副本是**本 repo 的完整複製**（含 `.specify/`、extension） |
+
+## 2026-10-07 收尾說明
+
+- P0 – P4、P4a（安全修正）、P6（限定的代理驗收）、P7（文件）已做；**P5（Policy Check，G-PC）與 G-NUM 的自動機制未做**，留待後續 change，不是取消。
+- 這份計畫是原本的構想；採用的嚴格 Delta／Snapshot／Manifest 格式不是使用者已定案的規格（見 `tooling/speckit/README.md`）。後續開發以 Spec Kit change 重新討論詳細需求。

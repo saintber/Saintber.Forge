@@ -24,6 +24,7 @@
 // 嚴格規則：Delta 區段裡**任何無法辨識的內容都是錯誤**，不得靜默忽略；空 Delta 是錯誤。
 
 import { REQ_ID_PATTERN, REQ_ID_INLINE, assertCapabilityId } from "./safety.mjs";
+import { fenceMask, digest } from "./markdown.mjs";
 
 const HEADING = /^(#{1,6})\s+(.*)$/;
 const REQ_HEAD = /^###\s+(\S+)(.*)$/;
@@ -38,13 +39,20 @@ const lf = (t) => t.replace(/\r\n/g, "\n");
  */
 export function parseSpec(text) {
   const lines = lf(text).split("\n");
+  const mask = fenceMask(lines);
   const blocks = [];
   const errors = [];
   let cur = { type: "text", lines: [] };
   const push = () => {
     if (cur.lines.length || cur.type === "req") blocks.push(cur);
   };
-  for (const line of lines) {
+  for (let li = 0; li < lines.length; li++) {
+    const line = lines[li];
+    // fenced code block 內的任何行（含 ### REQ-…、| 資料列）都不是結構，只是內容
+    if (mask[li]) {
+      cur.lines.push(line);
+      continue;
+    }
     const h = HEADING.exec(line);
     if (h && h[1].length <= 3) {
       // 任何 ≤ 3 層的標題都會結束前一個 requirement
@@ -86,12 +94,14 @@ export function validateSpec(text) {
  */
 export function parseDelta(text) {
   const lines = lf(text).split("\n");
-  const start = lines.findIndex((l) => /^##\s+Delta\s*$/.test(l));
+  const mask = fenceMask(lines);
+  const start = lines.findIndex((l, i) => !mask[i] && /^##\s+Delta\s*$/.test(l));
   const out = { found: start >= 0, capabilities: new Map(), errors: [] };
   if (start < 0) return out;
 
   let end = lines.length;
   for (let i = start + 1; i < lines.length; i++) {
+    if (mask[i]) continue;
     const h = HEADING.exec(lines[i]);
     if (h && h[1].length <= 2) {
       end = i;
@@ -105,6 +115,7 @@ export function parseDelta(text) {
   const flush = () => {
     if (req) {
       req.body = req.body.replace(/\s+$/, "");
+      req.digest = digest(`${req.id}\n${req.title}\n${req.body}`); // 標題與內容的雜湊：adopt 後工作包若被改，採納快照就對不上
       cap[section].push(req);
       req = null;
     }
@@ -113,6 +124,12 @@ export function parseDelta(text) {
   for (let i = start + 1; i < end; i++) {
     const line = lines[i];
     const where = `Delta 第 ${i + 1} 行`;
+    // fence 內的行是 requirement 內容的一部分，不是結構
+    if (mask[i]) {
+      if (req) req.body += (req.body ? "\n" : "") + line;
+      else out.errors.push(`${where}：程式碼區塊不在任何 requirement 之下`);
+      continue;
+    }
     const h = HEADING.exec(line);
 
     if (h && h[1].length === 3) {
@@ -246,25 +263,44 @@ export function applyDelta(specText, delta) {
       ensureTrailingBlank(out[at].lines);
       out.splice(at + 1, 0, { type: "req", lines: added });
     } else {
-      // 沒有 requirement：找「## Requirements」
-      const idx = out.findIndex((b) => b.type === "text" && b.lines.some((l) => /^##\s+Requirements\s*$/.test(l)));
-      if (idx >= 0) {
-        const lines = out[idx].lines;
-        const h = lines.findIndex((l) => /^##\s+Requirements\s*$/.test(l));
-        lines.splice(h + 1, 0, "", ...added);
+      // 沒有 requirement：只在「真正的結構」（不在 fenced code block 內）找 ## Requirements / ## Change Log
+      const findHeading = (re) => {
+        for (let bi = 0; bi < out.length; bi++) {
+          if (out[bi].type !== "text") continue;
+          const ls = out[bi].lines;
+          const mk = fenceMask(ls);
+          const li = ls.findIndex((l, i) => !mk[i] && re.test(l));
+          if (li >= 0) return { bi, li };
+        }
+        return null;
+      };
+      const req = findHeading(/^##\s+Requirements\s*$/);
+      if (req) {
+        out[req.bi].lines.splice(req.li + 1, 0, "", ...added);
       } else {
-        const cl = out.findIndex((b) => b.type === "text" && b.lines.some((l) => /^##\s+Change Log\s*$/.test(l)));
-        const block = { type: "text", lines: ["## Requirements", "", ...added] };
-        if (cl >= 0) {
-          const lines = out[cl].lines;
-          const h = lines.findIndex((l) => /^##\s+Change Log\s*$/.test(l));
-          lines.splice(h, 0, ...block.lines);
-        } else out.push(block);
+        const block = ["## Requirements", "", ...added];
+        const cl = findHeading(/^##\s+Change Log\s*$/);
+        if (cl) out[cl.bi].lines.splice(cl.li, 0, ...block);
+        else {
+          const last = out[out.length - 1];
+          if (last) ensureTrailingBlank(last.lines);
+          out.push({ type: "text", lines: block });
+        }
       }
     }
   }
 
-  return { text: out.flatMap((b) => b.lines).join("\n"), errors: [] };
+  const text = out.flatMap((b) => b.lines).join("\n");
+  // 套用後驗證：每條 ADDED/MODIFIED 必須真的被解析為 requirement，REMOVED 必須消失（不得空採納）
+  const after = new Map(parseSpec(text).blocks.filter((b) => b.type === "req").map((b) => [b.id, b]));
+  for (const r of [...delta.added, ...delta.modified]) {
+    const b = after.get(r.id);
+    if (!b) errors.push(`套用後 ${r.id} 沒有出現在有效規格的 requirement 結構中（可能落入 code block）`);
+    else if (digest(b.lines.join("\n")) !== digest(renderReq(r, 1).join("\n"))) errors.push(`套用後 ${r.id} 的內容與 Delta 不一致`);
+  }
+  for (const r of delta.removed) if (after.has(r.id)) errors.push(`套用後 ${r.id} 仍存在`);
+  if (errors.length) return { text: specText, errors };
+  return { text, errors: [] };
 }
 
 function trailingBlank(lines) {
@@ -286,7 +322,11 @@ function renderReq(r, blankAfter = 1) {
 export function removedIdsFromChangeLog(specText) {
   const out = new Set();
   let inLog = false;
-  for (const l of lf(specText).split("\n")) {
+  const all = lf(specText).split("\n");
+  const mk = fenceMask(all);
+  for (let i = 0; i < all.length; i++) {
+    if (mk[i]) continue;
+    const l = all[i];
     if (/^##\s+Change Log\s*$/.test(l)) { inLog = true; continue; }
     if (inLog && /^##\s+/.test(l)) inLog = false;
     if (inLog && l.startsWith("|")) for (const m of l.matchAll(/-\s*(REQ(?:-[A-Z0-9]+)+-\d+)/g)) out.add(m[1]);
@@ -294,33 +334,60 @@ export function removedIdsFromChangeLog(specText) {
   return out;
 }
 
-/** Change Log 的資料列（不含表頭與分隔列）。 */
+/**
+ * Change Log 的資料列（不含表頭與分隔列）。略過 fenced code block 內的表格列。
+ * 第 6 欄 `Snapshot`（內容雜湊）可有可無：沒有的舊資料列 snapshot 為 null。
+ */
 export function changeLogRows(specText) {
   const rows = [];
   let inLog = false;
-  for (const l of lf(specText).split("\n")) {
+  const all = lf(specText).split("\n");
+  const mk = fenceMask(all);
+  for (let i = 0; i < all.length; i++) {
+    if (mk[i]) continue;
+    const l = all[i];
     if (/^##\s+Change Log\s*$/.test(l)) { inLog = true; continue; }
     if (inLog && /^##\s+/.test(l)) inLog = false;
     if (!inLog || !l.startsWith("|")) continue;
     const cells = l.split("|").slice(1, -1).map((c) => c.trim());
     if (cells.length < 5 || /^-+$/.test(cells[0]) || cells[0] === "Date") continue;
-    rows.push({ date: cells[0], change: cells[1], requirements: cells[2], summary: cells[3], archive: cells[4] });
+    rows.push({ date: cells[0], change: cells[1], requirements: cells[2], summary: cells[3], archive: cells[4], snapshot: (cells[5] || "").replace(/`/g, "") || null });
   }
   return rows;
 }
 
-/** 在 Change Log 表格新增一列；找不到 Change Log 則建立。 */
+const LOG_HEAD = "| Date | Change | Requirements | Summary | Archive | Snapshot |";
+const LOG_SEP = "|---|---|---|---|---|---|";
+
+/** 在 Change Log 表格新增一列；找不到 Change Log 則建立。略過 fenced code block 內的「## Change Log」。 */
 export function appendChangeLog(specText, row) {
   const lines = lf(specText).split("\n");
-  const line = `| ${row.date} | ${row.change} | ${row.requirements} | ${row.summary} | ${row.archive} |`;
-  const at = lines.findIndex((l) => /^##\s+Change Log\s*$/.test(l));
+  const mk = fenceMask(lines);
+  const line = `| ${row.date} | ${row.change} | ${row.requirements} | ${row.summary} | ${row.archive} | \`${row.snapshot || ""}\` |`;
+  const at = lines.findIndex((l, i) => !mk[i] && /^##\s+Change Log\s*$/.test(l));
   if (at < 0) {
     while (lines.length && lines[lines.length - 1] === "") lines.pop();
-    return [...lines, "", "## Change Log", "| Date | Change | Requirements | Summary | Archive |", "|---|---|---|---|---|", line, ""].join("\n");
+    return [...lines, "", "## Change Log", LOG_HEAD, LOG_SEP, line, ""].join("\n");
   }
   let lastRow = -1;
-  for (let i = at + 1; i < lines.length && !/^##\s+/.test(lines[i]); i++) if (lines[i].startsWith("|")) lastRow = i;
-  if (lastRow < 0) return [...lines.slice(0, at + 1), "| Date | Change | Requirements | Summary | Archive |", "|---|---|---|---|---|", line, ...lines.slice(at + 1)].join("\n");
+  const tableRows = [];
+  for (let i = at + 1; i < lines.length; i++) {
+    if (mk[i]) continue;
+    if (/^##\s+/.test(lines[i])) break;
+    if (lines[i].startsWith("|")) { lastRow = i; tableRows.push(i); }
+  }
+  // 舊的五欄表：升級表頭與分隔列為六欄，並把舊資料列補一個空的 Snapshot 儲存格（保留舊紀錄原文，Markdown 才能完整顯示）
+  const cellCount = (l) => l.split("|").slice(1, -1).length;
+  const head = tableRows.find((i) => /^\|\s*Date\s*\|/.test(lines[i]));
+  if (head !== undefined && cellCount(lines[head]) === 5) {
+    for (const i of tableRows) {
+      if (cellCount(lines[i]) !== 5) continue;
+      if (i === head) lines[i] = LOG_HEAD;
+      else if (/^\|[\s:|-]+\|\s*$/.test(lines[i]) && /-/.test(lines[i])) lines[i] = LOG_SEP;
+      else lines[i] = lines[i].replace(/\s*$/, "") + "  |";
+    }
+  }
+  if (lastRow < 0) return [...lines.slice(0, at + 1), LOG_HEAD, LOG_SEP, line, ...lines.slice(at + 1)].join("\n");
   return [...lines.slice(0, lastRow + 1), line, ...lines.slice(lastRow + 1)].join("\n");
 }
 
@@ -331,6 +398,18 @@ export function deltaSummaryIds(capDelta) {
     ...capDelta.modified.map((r) => `~${r.id}`),
     ...capDelta.removed.map((r) => `-${r.id}`),
   ].join(", ");
+}
+
+/**
+ * 一個 capability 的 Delta 的**完整內容快照**（雜湊）。
+ * 涵蓋 ADDED / MODIFIED 的 id、標題、內文，以及 REMOVED 的 tombstone（id）。
+ * 任何一個字改變，雜湊就不同；用來確認「adopt 之後工作包沒有被改」。
+ */
+export function deltaSnapshot(capDelta) {
+  const part = (kind, list) => list.map((r) => `${kind}\u0001${r.id}\u0001${r.digest ?? ""}`).sort().join("\u0002");
+  return digest(
+    [part("ADDED", capDelta.added), part("MODIFIED", capDelta.modified), part("REMOVED", capDelta.removed.map((r) => ({ id: r.id, digest: "" })))].join("\u0003"),
+  );
 }
 
 export { REQ_ID_INLINE };

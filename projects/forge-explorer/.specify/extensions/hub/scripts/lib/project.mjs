@@ -8,6 +8,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { isInside } from "./safety.mjs";
 
 export class ProjectError extends Error {
   constructor(message, code) {
@@ -96,7 +97,7 @@ export function resolveProject({ project, workspace, cwd = process.cwd(), env = 
       wsRoot = searchFrom;
       const reg = readWorkspace(wsRoot).projects.find((p) => p.id === project);
       if (!reg) throw new ProjectError(`workspace.json 沒有登錄專案：${project}`, "PROJECT_NOT_REGISTERED");
-      projectRoot = path.resolve(wsRoot, reg.path);
+      projectRoot = registeredRoot(wsRoot, reg);
       if (!isDir(path.join(projectRoot, ".specify"))) {
         throw new ProjectError(`專案 ${project} 的目錄沒有 .specify/：${projectRoot}`, "PROJECT_INVALID");
       }
@@ -122,7 +123,13 @@ export function resolveProject({ project, workspace, cwd = process.cwd(), env = 
   if (wsRoot) {
     const ws = readWorkspace(wsRoot);
     const rel = path.relative(wsRoot, projectRoot);
-    const reg = ws.projects.find((p) => path.resolve(wsRoot, p.path) === projectRoot);
+    const reg = ws.projects.find((p) => {
+      try {
+        return registeredRoot(wsRoot, p) === projectRoot;
+      } catch {
+        return false;
+      }
+    });
     if (!reg) {
       // 找到了 workspace.json，但專案沒有登錄：報錯（不降級）
       throw new ProjectError(`專案 ${rel || "."} 沒有登錄在 ${path.join(wsRoot, "workspace.json")}`, "PROJECT_NOT_REGISTERED");
@@ -138,6 +145,22 @@ export function resolveProject({ project, workspace, cwd = process.cwd(), env = 
   }
 
   return { mode, projectId, projectRoot, workspaceRoot: wsRoot, source };
+}
+
+/**
+ * workspace.json 中登錄的專案路徑（Codex 審閱 R11）：
+ * 必須是相對路徑、不得含 `..` 片段，且解析 symlink / junction 後仍在 workspace 之內（允許 `.` = workspace 本身）。
+ */
+export function registeredRoot(wsRoot, reg) {
+  const p = String(reg.path ?? "");
+  if (!p || path.isAbsolute(p) || /^[a-zA-Z]:/.test(p) || p.split(/[\\/]/).includes("..")) {
+    throw new ProjectError(`workspace.json 中專案 ${reg.id} 的路徑不合法（必須是 workspace 內的相對路徑）：${p}`, "WORKSPACE_INVALID");
+  }
+  const abs = path.resolve(wsRoot, p);
+  if (!isInside(wsRoot, abs, { allowEqual: true })) {
+    throw new ProjectError(`workspace.json 中專案 ${reg.id} 的路徑解析後位在 workspace 之外（可能是 symlink / junction）：${p}`, "WORKSPACE_INVALID");
+  }
+  return abs;
 }
 
 export function readWorkspace(wsRoot) {

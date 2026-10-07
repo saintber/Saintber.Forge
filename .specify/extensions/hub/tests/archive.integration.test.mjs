@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { archive, ArchiveError } from "../scripts/archive.mjs";
 import { adopt } from "../scripts/adopt.mjs";
-import { makeWorkspace, write, git, commitAll } from "./helpers.mjs";
+import { makeWorkspace, write, git, commitAll, writeWorkPackage } from "./helpers.mjs";
 
 const TOOL = "projects/tool-a";
 const SPEC = `${TOOL}/docs/specifications/cap-x/spec.md`;
@@ -31,8 +31,8 @@ function setup(status = "verified") {
   write(ws, SPEC, EFFECTIVE);
   const base = commitAll(ws, "effective");
   const project = path.join(ws, TOOL);
-  write(ws, `${TOOL}/specs/002-x/spec.md`, `# Feature Specification: 002-x\n\n**Status**: ${status}\n**Baseline**: \`${base}\`\n**Affected Capabilities**: \`cap-x\`\n\n## Delta\n### ADDED\n#### REQ-CX-002 Second\nx\n`);
-  write(ws, `${TOOL}/specs/002-x/verification.md`, "# V\n\n## Final Status\n- Done\n");
+  // 工作包：Delta 新增 REQ-CX-002（status 可變，用來測 cancelled / superseded）
+  writeWorkPackage(ws, TOOL, "002-x", { baseline: base, status, delta: "### ADDED\n#### REQ-CX-002 Second\nx\n" });
   write(ws, `${TOOL}/specs/002-x/plan.md`, "# plan\n");
   write(ws, `${TOOL}/docs/intent/002-x/intent.md`, "# intent\n");
   return { ws, base, project };
@@ -88,11 +88,21 @@ test("可重試：重複執行 → 視為已完成，不報錯、不重複", () 
   assert.equal(fs.readFileSync(path.join(project, "archive/changes/002-x/archive.md"), "utf8"), before);
 });
 
-test("不覆蓋：目標已存在且內容不同 → 報錯，兩邊都不動", () => {
+test("不覆蓋：目標已存在且內容與來源不同 → TARGET_DIFFERS，兩邊都不動", () => {
   const { project } = setup("cancelled");
-  write(project, "archive/changes/002-x/work/spec.md", "DIFFERENT EXISTING ARCHIVE");
-  assert.throws(() => archive({ projectRoot: project, change: "002-x", status: "cancelled" }), (e) => e.code === "TARGET_DIFFERS");
-  assert.equal(fs.readFileSync(path.join(project, "archive/changes/002-x/work/spec.md"), "utf8"), "DIFFERENT EXISTING ARCHIVE");
+  archive({ projectRoot: project, change: "002-x", status: "cancelled", date: "2026-10-07" });
+  // 把來源放回去，但內容與封存不同（封存本身完整）
+  write(project, "specs/002-x/spec.md", "DIFFERENT SOURCE");
+  assert.throws(() => archive({ projectRoot: project, change: "002-x", status: "cancelled", date: "2026-10-07" }), (e) => e.code === "TARGET_DIFFERS");
+  assert.equal(fs.readFileSync(path.join(project, "specs/002-x/spec.md"), "utf8"), "DIFFERENT SOURCE");
+  assert.ok(fs.existsSync(path.join(project, "archive/changes/002-x/work/spec.md")));
+});
+
+test("不覆蓋：目標已存在但結構不完整 → TARGET_INCOMPLETE，兩邊都不動", () => {
+  const { project } = setup("cancelled");
+  write(project, "archive/changes/002-x/work/spec.md", "PARTIAL");
+  assert.throws(() => archive({ projectRoot: project, change: "002-x", status: "cancelled" }), (e) => e.code === "TARGET_INCOMPLETE");
+  assert.equal(fs.readFileSync(path.join(project, "archive/changes/002-x/work/spec.md"), "utf8"), "PARTIAL");
   assert.ok(fs.existsSync(path.join(project, "specs/002-x/spec.md")), "工作包不動");
 });
 

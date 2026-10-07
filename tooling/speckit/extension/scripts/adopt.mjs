@@ -19,7 +19,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveProject, ProjectError } from "./lib/project.mjs";
 import { pathChangeState, GitError, repoRoot } from "./lib/git.mjs";
-import { parseDelta, applyDelta, appendChangeLog, validateSpec, deltaSummaryIds } from "./lib/requirements.mjs";
+import { parseDelta, applyDelta, appendChangeLog, validateSpec, deltaSummaryIds, deltaSnapshot } from "./lib/requirements.mjs";
 import { assertChangeId, assertCapabilityId, within, safeRemove, assertNoLinks, SafetyError } from "./lib/safety.mjs";
 import { upsertIndexRow } from "./lib/spec-index.mjs";
 
@@ -134,6 +134,8 @@ export function plan({ projectRoot, change, date }) {
       requirements: deltaSummaryIds(capDelta) || "—",
       summary: title(wp.spec) || change,
       archive: `archive/changes/${change}`,
+      // 採納時 Delta 的完整內容快照（ADDED / MODIFIED 的內文、REMOVED 的 tombstone）。archive 用它確認 adopt 之後工作包沒被改。
+      snapshot: deltaSnapshot(capDelta).slice(0, 16),
     });
     after = /^last-adopted:.*$/m.test(after) ? after.replace(/^last-adopted:.*$/m, `last-adopted: ${change}`) : after.replace(/^(status:.*)$/m, `$1\nlast-adopted: ${change}`);
     const post = validateSpec(after);
@@ -193,7 +195,10 @@ export function adopt({ projectRoot, change, date = new Date().toISOString().sli
   const tmp = within(projectRoot, ".specify", "tmp", change);
   if (fs.existsSync(tmp)) throw new AdoptError(`暫存區已有殘留：${rel(projectRoot, tmp)}（上次可能失敗）。請檢查後手動刪除再重試。`, "TMP_EXISTS");
   fs.mkdirSync(tmp, { recursive: true });
-  p.files.forEach((f, i) => fs.writeFileSync(path.join(tmp, `${i}-${path.basename(f.target)}`), f.after));
+  p.files.forEach((f, i) => {
+    fs.writeFileSync(path.join(tmp, `${i}-${path.basename(f.target)}.after`), f.after);
+    if (f.before !== null) fs.writeFileSync(path.join(tmp, `${i}-${path.basename(f.target)}.before`), f.before);
+  });
 
   const second = baselineCheck(projectRoot, p.files, p.baseline);
   const changedSincePlan = p.files.filter((f) => (fs.existsSync(f.target) ? read(f.target) : null) !== f.before);
@@ -215,17 +220,24 @@ export function adopt({ projectRoot, change, date = new Date().toISOString().sli
     const failedRestore = [];
     for (const f of [...touched].reverse()) {
       try {
-        if (f.before === null) {
-          if (fs.existsSync(f.target)) fs.rmSync(f.target);
-        } else fs.writeFileSync(f.target, f.before);
+        const exists = fs.existsSync(f.target);
+        const current = exists ? read(f.target) : null;
+        if (current === f.before) { restored.push(f.rel); continue; } // 還沒寫到或已是原內容
+        if (current !== f.after) {
+          // 目標已不是本次寫入的內容：有人在期間修改／重建，保留新內容，不覆蓋、不刪除
+          failedRestore.push(`${f.rel}（目標已被其他程序修改，保留新內容未覆蓋；本次原內容在暫存區 .before）`);
+          continue;
+        }
+        if (f.before === null) fs.rmSync(f.target);
+        else fs.writeFileSync(f.target, f.before);
         restored.push(f.rel);
       } catch (re) {
         failedRestore.push(`${f.rel}（${re.message}）`);
       }
     }
-    try { safeRemove(tmpRoot, tmp); } catch { /* 暫存區保留供檢查 */ }
+    if (!failedRestore.length) { try { safeRemove(tmpRoot, tmp); } catch { /* 暫存區保留供檢查 */ } }
     throw new AdoptError(
-      `套用中途失敗，已只回復本次觸及的檔案：${restored.join(", ") || "（無）"}${failedRestore.length ? `；**無法回復**：${failedRestore.join(", ")}` : ""}。原因：${e.message}`,
+      `套用中途失敗，已只回復本次觸及的檔案：${restored.join(", ") || "（無）"}${failedRestore.length ? `；**無法回復**：${failedRestore.join(", ")}` : ""}。${failedRestore.length ? `暫存區 ${rel(projectRoot, tmp)} 已保留（含寫入前後的內容）。` : ""}原因：${e.message}`,
       failedRestore.length ? "ROLLBACK_INCOMPLETE" : "APPLY_FAILED",
       { restored, failedRestore },
     );

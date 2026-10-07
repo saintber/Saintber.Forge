@@ -1,4 +1,4 @@
-# Feature Specification: 第一階段 Spec Kit 擴充（context、adopt、archive、Policy Check）
+# Feature Specification: Spec Kit 擴充（context、adopt、archive；保留未完構想）
 
 **Status**: pending（工作包提案；**不是**有效規格）
 **Created**: 2026-10-06
@@ -6,14 +6,15 @@
 **Baseline**: `f0d3b89`（`docs/migration-status.md` 的撰寫時點）
 **Sources**: 採納設計（[快照](../../docs/architecture/decisions/0001-attachments/design-2026-10-adopted.md)）§11.3、§12、§13.4、§13.5、§15.5（驗收 1–5a）、§16（階段 1）；ADR-0001 決策 9；POL-SPEC-001、POL-SPECKIT-001
 
-> **範圍界線**：只做**階段 1**（治理與結構）完成所必需的部分。**不包含**階段 2 以後的 saintber CLI、bootstrap、installer、其他工具（驗收 6–12）。
+> **2026-10-07 交付範圍（使用者裁決：以遷移完成為目標，不再擴大開發）**：本工作包**保留為 active（pending）**，尚未採納、封存。已實作並完成必要安全修正的是 context、adopt、archive 三個指令（FR-001 – FR-007、FR-010；US1 – US4）。**FR-008（Policy Check，G-PC）與 FR-009（編號不重用的自動機制，G-NUM）未完成**，留待後續 change；US5 因此未達成。下方需求是原本的構想，**不是已定案的完整擴充需求**；後續以 Spec Kit change 重新討論詳細需求。實作時採用的嚴格 Delta／Snapshot／Manifest 格式不是使用者已定案的規格，見 `tooling/speckit/README.md`。
+>
+> **範圍界線**：本次只保存三指令的已實作能力、安全修正與實際驗證；完整需求仍待討論。CLI、bootstrap、installer、其他工具及自動 Policy Check／編號接軌不在本次繼續開發。不排第二階段，依 [ADR-0002](../../docs/architecture/decisions/0002-migration-delivery-scope.md)。
 
-## 為什麼必須做
+## 原始動機與目前範圍
 
-階段 1 的完成條件是**驗收 1–5（含 5a）**（設計 §16）。其中：
-- 驗收 4（adopt 後）、5（基線檢查）、5a（adopt 失敗回復）**直接依賴 adopt 與 archive 的行為**。
-- 設計 §13.4 把 `context`、`adopt`、`archive` 與 Policy Check 定為**新增指令**，而上游 Spec Kit v1.1.0 **沒有**它們。
-- 所以這些**不能只標「尚未實作」就宣告階段 1 完成**：它們是階段 1 完成的**必要條件**。
+原工作包依設計快照把 context、adopt、archive 與 Policy Check 都當成遷移必要功能，並要求驗收 1–5、5a。使用者於 2026-10-07 明確更正：快照提供方向，詳細需求尚待討論；**主要遷移不以完整擴充完成為前提**。
+
+因此這裡保留原構想與驗收供後續討論，不把未達成項目標為取消或已完成，也不因它們尚未完成就阻擋 worktree 開發。工作包仍 pending／Not Done，三指令的腳本證據與限定代理驗收分開記錄。
 
 ## User Scenarios & Testing
 

@@ -3,7 +3,9 @@
 > 狀態：遷移（`hub/000-restructure`）時，由舊的 `docs/intent/README.md` 併入並更新到新結構。
 > 完整設計見 [`採納時的設計（快照）`](../architecture/decisions/0001-attachments/design-2026-10-adopted.md) §10–§13。
 >
-> **重要**：下方標示「⏳」的項目目前**還不存在或尚未驗收**，不要假設可以使用。
+> **重要**：「已知限制」與「尚未完成」列出的項目目前**還不存在或尚未驗收**，不要假設可以使用。
+>
+> **不是所有工作都要走 Spec Kit**：粒度小的修改（例如一個小 skill）可以直接開發，仍須遵守適用的治理並完成必要驗證；需要討論詳細需求或要把結果採納進有效規格時，才開 Spec Kit change。
 
 本文說明 Hub 與各專案如何使用 Spec Kit 與 SDD（規格驅動開發）文件，不定義任何業務規則或技術決策。
 
@@ -96,11 +98,13 @@ Intent **不是**規格書、實作說明或 Release Note。
 |---|---|
 | `speckit-constitution`、`specify`、`clarify`、`plan`、`tasks`、`analyze`、`implement`、`checklist`、`taskstoissues`、`converge` | ✅ 上游 Spec Kit v1.1.0（CLI 產生，不手改） |
 | `speckit-hub-context` | ✅ 已安裝（hub 擴充）：解析目標專案、模式，並列出要讀的憲章與 Policy 索引；目標無效時報錯，**不建立任何檔案**、不退回 Hub |
-| `speckit-hub-adopt` | ✅ 已安裝：已驗證的工作包合併進有效規格；基線檢查（committed / staged / 未提交 / 新建）、暫存區、套用前再檢查、失敗只回復觸及的檔案；**不 stage、不 commit** |
-| `speckit-hub-archive` | ✅ 已安裝：adopted / cancelled / superseded；可重試、不覆蓋 |
+| `speckit-hub-adopt` | ✅ 已實作並完成必要安全修正：已驗證的工作包合併進有效規格；基線檢查（committed / staged / 未提交 / 新建）、暫存區、套用前再檢查；失敗只回復觸及的檔案，**目標被別人改過則保留新內容**並回報；**不 stage、不 commit** |
+| `speckit-hub-archive` | ✅ 已實作並完成必要安全修正：adopted / cancelled / superseded；可重試（以 Manifest 驗完整快照與身份）、不覆蓋、失敗回復不覆蓋並行新增 |
+
+> adopt 與 archive 目前要求工作包有嚴格的 `## Delta` 格式與 `**Affected Capabilities**`（見 `tooling/speckit/README.md`「尚未經使用者確認的實作選擇」）。**這是實作選擇，不是已定案的需求**；原生 Spec Kit 不會直接產出這個格式。
 
 - 指令名稱是 `speckit.hub.*`（技能名 `speckit-hub-*`），不是設計快照寫的 `speckit.context` 等簡寫：上游要求擴充指令必須是 `speckit.<擴充>.<指令>`。見 `specs/001-stage1-speckit-extension/plan.md` 的偏離紀錄。
-- 邏輯在 `tooling/speckit/extension/scripts/`（Node），有 38 個自動化測試（`node tooling/speckit/extension/tests/run-all.mjs`）。
+- 邏輯在 `tooling/speckit/extension/scripts/`（Node），有自動化測試（`node tooling/speckit/extension/tests/run-all.mjs [unit|integration|all]`；單元測試不碰檔案系統與 git，整合測試在暫存 repo 執行；2026-10-07 本輪實測 88 項通過）。
 - **安裝或升級**：執行 `node tooling/speckit/install.mjs --project-dir <專案>`。上游 v1.1.0 的 `specify extension add` 一次只安裝給**一個**代理，這個腳本會依序裝給每個整合，並把預設整合還原。**升級 Spec Kit 後要重跑。**
 
 ### 已知限制（第一階段）
@@ -109,6 +113,11 @@ Intent **不是**規格書、實作說明或 Release Note。
 |---|---|---|
 | G-PC | plan 的 **Constitution & Policy Check** 沒有自動機制保證。以 preset 包裝 `speckit.plan` 會**改寫 CLI 受管理的檔案**且只作用在一個代理（已在隔離副本驗證），所以**不採用** | 依 POL-SPECKIT-001 R5，由人或代理在 plan 中加入；`analyze` 時檢查 |
 | G-NUM | 上游 `create-new-feature` 的編號**只掃 `specs/`**，不掃 `archive/changes/` | `speckit-hub-context` 會輸出 `nextChange`（兩者都掃）；specify 時以 `-Number <nextChange>` 傳入。**依賴代理照做** |
+
+| G-AGENT | adopt／archive 沒有**代理端到端**驗收；原生 specify→plan→archive 全流程的雙代理驗收也未做 | 腳本層有自動化測試；後續 change 再處理 |
+| 其他 | standalone 治理內化與遷出演練、舊 Change Log／封存的相容方案、跨程序鎖與崩潰復原 | 未完成，留待後續 change；見 `tooling/speckit/README.md` |
+
+未完成項**不是已取消**；要做時各自開 Spec Kit change，重新討論詳細需求，不直接以設計快照為完整需求。
 
 ### 代理驗收（設計 §13.5）
 

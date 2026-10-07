@@ -17,9 +17,12 @@
   - Command：`dotnet test tests/Saintber.Forge.BlazorServer.UnitTests`
   - Result：1 通過。**注意**：唯一的單元測試是空方法，只證明測試命令可執行，**不是**行為證據。
 - Test（hub 擴充）：
-  - Command：`node tooling/speckit/extension/tests/run-all.mjs`
-  - Result：**38 通過、0 失敗**（context 11、adopt 18、archive 9）
-  - 變異測試：對每個安全機制做變異，**每個變異都至少讓一個測試失敗**（基線檢查的第一次與第二次各自、staged、untracked、失敗回復、ID 重用、未驗證、自動 `git add`、暫存區殘留、archive 覆蓋、NOT_ADOPTED、失敗清理、先刪來源、清除上下文、SPECIFY_INIT_DIR 退回、編號忽略封存）。測試過程中曾發現兩處測試不足（只拿掉第一次基線檢查時被第二次檢查掩蓋；自動 `git add` 的變異本身有語法錯誤），已補測試並重新驗證。
+  - Command：`node tooling/speckit/extension/tests/run-all.mjs all`（可用 `unit` 或 `integration` 分開跑）
+  - Result：**88 通過、0 失敗**（單元 20、整合 68；2026-10-07 本輪實測）。單元測試依 POL-TEST-001 不碰檔案系統與 git，`run-all.mjs` 會檢查命名與這項限制
+  - Codex 2026-10-07 獨立重跑：**88 通過、0 失敗、0 略過**；記錄在 `%TEMP%/saintber-review/migration-extension-tests.txt`。本輪安裝與骨架證據另見 `docs/developer-guide/migration-verification.md`。
+  - 修正版已以現有安裝器同步 Hub／forge-explorer：兩專案的 Claude／Codex 各 3/3 個技能，預設 `claude` 還原；核心 managed modified 0、missing 0。
+  - 本輪新增的安全修正在**隔離副本**做 mutation：7 項變異（重試完整性、封存身份、回復不覆蓋、寫入後驗證、applyDelta 的 fence 感知、Change Log 升級、feature.json 精確比對）**6 項被測試抓到**；archive 寫入後的 `verifyArchive` 因前一行 `sameTree(tmp, target)` 已涵蓋同類錯誤，**沒有被單獨抓到**，只能視為重複防線。adopt 最後的回復修正只有回歸測試，沒有再做 mutation。
+  - 先前（38 項時期）的變異測試：對每個安全機制做變異，**每個變異都至少讓一個測試失敗**（基線檢查的第一次與第二次各自、staged、untracked、失敗回復、ID 重用、未驗證、自動 `git add`、暫存區殘留、archive 覆蓋、NOT_ADOPTED、失敗清理、先刪來源、清除上下文、SPECIFY_INIT_DIR 退回、編號忽略封存）。測試過程中曾發現兩處測試不足（只拿掉第一次基線檢查時被第二次檢查掩蓋；自動 `git add` 的變異本身有語法錯誤），已補測試並重新驗證。
 
 ## 驗收對照（設計 §15.5，階段 1 = 驗收 1–5、5a）
 
@@ -28,9 +31,9 @@
 | 1 | 遷移後 build / 測試與基線相同 | ✅ PASS | 上方 Gate A（基線見 `docs/migration-status.md`） |
 | 2 | 從 Hub 指定專案執行 specify，產出只在該專案 | ✅ PASS（Claude、Codex） | 代理驗收（範圍見下方「S2 的範圍限制」） |
 | 3 | 指定不存在的專案：報錯、Hub 沒有產出 | ✅ PASS（Claude、Codex） | 代理驗收；腳本測試 |
-| 4 | adopt 後只有一份有效規格、Change Log 指向封存、歷史不遺失 | ✅ PASS（腳本自動化測試） | `adopt.test.mjs` 驗收 4 |
-| 5 | 並行、staged、未提交、新建的目標規格被攔下；不覆蓋 | ✅ PASS（腳本自動化測試） | `adopt.test.mjs` 驗收 5 系列、套用前再檢查 |
-| 5a | 套用中途失敗：只回復觸及的檔案、使用者修改保留、未 stage / commit | ✅ PASS（腳本自動化測試） | `adopt.test.mjs` 驗收 5a 系列 |
+| 4 | adopt 後只有一份有效規格、Change Log 指向封存、歷史不遺失 | ✅ PASS（腳本自動化測試） | `adopt.integration.test.mjs` 驗收 4 |
+| 5 | 並行、staged、未提交、新建的目標規格被攔下；不覆蓋 | ✅ PASS（腳本自動化測試） | `adopt.integration.test.mjs` 驗收 5 系列、套用前再檢查 |
+| 5a | 套用中途失敗：只回復觸及的檔案、使用者修改保留、未 stage / commit | ✅ PASS（腳本自動化測試） | `adopt.integration.test.mjs` 驗收 5a 系列 |
 
 **驗收 4、5、5a 的證據等級**：由**腳本的自動化測試**在隔離的 git repo 中驗證。指令 `.md` 只呼叫腳本並轉述結果；**沒有**用代理端到端執行 adopt / archive。若需要代理層的 adopt / archive 驗收，是另外的工作。
 
@@ -79,18 +82,29 @@ SA **只驗證**：context 在沒有父 repo 時解析為 standalone、不讀父
 | G-AGENT-ADOPT | adopt / archive 沒有代理端到端驗收 | 見上方「證據等級」 |
 
 ## Docs Consistency (R6a)
-- Documents checked：`docs/developer-guide/speckit-workflow.md`（指令現況、呼叫方式、已知限制、代理驗收表）、`AGENTS.md`、`tooling/speckit/README.md`、ADR-0001（實現與進度）、`docs/migration-status.md`。
+- Documents checked：`docs/developer-guide/speckit-workflow.md`（指令現況、呼叫方式、已知限制、代理驗收表）、`tooling/speckit/README.md`（交付範圍、未完成、未定案的實作選擇）、`specs/001-*/{spec,plan,tasks}.md`（2026-10-07 同步）。`AGENTS.md`、docs 導航、ADR、`docs/migration-status.md` 等由 Codex 同步並另行記錄（R15）；本檔不代為宣稱它們一致。
 - Deviations from approved design：
   - 指令全名 `speckit.hub.*`，不是快照的 `speckit.context` 等簡寫（上游命名規則要求）。屬命名細節，不改架構與決策；記在 plan 的偏離紀錄與 ADR 的實現與進度。
   - 設計 §13.6 的「`sync-speckit.mjs` 與三種格式」不採用，已由 ADR-0001 決策 9 取代（非本工作包的偏離）。
 
 ## Final Status
-- **Not Done**（2026-10-06，Codex 審閱 R10–R15 退回）
-- 退回原因：腳本有已重現的缺陷（Delta 套用會刪除非 requirement 章節、多段 ID 被靜默忽略、capability 路徑可越界；archive 重試與回復不完整），以及本工作包自己 spec 寫明的 FR-008（Policy Check）與編號不重用尚未達成。修正中，見下方「R10–R15 修正紀錄」。
+- **Not Done**（整個工作包；2026-10-07）
 
-### 以下為退回前的紀錄（保留，不作為完成依據）
-- （原）Done（階段 1 的驗收 1–5、5a）
-- Notes：
-  - 驗收 2、3：兩種代理都實際執行，並以 `check.mjs` 客觀判定 PASS。範圍限制見上：**不含**上游 `create-new-feature.ps1`、編號、branch、hooks 的全流程。
-  - 驗收 4、5、5a：以腳本的自動化測試（含變異測試）驗證；**沒有**代理端到端的 adopt / archive 驗收（G-AGENT-ADOPT）。
-  - 不在本工作包範圍、仍未完成：G-PC、G-NUM、§11.6 治理內化、§14.3 遷出演練（驗收 11）、驗收 6–12（階段 2 以後）。
+### 範圍說明（使用者裁決：以遷移完成為目標，不再擴大開發）
+
+**本輪實測、可以主張完成的（僅限下列）**：
+- `context`、`adopt`、`archive` 三個指令的腳本行為與必要安全修正：88 項自動化測試通過（單元 20、整合 68），涵蓋驗收 4、5、5a 與 R10 – R13 的回歸（fence 感知解析、路徑與 ID 安全、symlink／junction、重試的 Manifest 與身份驗證、回復不覆蓋並行修改）。
+- 兩代理的限定驗收（S2 產出隔離、S3 無效專案、SA standalone 解析）：2026-10-06 的結果，範圍限制見上。
+- 修正版重新安裝已核對：Hub／forge-explorer 的兩代理各 3/3 個技能，受管理核心檔案 modified 0、missing 0；Codex 獨立 88 項測試通過。
+
+**不能主張完成的（整個工作包因此維持 Not Done）**：
+- **FR-008 / G-PC**（plan 的 Policy Check）與 **FR-009 / G-NUM**（編號不重用的自動機制）：未完成，留待後續 change，不是取消。
+- adopt／archive 的代理端到端驗收（G-AGENT-ADOPT），與原生 specify→plan→archive 的雙代理全流程。
+- standalone 治理內化、擴充分發與遷出演練（驗收 11）；驗收 6 – 12。
+- 採用的嚴格 Delta／Snapshot／Manifest 格式不是使用者已定案的規格。
+
+本工作包保持 active，**尚未 adopt、尚未 archive**。若採納，只能採納上面「可以主張完成」的範圍，且需先依現行生命週期補上工作包的 `**Affected Capabilities**` 與 Delta；未完成的 G-PC／G-NUM 不得寫入有效規格。
+
+### 歷史紀錄（保留，不作為完成依據）
+- 2026-10-06 Codex 審閱 R10 – R15 退回原因：腳本有已重現的缺陷（Delta 套用會刪除非 requirement 章節、多段 ID 被靜默忽略、capability 路徑可越界；archive 重試與回復不完整），以及 FR-008 與編號不重用尚未達成。其中腳本缺陷已於 2026-10-07 修正並有回歸測試；FR-008、G-NUM 仍未達成。
+- 退回前的紀錄：（原）Done（階段 1 的驗收 1–5、5a）。當時的 Notes：驗收 2、3 兩種代理實際執行並以 `check.mjs` 判定 PASS（**不含**上游 `create-new-feature.ps1`、編號、branch、hooks 的全流程）；驗收 4、5、5a 以腳本自動化測試驗證，沒有代理端到端的 adopt／archive 驗收。

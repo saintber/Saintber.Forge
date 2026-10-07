@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { adopt, AdoptError } from "../scripts/adopt.mjs";
-import { makeWorkspace, write, git, commitAll } from "./helpers.mjs";
+import { makeWorkspace, write, git, commitAll, writeWorkPackage } from "./helpers.mjs";
 
 const TOOL = "projects/tool-a";
 const SPEC = `${TOOL}/docs/specifications/cap-x/spec.md`;
@@ -31,22 +31,7 @@ second body
 | 2026-01-01 | 001-first | +REQ-CX-001, +REQ-CX-002 | init | archive/changes/001-first |
 `;
 
-function workPackage(root, change, { baseline, status = "verified", verified = true, delta, caps = "cap-x" }) {
-  write(root, `${TOOL}/specs/${change}/spec.md`, `# Feature Specification: ${change}
-
-**Status**: ${status}
-**Baseline**: \`${baseline}\`
-**Affected Capabilities**: \`${caps}\`
-
-## Delta
-${delta}
-`);
-  write(root, `${TOOL}/specs/${change}/verification.md`, `# Verification Record — ${change}
-
-## Final Status
-- ${verified ? "Done" : "Not Done"}
-`);
-}
+const workPackage = (root, change, o) => writeWorkPackage(root, TOOL, change, o);
 
 const DELTA_ADD3 = `### ADDED
 #### REQ-CX-003 Third
@@ -168,7 +153,7 @@ test("驗收 5a：新 capability 的第一次 adopt 失敗 → 新建的有效�
   const ws = makeWorkspace();
   const base = git(ws, "rev-parse", "HEAD").trim();
   const project = path.join(ws, TOOL);
-  workPackage(ws, "002-new", { baseline: base, delta: DELTA_ADD3, caps: "cap-new" });
+  workPackage(ws, "002-new", { baseline: base, delta: DELTA_ADD3, caps: "cap-new", owner: "tool-a" });
   assert.throws(() => adopt({ projectRoot: project, change: "002-new", faultInjection: () => { throw new Error("x"); } }), (e) => e.code === "APPLY_FAILED");
   assert.ok(!fs.existsSync(path.join(project, "docs/specifications/cap-new/spec.md")));
 });

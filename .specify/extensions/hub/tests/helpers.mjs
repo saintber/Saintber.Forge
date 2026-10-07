@@ -61,6 +61,44 @@ export function makeStandalone() {
   return root;
 }
 
+/** 工作包 Delta 的標題層級升級：舊寫法 `### ADDED / #### REQ-…` → 新寫法 `#### ADDED / ##### REQ-…`。 */
+function upgradeDelta(text) {
+  return String(text)
+    .replace(/^### (ADDED|MODIFIED|REMOVED)/gm, "#### $1")
+    .replace(/^#### (REQ-)/gm, "##### $1");
+}
+
+/**
+ * 在 `<root>/<toolDir>/specs/<change>/` 建立工作包（spec.md + verification.md）。
+ * delta：只含 ADDED / MODIFIED / REMOVED 的片段，會包進 caps 的第一個 capability；
+ * deltaFull：完整的 `## Delta` 內容（多 capability 時使用）。
+ */
+export function writeWorkPackage(root, toolDir, change, o) {
+  const { baseline, status = "verified", verified = true, delta, deltaFull, caps = "cap-x", owner } = o;
+  const capList = String(caps).split(/[,\s]+/).filter(Boolean);
+  const body = deltaFull ?? `### ${capList[0]}\n${upgradeDelta(delta)}`;
+  const capsLine = capList.map((c) => "`" + c + "`").join(", ");
+  const ownerLine = owner ? `\n**Owner**: ${owner}` : "";
+  write(root, `${toolDir}/specs/${change}/spec.md`, [
+    `# Feature Specification: ${change}`,
+    "",
+    `**Status**: ${status}`,
+    "**Baseline**: `" + baseline + "`",
+    `**Affected Capabilities**: ${capsLine}${ownerLine}`,
+    "",
+    "## Delta",
+    body,
+    "",
+  ].join("\n"));
+  write(root, `${toolDir}/specs/${change}/verification.md`, [
+    `# Verification Record — ${change}`,
+    "",
+    "## Final Status",
+    `- ${verified ? "Done" : "Not Done"}`,
+    "",
+  ].join("\n"));
+}
+
 export function snapshotTree(root) {
   const out = [];
   const walk = (d) => {
