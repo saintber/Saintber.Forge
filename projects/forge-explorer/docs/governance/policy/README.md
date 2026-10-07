@@ -17,13 +17,13 @@ forge-explorer 在 workspace 內開發，繼承 Hub 的下列 Policy（Hub 憲�
 | POL-TEST-001 Testing Governance | workspace | |
 | POL-DOD-001 Implementation Definition of Done | workspace | R6a 來自已批准的憲章原則 VI |
 
-- **繼承基線**：Hub 在 `hub/000-restructure` 分支的版本（尚未建立 commit 或 tag；有了之後補上）。
+- **已提交的繼承基線**：Hub commit `44dfc96`（2026-10-07）；workspace 開發時讀取 Hub 的工作目錄。正在審閱的治理更正尚未包含於此基線，驗證並提交後再更新。
 - Hub Policy 位置：`../../../../../docs/governance/policy/`（workspace 模式，見採納時設計（快照）§11.4、§13.4）。
 - **與 Hub 憲章的衝突**：已由 owner 於 2026-10-07 裁決（**同意 A+B**）並套用到 forge-explorer 憲章，**v1.0.0 → v1.1.0**（原則 1–10 未修改）。依據紀錄見 [`conflicts-with-hub.md`](conflicts-with-hub.md)。本目錄五份專屬 Policy 的內文**沒有更動**。
 
 ## 本專案的專屬 Policy
 
-這五份是從舊的全專案 Forge Policy 搬來的，**內文沒有修改**，只補上 frontmatter。它們原本適用整個 Saintber.Forge，現在只適用 forge-explorer。
+這五份是從舊的全專案 Forge Policy 搬來的，補上 frontmatter 後只適用 forge-explorer。其中 `implementation-definition-of-done.md` 的 Verification Record 路徑已依已採納設計修訂並留下註記；其餘內文保留。沒有藉遷移新增或放寬規則。
 
 | ID | 檔案 | scope | 說明 |
 |---|---|---|---|
@@ -37,11 +37,11 @@ forge-explorer 在 workspace 內開發，繼承 Hub 的下列 Policy（Hub 憲�
 
 ## 原文中已知的過時內容
 
-遷移時**刻意不改寫**原文，避免在搬檔案的同時悄悄改變規則。下列內容與遷移後的結構不符，閱讀時請以本表的對應為準，之後在專案自己的工作包中再正式修訂：
+除已授權並註記的路徑修訂外，遷移時**保留**原文，避免悄悄改變規則。下表區分已修訂項目與仍待後續工作包處理的舊內容：
 
 | 位置 | 原文寫的 | 現況 |
 |---|---|---|
-| `implementation-definition-of-done.md`（Verification Record 位置） | `docs/plan/verification/<change-id>.verify.md` | Verification Record 放在工作包內：`specs/<NNN-name>/verification.md`（見 Hub 的 POL-DOD-001 R7） |
+| `implementation-definition-of-done.md`（Verification Record 位置） | 原位置 `docs/plan/verification/<change-id>.verify.md` | **已修訂**為 `specs/<NNN-name>/verification.md`，正文已有路徑修訂註記（見 Hub 的 POL-DOD-001 R7） |
 | `testing-governance.md`（「所有 Forge 專案…皆須遵循」） | 適用所有 Forge 專案與子項目 | 只適用 forge-explorer；通用原則由 Hub 的 POL-TEST-001 涵蓋 |
 | `testing-governance.md`（Decision 文件位置） | `docs/intent/<intent-id>-<intent-name>/` | 現在是 `docs/intent/<NNN-name>/decision.md`（小寫檔名）；封存後在 `archive/changes/<NNN-name>/inputs/` |
 | `testing-governance.md`（兩處 `:contentReference[...]`） | 無意義的殘留標記 | 是舊文件產生時留下的雜訊，可在修訂時移除 |

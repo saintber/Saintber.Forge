@@ -10,8 +10,8 @@
 ├─ workspace.json          登錄專案（hub、forge-explorer）
 ├─ catalog/index.json      工具索引，目前 tools 為空
 ├─ docs/                   Hub 的文件、Policy、ADR
-├─ specs/                  Hub 的工作包（目前沒有）
-├─ tooling/speckit/        Spec Kit 版本紀錄（上游 v1.1.0）
+├─ specs/                  Hub 的工作包（001-stage1-speckit-extension 驗收中）
+├─ tooling/speckit/        上游 v1.1.0 版本紀錄、hub 擴充原始碼與安裝／驗證工具
 ├─ scripts/、schemas/      只有 README，尚無腳本與 schema
 ├─ .specify/               Hub 的 Spec Kit
 └─ projects/
@@ -21,11 +21,13 @@
 ## 專案
 
 ### Hub
-目前只有**治理與文件**：憲章（Active v1.0.0）、Policy、ADR-0001、Spec Kit 設定。**沒有程式碼**：根目錄沒有 `src/`、`tests/`、`package.json`。
+已有憲章（Active v1.0.0）、八份 Policy、ADR-0001 與 Spec Kit 設定，也有 `tooling/speckit/` 下的 Node 開發腳本、擴充原始碼與測試。擴充的修正與驗收仍在進行中，結果以 [`migration-status.md`](../migration-status.md) 為準。
+
+**saintber CLI 尚未實作**：根目錄沒有 CLI 的 `src/`、`tests/`、`package.json`。開發工具腳本的存在不代表安裝／設定／啟動入口已完成。
 
 ### forge-explorer
 - 原 Saintber.Forge 的 .NET 內容，整體搬到 `projects/forge-explorer/`，**路徑以外沒有修改**（命名空間 `Saintber.Forge.*` 與 `Saintber.Forge.sln` 檔名不變）。
-- 有自己的 `.specify/`、憲章、Policy 與封存（`001-portal-home`）。
+- 有自己的 `.specify/`、憲章（Active v1.1.0）、Policy、三份補建的有效規格與封存（`001-portal-home`）。規格的證據等級與缺口見該專案 [`有效規格索引`](../../projects/forge-explorer/docs/specifications/README.md)。
 - **還沒有 saintber 入口**（`saintber.project.json` 與 install / configure / run），所以不在 `catalog/index.json` 中，不能被 `saintber` 呼叫。
 - 建置與單元測試的結果見 [`../migration-status.md`](../migration-status.md)。
 

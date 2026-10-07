@@ -33,7 +33,7 @@ source: 採納時的設計 §3.2、§10、§11、§12.2；憲章原則 IV、VI�
 | 封存 | 歷史 | `archive/changes/`、`archive/governance/` |
 
 ### R2 描述性文件只描述已完成的實作（憲章原則 VI、VII）
-- `docs/architecture/` 與使用手冊**只描述已完成的實作**，**不得**描述尚未實作的能力。
+- `docs/architecture/` 的描述性文件與使用手冊**只描述已完成的實作**，**不得**把尚未實作的能力描述成現況。`docs/architecture/decisions/` 的 ADR 與其設計附件依 R3、R6 處理，可以記錄設計階段的提案與決策。
 - 尚未實作的能力，文件必須明確標示「尚未實作」，**不得**寫得像已經存在。
 - 描述性文件在變更**驗證並採納（adopt）後**更新。
 
@@ -61,9 +61,10 @@ source: 採納時的設計 §3.2、§10、§11、§12.2；憲章原則 IV、VI�
 - 驗證不足之處必須記為**已知缺口**，**不得**宣稱已驗證。
 - 補建的有效規格，要標示每條 requirement 的**證據等級**，不得把低等級證據寫成高等級（範例：`projects/forge-explorer/docs/specifications/README.md`）。
 
-### R8 連結與引用（§7.4、§11.6、§14.3）
-- 引用其他位置的 schema 或共用文件，使用**有版本的網址**或本地快照，**不用** `../../` 這類遷出後會失效的相對路徑，也不依賴 main 分支的浮動內容。
-- 工具遷出後，不得留下指向舊父目錄的失效連結。
+### R8 連結與引用（§7.4、§11.4、§11.6、§14.3）
+- workspace 內的文件可以用相對路徑引用 Hub 的治理與共用文件；工具的 Policy 索引要記錄繼承基線，並明確標示這是 workspace 引用。
+- 對外 manifest 的 `$schema` 依 §7.4 使用**有版本的網址**，不依賴父 repo 的相對路徑。
+- 工具遷出時，workspace Policy 必須內化，distribution Policy 保存版本固定的快照；共用文件改用**本地快照或有版本的網址**。遷出後不得留下指向舊父目錄的失效連結，也不依賴 main 分支的浮動內容。
 
 ### R9 文件結構（§10.1）
 Hub 與每個工具的 `docs/` 結構相同：`README.md`、`user-guide/`、`developer-guide/`、`architecture/`（含 `decisions/`）、`governance/policy/`、`intent/`、`specifications/`。

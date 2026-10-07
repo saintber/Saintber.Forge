@@ -10,7 +10,7 @@
 
 這個 repo 是 **Hub**（`saintber` 工具集入口），各工具在 `projects/<id>/` 底下，各自有自己的 `.specify/`、文件與憲章。
 
-- 設計與遷移計畫：[`採納時的設計（快照）`](docs/architecture/decisions/0001-attachments/design-2026-10-adopted.md)（已採納，遷移進行中，分支 `hub/000-restructure`）
+- 設計與遷移計畫：[`採納時的設計（快照）`](docs/architecture/decisions/0001-attachments/design-2026-10-adopted.md)（已採納）；目前進度見 [`遷移狀態`](docs/migration-status.md)。
 - 文件導覽：[`docs/README.md`](docs/README.md)
 - Spec Kit 與 SDD 文件的使用方式：[`docs/developer-guide/speckit-workflow.md`](docs/developer-guide/speckit-workflow.md)
 
@@ -19,12 +19,12 @@
 - 以該目錄內的 `.specify/`、憲章與 `docs/governance/policy/` 為準，**不要**把工作包建立在 Hub 的 `specs/`。
 - Spec Kit v1.1.0 會往上找最近的 `.specify/`，所以**在該專案目錄內執行**指令即可。要從別處指定專案，設環境變數 `SPECIFY_INIT_DIR` 指向專案目錄；路徑無效時它會報錯，不會退回 Hub。
 - 目前各專案的憲章與 Policy：
-  - Hub：憲章 `.specify/memory/constitution.md`，**Active（v1.0.0，2026-10-06 由使用者批准）**；Policy 在 `docs/governance/policy/`（三份已撰寫，其餘尚未）。
-  - forge-explorer：憲章 `projects/forge-explorer/.specify/memory/constitution.md`；Policy 在其 `docs/governance/policy/`。
+  - Hub：憲章 `.specify/memory/constitution.md`，**Active（v1.0.0，2026-10-06 由使用者批准）**；Policy 在 `docs/governance/policy/`（八份已撰寫，適用範圍與後續項目見索引）。
+  - forge-explorer：憲章 `projects/forge-explorer/.specify/memory/constitution.md`，**Active v1.1.0（2026-10-07 修訂）**；Policy 在其 `docs/governance/policy/`。
 
 ## Hub 擴充指令（context、adopt、archive）
 
 - 開始工作前先執行 `speckit-hub-context`（可帶專案 ID），確認目標專案與模式，並讀它列出的憲章與 Policy 索引。**它報錯時就停止**，不要改用別的專案或 Hub 根目錄。
 - 工作包驗證完成後用 `speckit-hub-adopt <NNN-name>` 合併進有效規格，再用 `speckit-hub-archive <NNN-name>` 封存。被拒絕時照錯誤訊息處理，**不要手動改有效規格來繞過**。
-- 這些指令都**不會** stage 或 commit；你也不要。
+- 這些指令都**不會自行** stage 或 commit；提交由另外取得使用者授權的提交流程處理。
 - 已知限制（plan 的 Policy Check、編號掃描）見 `docs/developer-guide/speckit-workflow.md` 的「已知限制」。
