@@ -18,7 +18,7 @@
 
 設計快照提供方向，不是詳細需求的完整正本；後續功能以新的 Spec Kit change 討論並確立範圍。本次只完成遷移與已開始工作的交付，不安排第二階段（workspace 模式參考 Hub 的 ADR-0002）。
 
-小粒度且需求清楚的工作可直接開發與驗證，不強迫使用 Spec Kit。目錄與 worktree 操作見 Hub 的 `docs/developer-guide/parallel-development.md`；適用治理、設計先於實作與規格唯一仍須遵守。
+依需求性質選擇開發流程（Hub 的 `docs/developer-guide/development-workflows.md`，ADR-0003）：範圍清楚的工作可直接開發，設計與驗證紀錄放在本專案 `docs/architecture/proposals/`；需要完整需求流程時用 Spec Kit。適用治理、設計先於實作與規格唯一仍須遵守。worktree 操作見 Hub 的 `docs/developer-guide/parallel-development.md`。
 
 ## 執行 Spec Kit
 
@@ -33,6 +33,7 @@
 
 | 內容 | 位置 |
 |---|---|
+| 設計提案、探索、直接開發的設計與驗證紀錄 | `docs/architecture/proposals/` |
 | 進行中的工作包 | `specs/<NNN-name>/` |
 | 人類輸入（Intent、Decision） | `docs/intent/<NNN-name>/` |
 | 有效規格 | `docs/specifications/<capability>/`（已有 portal-home、portal-authentication、tool-registry；先讀 `docs/specifications/README.md` 的證據等級與缺口） |

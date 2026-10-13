@@ -11,7 +11,7 @@ source: 採納時的設計 §11.3、§13；ADR-0001 決策 9；憲章原則 V、
 
 # Spec Kit Workflow
 
-依 owner 於 2026-10-07 的明確指示（[ADR-0002](../../architecture/decisions/0002-migration-delivery-scope.md)），本 Policy 的階段流程適用於選擇使用 Spec Kit 的工作；小粒度 skill 可直接開發與驗證，不強迫建立工作包或依賴自動擴充。適用治理、設計先於實作及規格唯一仍須遵守。
+依 owner 的明確指示（[ADR-0002](../../architecture/decisions/0002-migration-delivery-scope.md)、[ADR-0003](../../architecture/decisions/0003-development-workflow-granularity.md)），本 Policy 的階段流程適用於選擇使用 Spec Kit 的工作；不使用 Spec Kit 的直接開發不建立工作包，也不需要初始化 `.specify/`。適用治理、設計先於實作及規格唯一仍須遵守。三種流程見 [開發流程](../../developer-guide/development-workflows.md)。
 
 > 目的：規範 Hub 與各專案**如何使用 Spec Kit**：專案選擇、必讀上下文、版本、客製化與驗收。
 > 本文是對**已採納設計 §13** 與 **ADR-0001 決策 9** 的忠實展開。**設計與決策 9 有出入的地方，以決策 9 為準**（見「與設計快照的差異」）。
@@ -30,6 +30,7 @@ source: 採納時的設計 §11.3、§13；ADR-0001 決策 9；憲章原則 V、
 - **明確指定的目標無效時報錯，不退回 Hub，也不偷偷降級**成 standalone。
 - 不讓代理只靠 branch 名稱或「最新的數字」猜測目標。
 - 在 `projects/<id>/` 內執行時，工作包建立在**該專案的** `specs/`，**不是** Hub 的 `specs/`。
+- **該專案尚未初始化自己的 `.specify/` 時，不執行 Spec Kit**：上游會往上解析到 Hub。第一次使用時先在 Tool 根目錄以固定上游版本初始化並安裝 Hub 擴充（ADR-0003）。未初始化時 Hub 憲章與適用 Policy 仍然適用；不偽造 Tool 憲章，也不複製 Hub 憲章作為第二份正本。
 
 ### R3 兩種模式（§13.4）
 | 模式 | 何時 | Policy 來源 |

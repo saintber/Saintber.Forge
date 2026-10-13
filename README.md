@@ -7,7 +7,7 @@
 > 舊 .NET 內容已搬到 forge-explorer，Hub 的基本目錄、治理與文件位置已建立（遷移分支 `backlogs/hub-restructure`）。後續可以開出 worktree 平行開發；交付證據與保留事項見 [遷移狀態](docs/migration-status.md)。
 > **`saintber` CLI、安裝腳本、各工具的入口都還沒有實作。** 下方標示 ⏳ 的章節是待補的說明，不是遺漏。
 >
-> 現在能做的：使用既有的 forge-explorer（.NET），從遷移基準開 worktree 開發。需要完整需求流程時使用 Spec Kit；小粒度 skill 可直接開發與驗證。
+> 現在能做的：使用既有的 forge-explorer（.NET），從遷移基準開 worktree 開發。依需求性質選擇流程：直接開發、Spec Kit 單次功能、完整 Tool 方向，見 [開發流程：三種顆粒度](docs/developer-guide/development-workflows.md)。
 
 ## 工具
 
@@ -66,7 +66,7 @@ dotnet test tests/Saintber.Forge.BlazorServer.UnitTests
 
 ### 使用 Spec Kit 開發
 
-在**專案目錄內**執行技能，例如 Claude 的 `/speckit-specify`、Codex 的 `$speckit-specify`。小粒度 skill 可直接開發，不強迫建立工作包；適用治理與必要驗證仍須遵守。細節見 [`docs/developer-guide/speckit-workflow.md`](docs/developer-guide/speckit-workflow.md)。
+在**專案目錄內**執行技能，例如 Claude 的 `/speckit-specify`、Codex 的 `$speckit-specify`；該專案必須已初始化自己的 `.specify/`。範圍清楚的工作可直接開發，設計與驗證紀錄放在所屬專案的 `docs/architecture/proposals/`，不建立工作包；適用治理與必要驗證仍須遵守（[開發流程](docs/developer-guide/development-workflows.md)）。細節見 [`docs/developer-guide/speckit-workflow.md`](docs/developer-guide/speckit-workflow.md)。
 
 ## 文件
 

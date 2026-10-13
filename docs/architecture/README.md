@@ -16,7 +16,8 @@
 | 採納時的設計 | [`decisions/0001-attachments/design-2026-10-adopted.md`](decisions/0001-attachments/design-2026-10-adopted.md)（**唯讀快照**） |
 | 為什麼這樣設計、已核准的決策、待裁決事項 | [`decisions/0001-hub-and-project-split.md`](decisions/0001-hub-and-project-split.md) |
 | 本次遷移交付範圍與後續需求確立方式 | [`decisions/0002-migration-delivery-scope.md`](decisions/0002-migration-delivery-scope.md)（使用者於 2026-10-07 核准） |
-| Spec Kit 擴充完整構想、實作狀態與待確認取捨 | [`proposals/speckit-extension-design.md`](proposals/speckit-extension-design.md)（**待使用者確認**，不是現況或已批准需求） |
+| 三種開發流程與設計文件位置 | [`decisions/0003-development-workflow-granularity.md`](decisions/0003-development-workflow-granularity.md)（使用者於 2026-10-13 核准） |
+| 設計提案（探索、方案、直接開發的設計、Tool 方向） | [`proposals/`](proposals/README.md)（草稿；**不是**現況、Policy 或有效規格） |
 
 ## 規則（憲章原則 VI）
 

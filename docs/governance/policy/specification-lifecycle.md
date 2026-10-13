@@ -11,7 +11,7 @@ source: 採納時的設計 §12.1–§12.6；憲章原則 IV、VI
 
 # Specification Lifecycle
 
-本文件描述 Spec Kit 工作包的生命週期；依 owner 指示（[ADR-0002](../../architecture/decisions/0002-migration-delivery-scope.md)），小型直接開發不強迫建立整套工作包。若影響有效規格，仍須經驗證與相應採納紀錄更新現況，不能用未驗證提案取代。
+本文件描述 Spec Kit 工作包的生命週期；依 owner 指示（[ADR-0002](../../architecture/decisions/0002-migration-delivery-scope.md)、[ADR-0003](../../architecture/decisions/0003-development-workflow-granularity.md)），不使用 Spec Kit 的直接開發不建立工作包。若影響有效規格，仍須經驗證與相應採納紀錄更新現況，不能用未驗證提案取代；R1、R2、R5 的採納檢查、R9 的基線檢查同樣適用。三種流程與目錄見 [開發流程](../../developer-guide/development-workflows.md)。
 
 > 目的：規範**有效規格、工作包與封存**的生命週期。
 > 本文是對**已採納設計 §12** 與 **Hub 憲章原則 IV、VI** 的忠實展開，每條規則標示出處。出處不在設計或憲章內的條文，標為 **Proposed**，集中列在文末。
@@ -80,6 +80,14 @@ source: 採納時的設計 §12.1–§12.6；憲章原則 IV、VI
 - 先辨識哪些變更是**本工作包準備的 Delta**，哪些是**其他來源**的修改。有衝突或來源不明時，停止並重新比對，**不覆蓋**。
 - 在暫存區驗證完、真正套用之前，**再檢查一次**。
 - 與目標 capability 無關的使用者變更不受影響，也不會被清理。
+
+### R9a 不使用 Spec Kit 時的採納（ADR-0003）
+- 設計與驗證紀錄在所屬專案的 `docs/architecture/proposals/<topic>.md`（或 `<topic>/`）；開始時記錄 `baseline-commit` 與受影響的 capability。
+- 影響有效規格時，驗證通過後依 R1、R5、R9 **手動**更新有效規格與 Change Log：ID 不重複、不重用；Change Log 的 Archive 欄填該 proposal 的路徑。基線檢查以開始時記錄的 `baseline-commit` 為準。
+- R7 的原則同樣適用：先在暫存位置產生並檢查結果、套用前再檢查、失敗只回復本次觸及的檔案、不自行 stage 或 commit。暫存位置可以用系統暫存目錄，不需要為此初始化 Spec Kit。
+- 採納紀錄寫在 proposal：驗證依據、baseline、capability、變更的 requirement ID 與 Change Log 列。
+- proposal 留在原處作為歷史，不移到 `archive/changes/`；R6 的封存與 R8 的編號只適用 Spec Kit 工作包。
+- Hub 擴充的 `adopt`／`archive` 只處理 `specs/<NNN-name>/`，不處理 proposal。
 
 ### R10 補建的有效規格（§15.4；憲章原則 VII）
 遷移時補建有效規格，要以**規格、程式碼、驗證紀錄三方核對**的結果為準，**不得**把候選規格整份複製成現況；每條 requirement 標示證據等級，缺口如實列出。範例：`projects/forge-explorer/docs/specifications/`。

@@ -151,6 +151,8 @@ specs/<NNN-name>/verification.md
 ```
 
 > **路徑修訂（2026-10-06，遷移 `hub/000-restructure`）**：原文為 `docs/plan/verification/<change-id>.verify.md`。該目錄在遷移後不再存在，與現行的 Hub 正本 POL-DOD-001 R7 衝突，故改為上方路徑；封存後隨工作包移到 `archive/changes/<NNN-name>/work/verification.md`。這是**路徑修訂**，規則本身不變。**依已採納設計（Hub 設計 §12.3、§12.5、§15.2）調整路徑，已授權**，不是新決策。
+>
+> **位置補充（2026-10-13，Hub [ADR-0003](../../../../../docs/architecture/decisions/0003-development-workflow-granularity.md)，使用者明確核准）**：上方路徑適用**使用 Spec Kit 的工作包**。不使用 Spec Kit 的直接開發，Verification Record 寫在本專案 `docs/architecture/proposals/<topic>.md` 的「驗證紀錄」一節，或 `docs/architecture/proposals/<topic>/verification.md`。只補位置；Gate、狀態、必填欄位與第五節的循環同樣適用於直接開發。
 
 其中 `<change-id>` 需能辨識本次變更，例如：
 

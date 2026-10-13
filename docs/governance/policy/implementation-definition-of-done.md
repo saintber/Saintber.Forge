@@ -15,9 +15,10 @@ supersedes: []
 
 本文由 `projects/forge-explorer/docs/governance/policy/implementation-definition-of-done.md` 中的通用部分提煉而來。
 
-> **與原文的差異（兩處）**
+> **與原文的差異（三處）**
 > 1. **R7 的 Verification Record 位置**：原文指定 `docs/plan/verification/`，該目錄在遷移後不再存在，改為工作包內 `specs/<NNN-name>/verification.md`。**依已採納設計（§12.3、§12.5、§15.2）調整路徑，已授權**，不是新決策。
 > 2. **新增 R6a「設計先於實作；文件與事實相符」及 Docs Consistency 欄位**：來自 **Hub 憲章原則 VI**。憲章已於 2026-10-06 由使用者批准（Active v1.0.0），因此 R6a **具約束力**，屬已核准的規則（Policy 索引的 A 類），也呼應使用者「禁止實作違背文件，先改設計再實作」的明確指示。
+> 3. **R7 補上不使用 Spec Kit 時的位置**：依 [ADR-0003](../../architecture/decisions/0003-development-workflow-granularity.md)（使用者 2026-10-13 明確核准），直接開發的 Verification Record 寫在 proposal。只補位置，Gate、狀態與必填欄位不變。
 >
 > 其餘各條提煉自舊 Policy，屬既有已核准的規則，**仍須遵守**。
 
@@ -92,7 +93,14 @@ supersedes: []
 ### R7 Verification Record
 **目的**：確保 Gate A、Gate B 在**每一次可交付的變更**都被重新執行與記錄，避免「之前做過一次」就被誤判為這次也完成。
 
-**位置**：該變更的工作包內，`specs/<NNN-name>/verification.md`；封存後隨工作包移到 `archive/changes/<NNN-name>/work/verification.md`。
+**位置**（依開發流程；見 [開發流程](../../developer-guide/development-workflows.md)）：
+
+| 流程 | 位置 |
+|---|---|
+| 使用 Spec Kit 的工作包 | `specs/<NNN-name>/verification.md`；封存後隨工作包移到 `archive/changes/<NNN-name>/work/verification.md` |
+| 直接開發（不用 Spec Kit） | 所屬專案 `docs/architecture/proposals/<topic>.md` 的「驗證紀錄」一節，或 `proposals/<topic>/verification.md` |
+
+兩種位置的必填欄位與判定規則相同。
 
 **必填欄位**：
 - 變更 ID 與範圍。

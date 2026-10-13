@@ -5,7 +5,7 @@
 >
 > **重要**：「已知限制」與「尚未完成」列出的項目目前**還不存在或尚未驗收**，不要假設可以使用。
 >
-> **不是所有工作都要走 Spec Kit**：粒度小的修改（例如一個小 skill）可以直接開發，仍須遵守適用治理並完成必要驗證；需要完整需求、計畫與工作包時才開 Spec Kit change。直接開發若影響有效規格，仍須驗證並留下採納紀錄，不把 Spec Kit 工作包或自動擴充當成所有工作的前置依賴（ADR-0002）。
+> **不是所有工作都要走 Spec Kit**：先依 [開發流程：三種顆粒度](development-workflows.md) 選擇流程（ADR-0003）。本文只說明**選擇使用 Spec Kit 時**（流程 B，以及 C 拆出來的 change）的做法。直接開發的設計與驗證紀錄放在 `docs/architecture/proposals/`；影響有效規格時依 POL-SPEC-001 R9a 手動採納。
 
 本文說明 Hub 與各專案如何使用 Spec Kit 與 SDD（規格驅動開發）文件，不定義任何業務規則或技術決策。
 
@@ -15,6 +15,7 @@
 |---|---|---|
 | **Constitution** | `.specify/memory/constitution.md` | 不可退讓的治理原則。所有文件與實作都不得違反。正本只有這一份，不保留副本 |
 | **Policy** | `docs/governance/policy/` | 長期且通用的規範。具約束力；違反需要 owner 核准的例外。見該目錄的 `README.md` |
+| **設計提案** | `docs/architecture/proposals/<topic>.md` | specify 之前未編號的探索、候選方案、待決事項；**不是**需求或現況。確定要做時整理成 Intent |
 | **Intent** | `docs/intent/<NNN-name>/intent.md` | 為什麼要做這次變更。保存人類對問題的理解及其演進，不描述實作方式 |
 | **Decision** | `docs/intent/<NNN-name>/decision.md` | 在特定 Intent 前提下的實作約束或取捨。只適用該 Intent；若演變成長期通用規則，要升級為 Policy |
 | **工作包** | `specs/<NNN-name>/` | 進行中的變更提案：spec、plan、tasks、驗證等。由 Spec Kit 依 Intent / Decision / Policy 產生 |
@@ -29,7 +30,7 @@
 ### 定位
 Intent 記錄：原始利害關係人需求、問題定義與動機、功能意圖的演進。
 
-Intent **不是**規格書、實作說明或 Release Note。
+Intent **不是**規格書、實作說明或 Release Note。進入 specify 前，它只整理本次問題、情境、範圍與非目標、已確立的限制、未決事項、驗收方向與來源連結；不先寫與 spec 重複的完整規格，也不把探索中的所有候選方案當成需求（[開發流程 §5.2](development-workflows.md#52-從探索到-change)）。
 
 ### 單檔、多版本
 - 每個 Intent 只有**一份** `intent.md`，用文件內的 **Intent Version Index** 記錄意圖的演進。
@@ -133,6 +134,8 @@ Intent **不是**規格書、實作說明或 Release Note。
 
 ## 5. 呼叫指令時要提供的上下文（手動）
 
+**前提**：目標專案已初始化自己的 `.specify/`。還沒初始化的 Tool 不要執行 Spec Kit，否則會往上解析到 Hub（[開發流程 §5.3](development-workflows.md#53-specify-的初始化時機)）。
+
 在自動載入完成之前，呼叫 `/speckit-specify` 時，請在訊息中明確列出下列上下文。**這是人工的輔助檢查，不是有效規格，也不會自動強制 Policy**；新產生的 spec 在驗證並採納之前仍是 pending：
 
 ```text
@@ -141,6 +144,7 @@ Intent **不是**規格書、實作說明或 Release Note。
 Inputs:
 - docs/intent/<NNN-name>/intent.md
 - docs/intent/<NNN-name>/decision.md
+- （選用）docs/architecture/proposals/<topic>.md：只作背景，需求以 intent 為準
 
 Policies（依專案而定，位置見各專案的 docs/governance/policy/README.md）:
 - .specify/memory/constitution.md

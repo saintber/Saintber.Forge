@@ -16,6 +16,7 @@
 | repo 自製 skill | `tooling/skills/<name>/`；產品 skill 放在擁有它的 Tool |
 | 新 Tool 的靜態範本 | `tooling/scaffold/project/` |
 | 使用手冊、架構、Policy | 擁有該能力的專案 `docs/` |
+| 設計提案、探索、直接開發的設計與驗證紀錄、Tool 方向 | 該專案 `docs/architecture/proposals/`（Tool 方向在 `proposals/product-direction/`） |
 | 需求輸入、候選工作包、有效規格、歷史 | 該專案 `docs/intent/`、`specs/`、`docs/specifications/`、`archive/changes/` |
 
 標示為骨架的目錄只代表固定內容位置，沒有產品功能。Node 工具各自有 `private: true` 的 package.json 與 lockfile，不啟用 npm workspaces。新工具開始開發時才建立實際專案。
@@ -45,14 +46,19 @@ Copy-Item -LiteralPath tooling/scaffold/project -Destination projects/ai-queue -
 
 目的地須尚不存在；既有工具直接使用其目錄，不覆蓋。把 `<project-id>` 改成真實 ID，確認 owner、目的與技術，並登錄到 `workspace.json`。依需要新增套件設定或工具入口。
 
-範本刻意沒有假的憲章或 Spec Kit 產生檔案。**需要 Spec Kit 時，先在工具根目錄用上游 CLI 初始化該工具自己的 `.specify/`、整合與憲章，再安裝 Hub 擴充。** 尚未初始化前不執行 Spec Kit，避免向上解析到 Hub；不要把 Tool 工作包建到 Hub `specs/`。
+範本刻意沒有假的憲章或 Spec Kit 產生檔案。**不使用 Spec Kit 時不需要初始化 `.specify/`**；需要時，先在工具根目錄用上游 CLI 初始化該工具自己的 `.specify/` 與整合，再安裝 Hub 擴充。尚未初始化前不執行 Spec Kit，避免向上解析到 Hub；不要把 Tool 工作包建到 Hub `specs/`。未初始化時 Hub 憲章與適用 Policy 仍然適用，不偽造 Tool 憲章（[開發流程 §5.3](development-workflows.md#53-specify-的初始化時機)）。
 
-## 依工作大小選流程
+整體方向先寫在 `docs/architecture/proposals/product-direction/`，再拆成可獨立驗收的 change（[開發流程 §6](development-workflows.md#6-c-完整-tool-方向)）。
 
-- 功能需討論需求、驗收、架構與任務時，在目標專案使用 Spec Kit；設計快照作方向參考，詳細需求在新 change 確立。
-- 小型 skill 或範圍清楚的修改，可以直接記錄設計／理由、實作、必要驗證與提交，不為了流程建立整套工作包。
-- 兩者都要讀適用治理，不得實作偏離已批准設計。涉及有效規格的變更仍須有驗證與相應採納紀錄，規格保持唯一；不用 Spec Kit 不等於忽略規格。
-- 三個 Hub 擴充指令已實作，完整設計／格式尚待確認。使用時遵守拒絕結果；未完成的自動 Policy Check、編號接軌不是其他 worktree 開發的前置依賴。
+## 選擇流程
+
+流程依需求性質選擇，步驟、目錄與收尾的正本是 [開發流程：三種顆粒度](development-workflows.md)：
+
+- **A. 直接開發**：範圍清楚的工作；設計與驗證紀錄在 `docs/architecture/proposals/`，不建立工作包或正式 Intent（既有的空骨架照常保留）、不需要 `.specify/`。
+- **B. Spec Kit 單次功能**：需要討論需求、驗收、架構與任務時；探索在 `proposals/`，正式輸入在 `docs/intent/<NNN-name>/`，工作包在 `specs/`。
+- **C. 完整 Tool 方向**：`proposals/product-direction/`，再拆成多個 A 或 B。
+
+三者都要讀適用治理，不得實作偏離已批准設計；影響有效規格的變更都要驗證並留下採納紀錄。三個 Hub 擴充指令已實作，完整設計／格式尚待確認；未完成的自動 Policy Check、編號接軌不是其他 worktree 開發的前置依賴。
 
 ## 合併前
 

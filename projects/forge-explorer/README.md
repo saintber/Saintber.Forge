@@ -59,7 +59,7 @@ dotnet run
 
 ## 使用 Spec Kit 開發
 
-**在這個目錄內**執行技能（Claude 的 `/speckit-specify`、Codex 的 `$speckit-specify`），Spec Kit 會往上找最近的 `.specify/`，解析到本專案，而不是 Hub 根目錄。小型工作可直接開發與驗證，不強迫建立工作包。細節與限制見 Hub 的 [`docs/developer-guide/speckit-workflow.md`](../../docs/developer-guide/speckit-workflow.md)，worktree 操作見 [`並行開發指引`](../../docs/developer-guide/parallel-development.md)。
+**在這個目錄內**執行技能（Claude 的 `/speckit-specify`、Codex 的 `$speckit-specify`），Spec Kit 會往上找最近的 `.specify/`，解析到本專案，而不是 Hub 根目錄。範圍清楚的工作可直接開發，設計與驗證紀錄放在 `docs/architecture/proposals/`，不建立工作包。流程選擇見 Hub 的 [`開發流程`](../../docs/developer-guide/development-workflows.md)；Spec Kit 細節與限制見 Hub 的 [`docs/developer-guide/speckit-workflow.md`](../../docs/developer-guide/speckit-workflow.md)，worktree 操作見 [`並行開發指引`](../../docs/developer-guide/parallel-development.md)。
 
 ## 進一步
 

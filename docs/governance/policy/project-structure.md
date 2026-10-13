@@ -28,7 +28,8 @@ source: 採納時的設計 §1.3、§3、§4、§5、§6、§14.3
 - Hub 只往下呼叫工具；工具不會反過來呼叫 Hub。
 
 ### R3 每個工具專案的固定結構（§5）
-每個工具專案至少有：`README.md`、`AGENTS.md`、`CHANGELOG.md`、`saintber.project.json`（有入口之後）、`.specify/`、`docs/`、`specs/`、`archive/changes/`、`src/`、`tests/`。
+每個工具專案至少有：`README.md`、`AGENTS.md`、`CHANGELOG.md`、`saintber.project.json`（有入口之後）、`.specify/`（**開始使用 Spec Kit 之後**；不使用時不需要初始化，ADR-0003）、`docs/`、`specs/`、`archive/changes/`、`src/`、`tests/`。
+- `specs/`、`archive/changes/`（以及 `docs/intent/`）是固定的內容位置，骨架照常保留；不使用 Spec Kit 的直接開發不在其中建立工作包或正式 Intent（ADR-0003）。
 - 套件與 solution 定義檔（`package.json`、`.sln`）放在**工具根目錄**；`src/` 內部的配置由工具依技術自訂。
 - 沒有開始開發的工具只列在路線圖，**不預先建立空目錄**（§1.2）。
 

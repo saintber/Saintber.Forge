@@ -2,7 +2,7 @@
 
 本目錄是 Hub 的 Policy。格式與規則見 [採納時的設計（快照）](../../architecture/decisions/0001-attachments/design-2026-10-adopted.md) §11。
 
-設計快照提供方向，不能直接代替完整的功能需求；後續詳細需求以新的 Spec Kit change 討論。本次交付範圍依 [ADR-0002](../../architecture/decisions/0002-migration-delivery-scope.md)。Policy 的效力與實作授權分開判斷：適用的治理規則仍須遵守，但不能因規則或快照提到某項尚未完成的功能，就自行擴大本次實作。
+設計快照提供方向，不能直接代替完整的功能需求；後續詳細需求以新的 Spec Kit change 討論。本次交付範圍依 [ADR-0002](../../architecture/decisions/0002-migration-delivery-scope.md)；三種開發流程（直接開發、Spec Kit 單次功能、Tool 方向）與設計、驗證紀錄的位置依 [ADR-0003](../../architecture/decisions/0003-development-workflow-granularity.md)，流程正本見 [開發流程](../../developer-guide/development-workflows.md)。Policy 的效力與實作授權分開判斷：適用的治理規則仍須遵守，但不能因規則或快照提到某項尚未完成的功能，就自行擴大本次實作。
 
 ## 效力
 
@@ -42,14 +42,14 @@ POL-SEC-001 的「尚未涵蓋」列出 Hub 自身的安全責任（bootstrap �
 
 | ID | 檔案 | scope | applies-to | 備註 |
 |---|---|---|---|---|
-| POL-STRUCT-001 | [project-structure.md](project-structure.md) | workspace | specify, plan, tasks, analyze, implement | 設計 §1.3、§3–§6、§14 的展開 |
-| POL-DOC-001 | [documentation-governance.md](documentation-governance.md) | workspace | specify – adopt | 設計 §10、§12.2；憲章 IV、VI、VII |
-| POL-SPEC-001 | [specification-lifecycle.md](specification-lifecycle.md) | workspace | specify – adopt | 設計 §12 的展開 |
-| POL-SPECKIT-001 | [speckit-workflow.md](speckit-workflow.md) | workspace | 全部階段 | 設計 §13；ADR 決策 9 |
+| POL-STRUCT-001 | [project-structure.md](project-structure.md) | workspace | specify, plan, tasks, analyze, implement | 設計 §1.3、§3–§6、§14 的展開；R3 `.specify/` 時機依 ADR-0003 |
+| POL-DOC-001 | [documentation-governance.md](documentation-governance.md) | workspace | specify – adopt | 設計 §10、§12.2；憲章 IV、VI、VII；`proposals/` 與 R10 依 ADR-0003 |
+| POL-SPEC-001 | [specification-lifecycle.md](specification-lifecycle.md) | workspace | specify – adopt | 設計 §12 的展開；R9a 直接開發的採納依 ADR-0003 |
+| POL-SPECKIT-001 | [speckit-workflow.md](speckit-workflow.md) | workspace | 全部階段（選擇使用 Spec Kit 的工作） | 設計 §13；ADR-0001 決策 9；適用範圍與初始化時機依 ADR-0002、0003 |
 | POL-INVOKE-001 | [invocation-contract.md](invocation-contract.md) | distribution | specify – implement | 設計 §7、§8；**CLI 尚未實作，這是待實作去遵守的契約** |
 | POL-SEC-001 | [security-baseline.md](security-baseline.md) | distribution | plan, tasks, analyze, implement | 提煉自舊 Policy；Hub 自身的安全責任尚待補 |
 | POL-TEST-001 | [testing-governance.md](testing-governance.md) | workspace | plan, tasks, analyze, implement | 提煉自舊 Policy |
-| POL-DOD-001 | [implementation-definition-of-done.md](implementation-definition-of-done.md) | workspace | tasks, implement, analyze, adopt | 提煉自舊 Policy；R6a 來自憲章原則 VI 與使用者的明確指示；R7 路徑依已採納設計 |
+| POL-DOD-001 | [implementation-definition-of-done.md](implementation-definition-of-done.md) | workspace | tasks, implement, analyze, adopt | 提煉自舊 Policy；R6a 來自憲章原則 VI 與使用者的明確指示；R7 路徑依已採納設計與 ADR-0003 |
 
 ### scope 的意義
 
