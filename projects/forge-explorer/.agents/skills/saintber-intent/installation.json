@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "hashes": {
+    ".agents/skills/saintber-intent/SKILL.md": "5c79604d2fde5dfbe8a63c6c9c6a6b4822c7c4cfd42271a696ac814df584620a",
+    ".claude/skills/saintber-intent/SKILL.md": "5c79604d2fde5dfbe8a63c6c9c6a6b4822c7c4cfd42271a696ac814df584620a",
+    ".gemini/commands/saintber-intent.toml": "f89b51786d6c4219a6d6d000e00048e409d93b07372f65b45d4915ebedee9674"
+  }
+}

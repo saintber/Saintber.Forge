@@ -70,7 +70,7 @@ Intent **不是**規格書、實作說明或 Release Note。進入 specify 前�
 
 ### 管理擴充提案（待採納）
 
-修訂摘要、語意版本、明確現行邊界、多來源承接與快照的候選格式見 [Intent 管理草稿](intent-workflow.md)（ADR-0006 Proposed）。它們尚未取代上方既有規則；新範本僅提供候選示例。
+修訂摘要、語意版本、明確現行邊界、多來源承接與快照的候選格式見 [Intent 管理草稿](intent-workflow.md)（ADR-0006 Proposed）。它們尚未取代上方既有規則；新範本僅提供候選示例。需求分析技能 `saintber-intent`（[說明](../../tooling/skills/saintber-intent/README.md)）不依賴 Spec Kit：已有正式 Intent 且使用者要求修訂時，由代理讀檔核對邊界後依版本規則修訂；沒有正式 Intent 時不建立，也不修改 spec、plan、tasks。
 
 ## 3. 規格的唯一性
 

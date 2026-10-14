@@ -448,7 +448,7 @@ C 本身停留在方案探索的方向稿；拆出來的每個能力（§6.2 步
 
 | 階段 | `saintber-design` | Spec Kit（流程 B） | 直接開發（流程 A） |
 |---|---|---|---|
-| 需求分析 | 不使用：只**讀取**已有的 `intent.md`，不改寫；探索發現需求問題時回報釐清 | 不使用 | 選用；**目前**沒有需求分析專用的指令（`saintber-intent` 只有設計、尚未實作，§12.5） |
+| 需求分析 | 不使用：只**讀取**已有的 `intent.md`，不改寫；探索發現需求問題時回報釐清。需求分析用 `saintber-intent`（§12.5） | 不使用 | 選用；可用 `saintber-intent`（§12.5），也可以手動依 [Intent 管理](intent-workflow.md) 撰寫 |
 | 方案探索 | **使用**：建立或修訂設計稿 | 不使用 | 同左；選用 |
 | 需求規格 | 不使用 | `speckit-hub-context`、`speckit-specify`、`speckit-clarify` | 不用 Spec Kit；範圍與驗收寫在設計稿。若需要規格整理，由人或 AI 依治理處理，不排除其他工具 |
 | 技術設計（`plan.md`、`tasks.md`） | 不使用 | `speckit-plan`、`speckit-tasks`、`speckit-analyze`（唯讀） | 不使用 Spec Kit；技術方案寫在設計稿 |
@@ -456,7 +456,7 @@ C 本身停留在方案探索的方向稿；拆出來的每個能力（§6.2 步
 | 採納與封存 | 不使用。轉換紀錄在**建立或承接 change 時**依 §11 記錄，**不由 `saintber-design` 執行**；這個階段只更新紀錄中的追溯位置 | `speckit-hub-adopt`、`speckit-hub-archive`（有已知限制，見下） | 依 POL-SPEC-001 R9a **手動**採納；結案紀錄留在 `proposals/` |
 
 - 呼叫方式：Claude Code 用 `/speckit-…`，Codex 用 `$speckit-…`（連字號）。
-- **Gemini 只保證 `saintber-design` 的 TOML 入口已安裝**。本 repo 的 Spec Kit 整合目前只有 Claude 與 Codex（`.specify/integration.json`），**沒有** Gemini 的 Spec Kit 指令，不要假設 Gemini 能執行 `speckit-*`。
+- **Gemini 只保證 `saintber-design`、`saintber-intent` 的 TOML 入口已安裝**。本 repo 的 Spec Kit 整合目前只有 Claude 與 Codex（`.specify/integration.json`），**沒有** Gemini 的 Spec Kit 指令，不要假設 Gemini 能執行 `speckit-*`。
 - `speckit-analyze` 是**唯讀**檢查（上游設定），不會修改檔案。
 - `speckit-hub-*` 是本 repo 的擴充，不是上游指令，各自的範圍不同：
   - `speckit-hub-context`：解析目標專案與模式，並載入該專案的治理（憲章、Policy 索引、有效規格索引）；不限於工作包，也不修改檔案。
@@ -467,8 +467,8 @@ C 本身停留在方案探索的方向稿；拆出來的每個能力（§6.2 步
 
 | 流程 | 順序 | 要不要用 Spec Kit |
 |---|---|---|
-| **A 直接開發** | （選用）需求分析 ⇄ `saintber-design` 方案探索 → 依設計稿實作與驗證（需求、驗收、技術方案須齊全）→ 手動採納（影響有效規格時）→ 結案 | **不需要，也不要變成強制**。直接開發不必初始化 `.specify/` |
-| **B 單次功能** | （選用）需求分析 ⇄ `saintber-design` 方案探索 → 確認目標與必要的初始化 → `speckit-hub-context`（報錯就停止）→（選用）整理正式 Intent → `speckit-specify`、`speckit-clarify` → `speckit-plan`、`speckit-tasks`、`speckit-analyze` → `speckit-implement` 與驗證 → adopt、archive | 需要（目標專案自己的 `.specify/`）。步驟細節與編號核對見 §5.2 |
+| **A 直接開發** | （選用）需求分析（`saintber-intent`）⇄ `saintber-design` 方案探索 → 依設計稿實作與驗證（需求、驗收、技術方案須齊全）→ 手動採納（影響有效規格時）→ 結案 | **不需要，也不要變成強制**。直接開發不必初始化 `.specify/` |
+| **B 單次功能** | （選用）需求分析（`saintber-intent`）⇄ `saintber-design` 方案探索 → 確認目標與必要的初始化 → `speckit-hub-context`（報錯就停止）→（選用）整理正式 Intent → `speckit-specify`、`speckit-clarify` → `speckit-plan`、`speckit-tasks`、`speckit-analyze` → `speckit-implement` 與驗證 → adopt、archive | 需要（目標專案自己的 `.specify/`）。步驟細節與編號核對見 §5.2 |
 | **C 完整 Tool 方向** | `saintber-design kind=direction` 寫方向稿（方案探索） → 拆成多個可獨立驗收的能力 → 每個能力各走 A 或 B | 方向稿本身不需要；拆出的每個 B 需要 |
 
 採納與封存的工具有已知限制：`speckit-hub-adopt`／`archive` 目前要求嚴格的 Delta 格式，格式尚未經使用者定案；自動 Policy Check（G-PC）與原生編號接軌（G-NUM）尚未完成。見 [Spec Kit 工作流程](speckit-workflow.md) 的已知限制。直接開發的採納沒有自動化工具。
@@ -483,10 +483,17 @@ C 本身停留在方案探索的方向稿；拆出來的每個能力（§6.2 步
 - 安裝器**沒有**跨程序鎖或多檔原子交易；中途失敗可能留下部分更新的入口，修正後重跑。技能本身沒有機械鎖，主稿狀態由代理讀檔判斷。
 - 本指令原暫名 `forge-design`，使用者已核准正式名稱 `saintber-design`；歷史驗證紀錄保留當時的名稱，見 ADR-0004 的更名註記。
 
-### 12.5 `saintber-intent`：只有設計，尚未實作
+### 12.5 `saintber-intent`：需求分析階段的技能
 
-需求分析階段目前沒有專用指令（§12.2 的「需求分析」列仍是「沒有需求分析專用的指令」）。[ADR-0006](../architecture/decisions/0006-intent-management-strategy.md) 決定**設計**一個 `saintber-intent` 技能處理需求分析（結果 `reuse`／`new`／`continue-change`／`needs-clarification`，識別規則沿用 `saintber-design`），設計見 [`intent-management/design.md`](../proposals/intent-management/design.md)。
+`saintber-intent` 處理需求分析階段：建立或修訂早期需求稿，判斷結果 `reuse`／`new`／`continue-change`／`needs-clarification`。它與 `saintber-design` 互相只讀不改：`saintber-intent` 讀設計稿、只改需求分析（合併稿只改需求部分）。管理規則見 [Intent 管理](intent-workflow.md)，設計與歷史見 [`intent-management/design.md`](../proposals/intent-management/design.md)。
 
-- **尚未實作**：沒有技能正本、安裝器與代理入口，`/saintber-intent`、`$saintber-intent` **不可呼叫**；不要假設它存在。
-- 在它實作之前，需求分析與 Intent 的管理由人與代理依 [Intent 管理](intent-workflow.md) 手動遵循。
-- 它不會取代 `saintber-design`，也不會初始化 Spec Kit 或代為執行 specify、adopt、archive、stage、commit。
+| 代理 | 呼叫 | 安裝後的位置 |
+|---|---|---|
+| Codex | `$saintber-intent` | `.agents/skills/saintber-intent/SKILL.md` |
+| Claude Code | `/saintber-intent` | `.claude/skills/saintber-intent/SKILL.md` |
+| Gemini CLI | `/saintber-intent` | `.gemini/commands/saintber-intent.toml` |
+
+- 正本是 `tooling/skills/saintber-intent/SKILL.md`，由獨立的 `node tooling/skills/saintber-intent/install.mjs --project-dir <目標專案>` 產生入口；與 `saintber-design` 可分別安裝，**不依賴 Spec Kit**。安裝、使用與安裝器限制見 [`tooling/skills/saintber-intent/README.md`](../../tooling/skills/saintber-intent/README.md)。
+- **範圍**：只動需求分析稿；不改 spec／plan／tasks、程式或有效規格，不執行承接、adopt、archive、stage、commit。既有活動 change 已有正式 Intent 且使用者要求修訂時可依版本規則修訂；沒有正式 Intent 時只回報（`continue-change`），不建立正式輸入。
+- **現況**：已部署到 Hub 與 forge-explorer；部署測試與 Claude 隔離情境驗證通過，範圍見 [交付紀錄](../proposals/saintber-intent-delivery/verification.md)。沒有獨立 Codex／Gemini CLI 端到端驗收；Gemini 只驗證 TOML 與內容。這是 AI 讀檔判斷的技能，沒有機器解析器或狀態鎖。
+- **治理效力**：ADR-0006 與 POL-DOC-001 P1 仍是 Proposed。技能依使用者要求實作並可使用，但這不等於其中的規則已被採納為強制 Policy；是否推廣為強制 Policy 留待後續。

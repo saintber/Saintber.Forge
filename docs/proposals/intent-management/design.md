@@ -1,11 +1,11 @@
 # Intent 管理策略與 `saintber-intent` 設計
 
-- 狀態：草案（文件設計已完成，管理規則待採納）；`saintber-intent` 技能**尚未實作**
+- 狀態：草案（文件設計已完成，管理規則待採納）；`saintber-intent` 技能已於後續工作實作（見「技能現況」），ADR-0006 與 POL-DOC-001 P1 仍是 Proposed
 - 類型：方案探索（`design.md`）；Hub 開發流程的文件設計
 - owner：Hub（`saintber`）
 - 目前決策：使用者詢問是否應有 intent 技能，以及 Intent 的保存、版本與多份需求策略；Codex 說明建議組合後，使用者回覆「那這部分還有我需要決定的嗎？如果沒有你可以交由 claude 去寫文件，你再去審閱」。本輪沒有需要人類裁決的重大分歧，採用下方「採用的預設」並文件化。決策記錄見 [ADR-0006](../../architecture/decisions/0006-intent-management-strategy.md)。
 - 本次範圍：管理策略文件化（[`intent-workflow.md`](../../developer-guide/intent-workflow.md)）、本設計稿、ADR-0006、必要的導覽與流程文件對齊、舊 Intent 樣本與 proposal 範本對齊。
-- 尚未實作：`saintber-intent` 技能（正本、安裝器、代理入口）、任何自動化（快照、轉換、檢查）。
+- 尚未實作：任何自動化（快照、轉換、檢查）。（上一輪交付時另列「`saintber-intent` 技能」未實作；該項已由後續工作完成，見「技能現況」。以下設計章節與驗證紀錄保留上一輪的原意。）
 - baseline-commit：`7cae618`
 - 受影響的 capability：不影響有效規格
 - 流程：A 直接開發（只改文件；不使用 Spec Kit，不改程式）
@@ -51,9 +51,11 @@
 - 與 `saintber-design` 相容：它仍只處理方案探索；讀取需求分析但不改寫。本設計**不修改**它的技能、入口或程序。
 - 與 POL-SPEC-001、POL-DOC-001 R5 相容：Current Effective Intent 之外的內容不被讀作需求；封存預設不讀作需求。
 
-## `saintber-intent` 技能設計（尚未實作）
+## `saintber-intent` 技能設計（上一輪交付時尚未實作）
 
-> **狀態：只有設計。** 沒有正本、安裝器與入口；`/saintber-intent`、`$saintber-intent` 目前**不可呼叫**。本節是未來實作的依據，實作時另走流程（至少 A 直接開發，並先審閱本設計），**不屬於本次範圍**。
+> **技能現況（後續更新）：** 技能已依使用者要求實作：正本 [`tooling/skills/saintber-intent/SKILL.md`](../../../tooling/skills/saintber-intent/SKILL.md)、獨立安裝器，入口為 Codex `$saintber-intent`、Claude Code `/saintber-intent`、Gemini CLI `/saintber-intent`，已部署到 Hub 與 forge-explorer；安裝與使用見 [操作說明](../../../tooling/skills/saintber-intent/README.md)。部署測試與 Claude 隔離情境驗證完成，範圍及修正見 [技能交付紀錄](../saintber-intent-delivery/verification.md)。Codex／Gemini CLI 端到端尚未驗證。技能正本依本次已審閱的設計與使用者授權實作，不以實作反向批准設計差異。技能已實作不等於 ADR-0006、Policy P1 已採納。
+>
+> **以下為上一輪交付的歷史設計，保留原意：** 當時只有設計，沒有正本、安裝器與入口，`/saintber-intent`、`$saintber-intent` 不可呼叫；本節是實作的依據，實作時另走流程，不屬於當時的範圍。
 
 ### 定位
 
@@ -124,9 +126,11 @@
 
 ## 待決事項
 
-- `saintber-intent` 何時實作、是否與 `saintber-design` 共用安裝器：**尚未決定**，需要時另行討論。
+- ~~`saintber-intent` 何時實作、是否與 `saintber-design` 共用安裝器~~：已解決。技能已實作，採獨立安裝器，兩技能可分別安裝（見 [操作說明](../../../tooling/skills/saintber-intent/README.md)）。
+- 技能行為驗收：Claude 隔離情境與 Codex 客觀比對已完成，範圍見交付紀錄；獨立 Codex／Gemini CLI 端到端驗收尚未做。
+- 是否把這些規則推廣為強制 Policy：留待後續，不阻止使用已實作的技能。
 - 既有正式 Intent 若仍使用舊欄位名稱 `Trigger`：不強制重寫，下次實質修訂時對齊。
-- 現行邊界的候選格式已寫入範本：獨立一行的 `<!-- 現行範圍開始 -->`、`<!-- 現行範圍結束 -->`；技能的解析與相容性驗證留到實作時處理。
+- 現行邊界的候選格式已寫入範本：獨立一行的 `<!-- 現行範圍開始 -->`、`<!-- 現行範圍結束 -->`；技能由代理讀檔核對邊界與舊格式，沒有機器解析器（技能現況）。
 - 新增治理規則的正式採納另依 owner 裁決；本輪交付的是已審閱的設計提案，不把委託撰寫當成逐條採納。
 - 採納時整合工作包的「需求來源與承接對照」metadata 範例／模板；目前由人與代理依手冊手動加入。不得直接修改 Spec Kit CLI 受管理的模板，整合方式由後續變更確立。
 - 採納時同步 ADR、Policy 索引與手冊的效力及引用；目前 ADR-0006 為 Proposed、Policy 只列 P1，R5 保持原規則。

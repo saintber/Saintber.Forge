@@ -1,10 +1,10 @@
 # Intent 管理：保存、修訂、多份需求與承接
 
-> 狀態：管理擴充提案，待 owner 採納。既有規則仍以 ADR-0005 與現行 Policy 為準；本文不是已生效的新規範。
+> 狀態：管理擴充提案，待 owner 採納（ADR-0006、POL-DOC-001 P1 仍是 Proposed）。既有規則仍以 ADR-0005 與現行 Policy 為準；本文不是已生效的新規範。`saintber-intent` 技能已實作並可使用（§13），這不等於本文規則已被採納為強制 Policy。
 
 本文是 **Intent（需求依據）管理擴充的詳細草稿正本**：Intent 放哪裡、怎麼修訂、什麼時候另開、多份需求如何並存與承接、現行與歷史如何讀取。決策出處見 [ADR-0006](../architecture/decisions/0006-intent-management-strategy.md)；設計與候選策略比較見 [`intent-management/design.md`](../proposals/intent-management/design.md)。
 
-> **範圍**：本文只說明文件的管理方式，**不新增**需求分析專用的指令（規劃中的 `saintber-intent` 尚未實作，現況見 §13），也不改變 A／B／C 流程與六個工作階段（[開發流程](development-workflows.md) §1、§10）。其他文件引用本文，不複製本文的規則全文。
+> **範圍**：本文說明文件的管理方式與技能 `saintber-intent` 所依的規則（技能現況見 §13），不改變 A／B／C 流程與六個工作階段（[開發流程](development-workflows.md) §1、§10）。其他文件引用本文，不複製本文的規則全文。
 
 ## 1. Intent 是什麼
 
@@ -246,4 +246,6 @@ flowchart TB
 - 不自動建立快照、轉換紀錄、stage 或 commit；不為了範例建立虛構檔案。
 - 不新增額外的版本制度：**早期 Intent 不強制版本號**；**正式 Intent 保留既有的 Version Index 與簡單序號版本**（版本代表需求語意，§5），不強制 semver；不另設全 repo 的需求倉庫。
 - 不修改已結案的歷史正文；新需求另開。
-- 本文**不代表** `saintber-intent` 技能已存在：該技能目前**只有設計，尚未實作**，也**沒有**對應的 `.agents`／`.claude`／`.gemini` 入口，沒有可呼叫的指令。規劃見 [`intent-management/design.md`](../proposals/intent-management/design.md)。在它實作之前，本文由人與代理依文字手動遵循。
+- **技能現況**：`saintber-intent` 已實作，可用 Codex `$saintber-intent`、Claude Code `/saintber-intent`、Gemini CLI `/saintber-intent` 呼叫；正本與安裝、使用見 [`tooling/skills/saintber-intent/README.md`](../../tooling/skills/saintber-intent/README.md)，與 `saintber-design` 的分工見 [開發流程 §12.5](development-workflows.md#125-saintber-intent需求分析階段的技能)。設計沿革見 [`intent-management/design.md`](../proposals/intent-management/design.md)。
+- **技能的實際界線**：它依使用者要求建立或修訂早期需求稿；只在使用者明確要求、且承接已真實發生時才補來源 metadata；快照只建議、不自動保存。正式 Intent 的現行邊界與舊格式由代理讀檔核對，**沒有**機器解析器或狀態鎖；沒有正式 Intent 時 `continue-change` 只回報、不建立。
+- **治理效力**：技能已實作不等於本文規則已採納。ADR-0006、POL-DOC-001 P1 仍是 Proposed，推廣為強制 Policy 留待後續，不阻止使用已實作的技能。部署測試通過不等於行為驗收；Gemini 目前只做 TOML 與內容驗證，沒有 CLI 實機。

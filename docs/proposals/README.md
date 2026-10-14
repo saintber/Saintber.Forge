@@ -43,7 +43,8 @@
 |---|---|---|
 | [`speckit-extension-design.md`](speckit-extension-design.md) | 待使用者確認 | Spec Kit 擴充的完整構想、目前實作與未完成部分 |
 | [`task-team-design.md`](task-team-design.md) | 待釐清，尚未實作 | 按任務啟動 AI 團隊；目錄歸屬待決，設定草稿見 [`task-team-config.example.json`](task-team-config.example.json) |
-| [`intent-management/design.md`](intent-management/design.md) | 草案（管理規則待採納） | 文件交付與校閱已完成，見 [驗證紀錄](intent-management/verification.md)；技能尚未實作 |
+| [`intent-management/design.md`](intent-management/design.md) | 草案（管理規則待採納） | 文件交付與校閱已完成，見 [驗證紀錄](intent-management/verification.md)；`saintber-intent` 技能已另行實作（見該設計稿「現況」），規則仍待採納 |
+| [`saintber-intent-delivery/verification.md`](saintber-intent-delivery/verification.md) | 已完成（結案） | 需求分析技能的三代理入口、隔離行為驗證、文件校閱及實際驗證範圍 |
 | [`development-workflow-granularity/verification.md`](development-workflow-granularity/verification.md) | 已完成（結案） | 本次流程文件更新的驗證紀錄；設計見 ADR-0003 |
 | [`development-phase-terminology/verification.md`](development-phase-terminology/verification.md) | 已完成（結案） | 四個工作階段與溝通用詞的整合紀錄 |
 | [`exploration-conversion-tracking/verification.md`](exploration-conversion-tracking/verification.md) | 已完成（結案） | 轉換追蹤流程與 Claude 隔離代理驗證；決策見 ADR-0004 |

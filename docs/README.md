@@ -14,7 +14,7 @@
 | 整體設計、目錄、責任邊界、遷移計畫 | [`採納時的設計（快照）`](architecture/decisions/0001-attachments/design-2026-10-adopted.md) |
 | 本次遷移交付範圍、設計快照與詳細需求的關係 | [`ADR-0002`](architecture/decisions/0002-migration-delivery-scope.md)；後續詳細需求以新的 Spec Kit change 討論 |
 | **要開始一項工作：選哪種流程、文件放哪裡** | [`開發流程：三種顆粒度`](developer-guide/development-workflows.md)（直接開發、Spec Kit 單次功能、完整 Tool 方向） |
-| 需求依據（Intent）怎麼保存、修訂、拆分與承接 | [`Intent 管理`](developer-guide/intent-workflow.md)（ADR-0006；`saintber-intent` 技能尚未實作） |
+| 需求依據（Intent）怎麼保存、修訂、拆分與承接 | [`Intent 管理`](developer-guide/intent-workflow.md)（ADR-0006 提案；需求分析技能 [`saintber-intent`](../tooling/skills/saintber-intent/README.md) 已實作） |
 | 開 worktree、選目錄、新 Tool | [`並行開發指引`](developer-guide/parallel-development.md) |
 | 在 Herdr 新增 pane、整理開發版面 | [`Herdr 網格使用說明`](developer-guide/herdr-grid.md) |
 | 各專案在哪裡 | [`projects/`](../projects/) |

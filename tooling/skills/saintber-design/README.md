@@ -12,13 +12,13 @@
 
 ## 六階段與各流程用什麼工具
 
-流程：`需求分析 ⇄ 方案探索 → 需求規格 → 技術設計 → 實作與驗證 → 採納與封存`（ADR-0005）。可以省略文件，不省略實作依據；沒有需求分析專用的指令。
+流程：`需求分析 ⇄ 方案探索 → 需求規格 → 技術設計 → 實作與驗證 → 採納與封存`（ADR-0005）。可以省略文件，不省略實作依據；需求分析階段可用 [`saintber-intent`](../saintber-intent/README.md)（獨立安裝）。
 
 完整對照、A／B／C 的使用順序與已知限制見手冊 [§12](../../../docs/developer-guide/development-workflows.md#12-流程配套工具saintber-design-與-spec-kit-指令)。摘要：
 
 | 階段 | `saintber-design` | Spec Kit（流程 B） | 直接開發（流程 A） |
 |---|---|---|---|
-| 需求分析 | 不使用（只讀取已有的 `intent.md`） | 不使用 | 選用；可寫在提案中 |
+| 需求分析 | 不使用（只讀取已有的 `intent.md`；需求分析用 `saintber-intent`） | 不使用 | 選用；可寫在提案中 |
 | 方案探索 | **使用** | 不使用 | 選用 |
 | 需求規格 | 不使用 | `speckit-hub-context`、`speckit-specify`、`speckit-clarify` | 不用 Spec Kit；若需要規格整理，由人或 AI 依治理處理 |
 | 技術設計（`plan.md`、`tasks.md`） | 不使用 | `speckit-plan`、`speckit-tasks`、`speckit-analyze` | 不用 Spec Kit；技術方案寫在設計稿 |
