@@ -1,100 +1,328 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "status": "draft-not-executable",
+  "note": "All numeric values are editable initial examples. GPT/Gemini model names are discussion candidates, not account availability guarantees. Claude model strings keep the user-provided azuer_ai/... spelling. Thresholds belong to each entry: the same model in SA1 and SA2 may use different values (SA1 gpt-6.1-sol 50, SA2 gpt-6.1-sol 70; editable examples, not global company/personal thresholds). SD2 is enabled with models [] to show defaultModel use; QA is a disabled, editable expansion example (not an approved team member) and cannot start via defaultModel. Role IDs are open: PM/SA1/SA2/SD1/SD2/PG are initial examples, not an allowed list. Field names are draft and do not imply a runtime exists. A negative value (e.g. -1) means keep working when low or unknown and wait for quota only on a real limit signal, never switching. metric/value support beyond this example is not implemented and is left to technical design.",
   "decisions": {
-    "ownership": "pending-user-decision",
-    "personalFallbackAuthorization": "pending-user-decision",
-    "companyModelAndBudgetStrategy": "pending-user-decision"
+    "ownership": "pending-user-decision"
   },
   "coordination": {
-    "pmRequired": true,
-    "teamSize": "pm-decides",
+    "pmRoleId": "PM",
+    "userContact": "pm-only",
+    "teamSize": "pm-selects-from-enabled-roles",
     "createMembersOnDemand": true,
     "maxReviewRoundsPerIssue": 3,
-    "onUnresolvedIssue": "request-user-decision",
+    "onUnresolvedIssue": "pm-relays-to-user",
     "onUserDecisionPending": "pause-dependent-work",
     "preserveUserFocus": true,
-    "workflow": "pm-selects-speckit-or-direct"
+    "workflow": "task-dependent-optional"
+  },
+  "roleExpansion": {
+    "proposedBy": "pm",
+    "addDuringTaskRequiresUserApproval": true,
+    "appliesToNewRoleAndExtraMember": true,
+    "approveBeforeLaunch": true,
+    "pendingIsNotApproval": true,
+    "modifiedProposalRequiresReapproval": true,
+    "applyOnlyApprovedScope": true,
+    "onRoleIdConflict": "stop-and-report",
+    "approvalScope": "team-effective-config",
+    "persistToSharedConfigRequiresExplicitApproval": true,
+    "retryMustNotExceedApprovedCount": true
+  },
+  "reporting": {
+    "mode": "role-pushes-to-pm",
+    "transport": "local-outbox-then-sender",
+    "deliveryStates": [
+      "queued",
+      "sent",
+      "received"
+    ],
+    "whenPmBusy": "queue-and-coalesce",
+    "maxSendRetries": 3,
+    "defaultDeadlines": {
+      "ackSeconds": 60,
+      "progressSeconds": 300,
+      "hardNoReportSeconds": 900
+    },
+    "heartbeatResetsHardDeadline": false,
+    "onDeadlineExceeded": "bounded-diagnosis-once",
+    "notifyPermission": "minimal-allow-for-fixed-wrapper"
   },
   "usage": {
     "pollIntervalSeconds": 60,
     "maxObservationAgeSeconds": 120,
-    "personalReserveRemainingPercentPerWindow": 50,
-    "personalUnknownQuota": "pause-and-request-user",
-    "companyUnknownQuota": "report-unknown-and-apply-budget-strategy",
     "taskEstimatedBudgetUsd": null,
     "monthlyEstimatedBudgetUsd": null,
     "allowExtraCredits": false,
-    "allowPersonalApiKeyFallback": false,
-    "onNoEligibleCandidate": "pause-and-report",
-    "handoffBeforeReassignment": true
+    "allowPersonalApiKeyFallback": false
   },
   "providers": {
     "claude": {
       "enabled": true,
-      "kind": "claude",
-      "billing": "company-api",
+      "cli": "claude",
       "authentication": "existing-cli-company-configuration",
       "quotaPool": "company-claude",
-      "usageSources": ["session-statusline", "optional-company-quota-adapter"],
-      "actualCompanyBillingAvailable": false
+      "usageSources": [
+        "session-statusline",
+        "optional-company-quota-adapter"
+      ]
     },
     "codex": {
       "enabled": true,
-      "kind": "codex",
-      "billing": "personal-subscription",
+      "cli": "codex",
       "authentication": "chatgpt-subscription",
       "quotaPool": "personal-codex",
-      "usageSources": ["app-server-account-rate-limits"],
-      "modelAccess": "must-verify-current-account"
+      "usageSources": [
+        "app-server-account-rate-limits"
+      ]
     },
     "gemini": {
       "enabled": false,
-      "kind": "gemini",
-      "billing": "personal-subscription",
+      "cli": "gemini",
       "authentication": "google-subscription",
       "quotaPool": "personal-gemini",
-      "usageSources": ["unverified-adapter-or-explicit-usage-report"],
-      "modelAccess": "must-verify-current-account",
-      "adapterStatus": "planned-not-verified"
+      "usageSources": [
+        "unverified-adapter"
+      ]
     }
   },
-  "profiles": {
-    "claude-sonnet55": { "provider": "claude", "model": "azuer_ai/sonnet-5-5[1m]", "enabled": true, "tier": "standard" },
-    "claude-haiku45": { "provider": "claude", "model": "azuer_ai/haiku-4-5", "enabled": true, "tier": "simple" },
-    "claude-opus55": { "provider": "claude", "model": "azuer_ai/opus-5-5[1m]", "enabled": true, "tier": "advanced" },
-    "claude-opus5": { "provider": "claude", "model": "azuer_ai/opus-5[1m]", "enabled": true, "tier": "advanced" },
-    "claude-sonnet5": { "provider": "claude", "model": "azuer_ai/sonnet-5[1m]", "enabled": true, "tier": "standard" },
-    "codex-sol": { "provider": "codex", "model": "gpt-6.1-sol", "enabled": true, "tier": "standard" },
-    "codex-luna": { "provider": "codex", "model": "gpt-6-luna", "enabled": true, "tier": "simple" },
-    "gemini-pro": { "provider": "gemini", "model": "gemini-3-pro-preview", "enabled": false, "tier": "standard" },
-    "gemini-flash": { "provider": "gemini", "model": "gemini-3-flash-preview", "enabled": false, "tier": "simple" }
+  "defaultModel": {
+    "provider": "claude",
+    "model": "azuer_ai/sonnet-5-5[1m]",
+    "enabled": true,
+    "remainingThreshold": {
+      "metric": "quotaRemainingPercent",
+      "value": 0
+    }
   },
   "roles": {
     "PM": {
-      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
-      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+      "displayName": "Project Manager",
+      "purpose": "理解任務目標並協調團隊直到交付。",
+      "responsibilities": [
+        "理解目標並決定所需成員、派工與流程",
+        "協調依賴與順序",
+        "作為唯一使用者對口，彙整並轉述人工裁決",
+        "現有團隊不足時向使用者提出擴充提案",
+        "核對完成條件並驗收交付"
+      ],
+      "instructions": "只有你和使用者溝通。追加角色或成員前先向使用者提案並取得同意。不自行修改模型清單或門檻。",
+      "deliverables": [
+        "團隊與派工紀錄",
+        "裁決請求與使用者答覆",
+        "交付摘要"
+      ],
+      "enabled": true,
+      "models": [
+        {
+          "provider": "claude",
+          "model": "azuer_ai/sonnet-5-5[1m]",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 0
+          }
+        },
+        {
+          "provider": "claude",
+          "model": "azuer_ai/sonnet-5[1m]",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 0
+          }
+        },
+        {
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 50
+          }
+        }
+      ]
     },
     "SA1": {
-      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
-      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+      "displayName": "需求分析",
+      "purpose": "釐清需求與總體方向。",
+      "responsibilities": [
+        "分析需求、範圍與限制",
+        "提出總體方向",
+        "任務需要時撰寫需求說明或規格"
+      ],
+      "instructions": "需要人工裁決時交給 PM，不直接詢問使用者。",
+      "deliverables": [
+        "需求分析或規格文件"
+      ],
+      "enabled": true,
+      "models": [
+        {
+          "provider": "claude",
+          "model": "azuer_ai/opus-5-5[1m]",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 0
+          }
+        },
+        {
+          "provider": "claude",
+          "model": "azuer_ai/opus-5[1m]",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 0
+          }
+        },
+        {
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 50
+          }
+        },
+        {
+          "provider": "gemini",
+          "model": "gemini-3-pro-preview",
+          "enabled": false,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 50
+          }
+        }
+      ]
     },
     "SA2": {
-      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
-      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+      "displayName": "需求審閱",
+      "purpose": "獨立審閱需求分析成果。",
+      "responsibilities": [
+        "審閱 SA1 成果並直接質詢",
+        "提出議題、引用段落與建議",
+        "確認議題結論並通知 PM"
+      ],
+      "instructions": "只審閱與回覆議題，由作者修改文件；不能審閱自己撰寫的成果。",
+      "deliverables": [
+        "審閱議題與結論"
+      ],
+      "enabled": true,
+      "models": [
+        {
+          "provider": "claude",
+          "model": "azuer_ai/opus-5-5[1m]",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 0
+          }
+        },
+        {
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 70
+          }
+        }
+      ]
     },
     "SD1": {
-      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
-      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+      "displayName": "設計",
+      "purpose": "在任務需要時產出具體設計。",
+      "responsibilities": [
+        "界面、資料流與技術方案設計",
+        "說明取捨與影響"
+      ],
+      "instructions": "只在任務需要設計時工作；重要取捨交 PM 轉述給使用者。",
+      "deliverables": [
+        "設計文件"
+      ],
+      "enabled": true,
+      "models": [
+        {
+          "provider": "claude",
+          "model": "azuer_ai/sonnet-5-5[1m]",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 0
+          }
+        },
+        {
+          "provider": "codex",
+          "model": "gpt-6.1-sol",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 50
+          }
+        }
+      ]
     },
     "SD2": {
-      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
-      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+      "displayName": "設計審閱",
+      "purpose": "獨立審閱設計成果。",
+      "responsibilities": [
+        "審閱 SD1 成果並直接質詢",
+        "確認議題結論並通知 PM"
+      ],
+      "instructions": "只審閱與回覆議題，由作者修改文件；不能審閱自己撰寫的成果。",
+      "deliverables": [
+        "審閱議題與結論"
+      ],
+      "enabled": true,
+      "models": []
     },
     "PG": {
-      "priority": ["claude-sonnet55", "claude-sonnet5", "codex-sol", "gemini-pro"],
-      "simplePriority": ["claude-haiku45", "claude-sonnet55", "codex-luna", "gemini-flash"],
-      "advancedPriority": ["claude-opus55", "claude-opus5", "claude-sonnet55", "codex-sol", "gemini-pro"]
+      "displayName": "實作",
+      "purpose": "依已確立的成果實作與驗證。",
+      "responsibilities": [
+        "依設計或規格實作",
+        "執行驗證並回報結果"
+      ],
+      "instructions": "依已確立的成果工作；發現設計缺口時回報 PM，不自行擴大範圍。",
+      "deliverables": [
+        "程式變更",
+        "驗證結果"
+      ],
+      "enabled": true,
+      "models": [
+        {
+          "provider": "claude",
+          "model": "azuer_ai/sonnet-5-5[1m]",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 0
+          }
+        },
+        {
+          "provider": "claude",
+          "model": "azuer_ai/haiku-4-5",
+          "enabled": true,
+          "remainingThreshold": {
+            "metric": "quotaRemainingPercent",
+            "value": 0
+          }
+        }
+      ]
+    },
+    "QA": {
+      "displayName": "品質驗證（停用示例）",
+      "purpose": "未啟用的可編輯擴充示例；不是已批准加入任何團隊的成員。",
+      "responsibilities": [
+        "依驗收情境做獨立驗證",
+        "回報缺陷與重現步驟"
+      ],
+      "instructions": "僅示範角色定義格式；啟用與加入團隊須依擴充流程取得使用者同意。",
+      "deliverables": [
+        "驗證報告"
+      ],
+      "enabled": false,
+      "models": []
     }
   }
 }
