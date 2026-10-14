@@ -98,7 +98,7 @@ supersedes: []
 | 流程 | 位置 |
 |---|---|
 | 使用 Spec Kit 的工作包 | `specs/<NNN-name>/verification.md`；封存後隨工作包移到 `archive/changes/<NNN-name>/work/verification.md` |
-| 直接開發（不用 Spec Kit） | 所屬專案 `docs/architecture/proposals/<topic>.md` 的「驗證紀錄」一節，或 `proposals/<topic>/verification.md` |
+| 直接開發（不用 Spec Kit） | 所屬專案 `docs/proposals/<topic>.md` 的「驗證紀錄」一節，或 `docs/proposals/<topic>/verification.md` |
 
 兩種位置的必填欄位與判定規則相同。
 

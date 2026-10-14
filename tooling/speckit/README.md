@@ -82,4 +82,4 @@ node tooling/speckit/install.mjs --project-dir <專案目錄>
 - `archive.md` 含 `## Manifest`（逐檔 sha256）與 `Metadata-Digest`。
 - change／capability／requirement ID 的白名單格式。
 
-完整構想、現況與待確認取捨見 [Spec Kit 擴充完整設計稿](../../docs/architecture/proposals/speckit-extension-design.md)（待確認 proposal，不是有效規格或 Policy）。
+完整構想、現況與待確認取捨見 [Spec Kit 擴充完整設計稿](../../docs/proposals/speckit-extension-design.md)（待確認 proposal，不是有效規格或 Policy）。

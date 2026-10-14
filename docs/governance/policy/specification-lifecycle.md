@@ -20,7 +20,7 @@ source: 採納時的設計 §12.1–§12.6；憲章原則 IV、VI
 
 | 層 | 位置 | 意義 | 狀態 |
 |---|---|---|---|
-| 人類輸入 | `docs/intent/<NNN-name>/intent.md`、`decision.md` | 這次為什麼做、限制、取捨 | 跟著工作包 |
+| 人類輸入（選用） | `docs/intent/<NNN-name>/intent.md`、`decision.md`；沒有時為記錄的探索稿或使用者指示 | 這次為什麼做、限制、取捨 | 跟著工作包；沒有正式輸入就沒有 inputs |
 | 工作包 | `specs/<NNN-name>/` | 這次的候選規格、研究、計畫、任務、驗證 | `draft` → `in-progress` → `verified`；或 `cancelled` / `superseded` |
 | 有效規格 | `docs/specifications/<capability>/spec.md` | 已驗證並採納、代表**現在**的行為 | `active` |
 | 封存 | `archive/changes/<NNN-name>/` | 歷史紀錄 | `adopted` / `cancelled` / `superseded`，唯讀 |
@@ -58,7 +58,7 @@ source: 採納時的設計 §12.1–§12.6；憲章原則 IV、VI
 - 動作：把 Delta 合併進有效規格並更新 Change Log；檢查 requirement ID 有沒有重複、有沒有被刪除後又重用；必要時更新 `docs/architecture/` 與使用手冊；長期決策提示寫成 ADR 或更新 Policy。
 
 ### R6 archive（§12.5）
-封存結構：`archive.md`（狀態、日期、change ID、來源路徑、`baseline-commit`、交付版本）、`inputs/`（原 intent / decision）、`work/`（原工作包完整內容）。
+封存結構：`archive.md`（狀態、日期、change ID、來源路徑、`baseline-commit`、交付版本）、`inputs/`（原正式 intent / decision；沒有時省略）、`work/`（原工作包完整內容）。
 - `archive.md` **不記錄** adopt 所在的 commit hash（一個檔案無法記錄包含它自己的 commit）；需要時以 change ID 從 git history 查詢。
 - 目標已存在時**拒絕覆蓋**：先比對內容，相同視為已完成，不同就報錯；重複執行是安全的（可重試）。
 - 清除這個工作包的**活動上下文**；現行導覽改指向封存位置。
@@ -82,7 +82,7 @@ source: 採納時的設計 §12.1–§12.6；憲章原則 IV、VI
 - 與目標 capability 無關的使用者變更不受影響，也不會被清理。
 
 ### R9a 不使用 Spec Kit 時的採納（ADR-0003）
-- 設計與驗證紀錄在所屬專案的 `docs/architecture/proposals/<topic>.md`（或 `<topic>/`）；開始時記錄 `baseline-commit` 與受影響的 capability。
+- 設計與驗證紀錄在所屬專案的 `docs/proposals/<topic>.md`（或 `<topic>/`）；開始時記錄 `baseline-commit` 與受影響的 capability。
 - 影響有效規格時，驗證通過後依 R1、R5、R9 **手動**更新有效規格與 Change Log：ID 不重複、不重用；Change Log 的 Archive 欄填該 proposal 的路徑。基線檢查以開始時記錄的 `baseline-commit` 為準。
 - R7 的原則同樣適用：先在暫存位置產生並檢查結果、套用前再檢查、失敗只回復本次觸及的檔案、不自行 stage 或 commit。暫存位置可以用系統暫存目錄，不需要為此初始化 Spec Kit。
 - 採納紀錄寫在 proposal：驗證依據、baseline、capability、變更的 requirement ID 與 Change Log 列。

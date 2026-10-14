@@ -66,7 +66,7 @@ dotnet test tests/Saintber.Forge.BlazorServer.UnitTests
 
 ### 使用 Spec Kit 開發
 
-在**專案目錄內**執行技能，例如 Claude 的 `/speckit-specify`、Codex 的 `$speckit-specify`；該專案必須已初始化自己的 `.specify/`。範圍清楚的工作可直接開發，設計與驗證紀錄放在所屬專案的 `docs/architecture/proposals/`，不建立工作包；適用治理與必要驗證仍須遵守（[開發流程](docs/developer-guide/development-workflows.md)）。細節見 [`docs/developer-guide/speckit-workflow.md`](docs/developer-guide/speckit-workflow.md)。
+在**專案目錄內**執行技能，例如 Claude 的 `/speckit-specify`、Codex 的 `$speckit-specify`；該專案必須已初始化自己的 `.specify/`。範圍清楚的工作可直接開發，設計與驗證紀錄放在所屬專案的 `docs/proposals/`，不建立工作包；適用治理與必要驗證仍須遵守（[開發流程](docs/developer-guide/development-workflows.md)）。細節見 [`docs/developer-guide/speckit-workflow.md`](docs/developer-guide/speckit-workflow.md)。
 
 ## 文件
 

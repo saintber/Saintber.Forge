@@ -2,7 +2,7 @@
 
 - 狀態：文件更新與 Codex 校閱完成；提交由提交流程另行處理
 - 流程：A 直接開發（只改文件與靜態目錄範本，不使用 Spec Kit）
-- 引用的設計：[ADR-0003](../../decisions/0003-development-workflow-granularity.md)（使用者 2026-10-13 核准的方向）；流程正本 [開發流程：三種顆粒度](../../../developer-guide/development-workflows.md)。本紀錄不重寫設計內容。
+- 引用的設計：[ADR-0003](../../architecture/decisions/0003-development-workflow-granularity.md)（使用者 2026-10-13 核准的方向）；流程正本 [開發流程：三種顆粒度](../../developer-guide/development-workflows.md)。本紀錄不重寫設計內容。
 - baseline-commit：`67f6ad5`（`backlogs/hub-restructure`，開始時工作目錄乾淨）
 - 受影響的 capability：不影響有效規格
 

@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "hashes": {
+    ".agents/skills/saintber-design/SKILL.md": "cb4b91bd9d26e376f4fc89633eb89f0f0082a63165e6573fb682841d23481cdc",
+    ".claude/skills/saintber-design/SKILL.md": "cb4b91bd9d26e376f4fc89633eb89f0f0082a63165e6573fb682841d23481cdc",
+    ".gemini/commands/saintber-design.toml": "e8e740bec4b105de57fe83c354b4a17b94c77cfbe627ae2151d9c1eb13413067"
+  }
+}

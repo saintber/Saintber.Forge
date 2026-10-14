@@ -45,7 +45,7 @@ source: 採納時的設計 §11.3、§13；ADR-0001 決策 9；憲章原則 V、
 1. 確認目標專案與模式（R2、R3）。
 2. 讀取目標專案的**憲章**與 **Policy 索引**（workspace 模式另讀 Hub 的 Policy 索引）。
 3. 依 Policy 的 `scope`、適用角色與本階段的 `applies-to`，載入適用的 Policy、相關架構文件與跨工具契約。**包含 specify、clarify、checklist**，不只 plan 之後的階段。
-4. 讀取相關的有效規格（先讀 `docs/specifications/README.md`）與本次的 intent / decision。
+4. 讀取相關的有效規格（先讀 `docs/specifications/README.md`）與本次**實際存在的**正式 Intent／Decision（`docs/intent/<NNN-name>/`）。**沒有**正式檔時，讀記錄的探索稿或需求來源（`docs/proposals/<topic>.md`、`<topic>/intent.md`、`<topic>/design.md`，或使用者指示）；來源必須明確、可定位，並寫明範圍與驗收。**不要求**必建 Intent（ADR-0005）。
 5. 把**實際讀取的檔案路徑**與 `baseline-commit` 記下，讓後續階段引用同一份上下文。
 
 ### R5 Policy Check（§11.3；憲章原則 V）

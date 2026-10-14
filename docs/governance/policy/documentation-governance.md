@@ -24,7 +24,7 @@ source: 採納時的設計 §3.2、§10、§11、§12.2；憲章原則 IV、VI�
 | 憲章 | 不可退讓的原則 | `.specify/memory/constitution.md`（**唯一正本，不保留副本**，§10.4） |
 | Policy | **必須**遵守什麼 | `docs/governance/policy/` |
 | 架構 | 系統**現在**怎麼運作（描述性） | `docs/architecture/` |
-| 設計提案 | 探索、方案、待決事項、直接開發的設計與驗證紀錄、Tool 方向（**不是**現況、Policy 或有效規格） | `docs/architecture/proposals/`（ADR-0003） |
+| 設計提案 | 需求分析、方案探索、待決事項、直接開發的設計與驗證紀錄、Tool 方向（**不是**現況、Policy 或有效規格） | `docs/proposals/`（ADR-0005；原位置 `docs/architecture/proposals/` 見 ADR-0005 的遷移映射） |
 | ADR | **為什麼**這樣選 | `docs/architecture/decisions/` |
 | 有效規格 | 系統**應該**有什麼行為（現行） | `docs/specifications/<capability>/` |
 | 工作包 | 這次要改什麼、怎麼做（pending） | `specs/<NNN-name>/` |
@@ -34,7 +34,7 @@ source: 採納時的設計 §3.2、§10、§11、§12.2；憲章原則 IV、VI�
 | 封存 | 歷史 | `archive/changes/`、`archive/governance/` |
 
 ### R2 描述性文件只描述已完成的實作（憲章原則 VI、VII）
-- `docs/architecture/` 的描述性文件與使用手冊**只描述已完成的實作**，**不得**把尚未實作的能力描述成現況。`docs/architecture/decisions/` 的 ADR 與其設計附件依 R3、R6 處理，可以記錄設計階段的提案與決策。`docs/architecture/proposals/` 的文件必須標明狀態、目前決策、本次範圍與尚未實作，不得把核准的方向寫成已交付（ADR-0003）。
+- `docs/architecture/` 的描述性文件與使用手冊**只描述已完成的實作**，**不得**把尚未實作的能力描述成現況。`docs/architecture/decisions/` 的 ADR 與其設計附件依 R3、R6 處理，可以記錄設計階段的提案與決策。`docs/proposals/` 的文件必須標明狀態、目前決策、本次範圍與尚未實作，不得把核准的方向寫成已交付（ADR-0003、ADR-0005）。
 - 尚未實作的能力，文件必須明確標示「尚未實作」，**不得**寫得像已經存在。
 - 描述性文件在變更**驗證並採納（adopt）後**更新。
 
@@ -69,13 +69,20 @@ source: 採納時的設計 §3.2、§10、§11、§12.2；憲章原則 IV、VI�
 - 工具遷出時，workspace Policy 必須內化，distribution Policy 保存版本固定的快照；共用文件改用**本地快照或有版本的網址**。遷出後不得留下指向舊父目錄的失效連結，也不依賴 main 分支的浮動內容。
 
 ### R9 文件結構（§10.1）
-Hub 與每個工具的 `docs/` 結構相同：`README.md`、`user-guide/`、`developer-guide/`、`architecture/`（含 `decisions/`；需要時含 `proposals/`，ADR-0003）、`governance/policy/`、`intent/`、`specifications/`。
+Hub 與每個工具的 `docs/` 結構相同：`README.md`、`user-guide/`、`developer-guide/`、`architecture/`（含 `decisions/`）、`proposals/`（設計提案，ADR-0005）、`governance/policy/`、`intent/`、`specifications/`。
 
 ### R10 設計提案的歸屬（ADR-0003）
 - 提案放在**擁有該工作的專案**；既有 Tool 的文件不留在 Hub。
-- Tool 尚未成立、owner 未確定時，可暫放 Hub `docs/architecture/proposals/` 並標明預計 owner；Tool 成立後移入其 `docs/`，修正連結，只保留一份正本。
+- Tool 尚未成立、owner 未確定時，可暫放 Hub `docs/proposals/` 並標明預計 owner；Tool 成立後移入其 `docs/`，修正連結，只保留一份正本。
 - 提案放在 `proposals/` 本身不等於批准，沒有 Policy 或有效規格的效力；在既有授權內經審閱確認的本次設計可以作為實作基準（憲章原則 VI）。
 - 草稿與 Tool 方向文件可以修改。結案的提案（已實作、已轉為 change、已撤回）留在原處作為歷史，內容不改寫，只更新導覽、連結、狀態等必要 metadata。已採納的設計版本與 ADR 附件是唯讀快照（R3）。
+
+### R11 探索稿的轉換紀錄（ADR-0004）
+- 探索內容轉為 change 時，在該主稿的「轉換紀錄」追加一列：轉換範圍、對應 change 與目前位置、來源 Git commit、日期。只在真正轉換時追加。
+- 來源 commit 必須真的包含被轉換的內容；尚未提交時先提交，或記為 `pending（未提交）`，不得偽造。
+- 已轉換的範圍不能藉修改主稿改動需求；後續新範圍另開 topic 或 change。
+- 紀錄缺漏或矛盾不等於從未轉換：先核對工作包、封存與有效規格，不覆寫、不依檔名推測，無法確認時請 owner 釐清。
+- 格式與判斷順序見 [開發流程 §11](../../developer-guide/development-workflows.md#11-探索稿的轉換紀錄)。
 
 ## Proposed（超出已採納設計的條文，待 owner 裁決）
 

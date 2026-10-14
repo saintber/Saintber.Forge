@@ -43,7 +43,7 @@ POL-SEC-001 的「尚未涵蓋」列出 Hub 自身的安全責任（bootstrap �
 | ID | 檔案 | scope | applies-to | 備註 |
 |---|---|---|---|---|
 | POL-STRUCT-001 | [project-structure.md](project-structure.md) | workspace | specify, plan, tasks, analyze, implement | 設計 §1.3、§3–§6、§14 的展開；R3 `.specify/` 時機依 ADR-0003 |
-| POL-DOC-001 | [documentation-governance.md](documentation-governance.md) | workspace | specify – adopt | 設計 §10、§12.2；憲章 IV、VI、VII；`proposals/` 與 R10 依 ADR-0003 |
+| POL-DOC-001 | [documentation-governance.md](documentation-governance.md) | workspace | specify – adopt | 設計 §10、§12.2；憲章 IV、VI、VII；`proposals/` 與 R10 依 ADR-0003；R11 轉換紀錄依 ADR-0004 |
 | POL-SPEC-001 | [specification-lifecycle.md](specification-lifecycle.md) | workspace | specify – adopt | 設計 §12 的展開；R9a 直接開發的採納依 ADR-0003 |
 | POL-SPECKIT-001 | [speckit-workflow.md](speckit-workflow.md) | workspace | 全部階段（選擇使用 Spec Kit 的工作） | 設計 §13；ADR-0001 決策 9；適用範圍與初始化時機依 ADR-0002、0003 |
 | POL-INVOKE-001 | [invocation-contract.md](invocation-contract.md) | distribution | specify – implement | 設計 §7、§8；**CLI 尚未實作，這是待實作去遵守的契約** |

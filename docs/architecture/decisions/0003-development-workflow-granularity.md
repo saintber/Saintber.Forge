@@ -3,6 +3,7 @@
 - 狀態：Accepted
 - 日期：2026-10-13
 - 核准者：`saintber`（使用者本次明確指示：「接受你的提案，請讓 claude 變更目前的專案設計與說明文件……說明文件請務必要包含這三種顆粒度大小的開發流程和使用的目錄的說明文件」；提案由 Codex 整理）
+- 後續修訂：提案目錄已由 [ADR-0005](0005-proposals-location-and-development-process.md) 移到 `docs/proposals/`（本文表格中的 `docs/architecture/proposals/` 是當時的位置）；其餘決策仍然有效。
 - 關聯：[ADR-0001](0001-hub-and-project-split.md)、[ADR-0002](0002-migration-delivery-scope.md)；流程正本 [開發流程：三種顆粒度](../../developer-guide/development-workflows.md)
 
 ## 背景

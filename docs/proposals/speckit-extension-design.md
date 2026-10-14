@@ -76,7 +76,7 @@
 | `docs/specifications/` | 已驗證並採納的現行需求；後續 change 先從這裡讀 |
 | `archive/changes/` | 歷史與證據，必要時追查；不預設把歷史需求載入成現行要求 |
 | 架構、ADR、Policy | 長期架構與治理；變更需依各自程序，不由 requirement 合併器自動改寫 |
-| 本稿 | 待確認設計；放在 `architecture/proposals/`，不提前拆成強制 Policy 或有效規格 |
+| 本稿 | 待確認設計；放在 `docs/proposals/`（原位置 `architecture/proposals/`，依 ADR-0005 移動），不提前拆成強制 Policy 或有效規格 |
 
 規格「唯一」指同一 capability、同一 requirement ID 只有一個有效定義；允許多個工作包討論變更，歷史封存也可保留舊文字。capability 以行為責任劃分，例如 `speckit-context`，不以每次 branch 劃分。
 
@@ -329,12 +329,12 @@ flowchart LR
 
 ## 14. 來源與核對紀錄
 
-- [採納時的總體設計快照](../decisions/0001-attachments/design-2026-10-adopted.md)：方向與歷史。
-- [本次遷移範圍 ADR](../decisions/0002-migration-delivery-scope.md)：使用者指定的收尾範圍；不是取消未完成功能構想。
-- [規格生命週期 Policy](../../governance/policy/specification-lifecycle.md)、[Spec Kit Workflow Policy](../../governance/policy/speckit-workflow.md)：現有治理；自動化缺口不代表既有規則失效。
-- [001 工作包](../../../specs/001-stage1-speckit-extension/spec.md)、[研究](../../../specs/001-stage1-speckit-extension/research.md)：包含先前範圍與試驗，正在同步本次交付邊界，不優先於使用者的新指示。
-- [擴充原始碼](../../../tooling/speckit/extension/)、[安裝器](../../../tooling/speckit/install.mjs)：目前實作，不代表全部設計已定案。
-- [操作指引](../../developer-guide/speckit-workflow.md)、[遷移狀態](../../migration-status.md)：仍在收尾同步；正式交付時需與驗證紀錄一致。
+- [採納時的總體設計快照](../architecture/decisions/0001-attachments/design-2026-10-adopted.md)：方向與歷史。
+- [本次遷移範圍 ADR](../architecture/decisions/0002-migration-delivery-scope.md)：使用者指定的收尾範圍；不是取消未完成功能構想。
+- [規格生命週期 Policy](../governance/policy/specification-lifecycle.md)、[Spec Kit Workflow Policy](../governance/policy/speckit-workflow.md)：現有治理；自動化缺口不代表既有規則失效。
+- [001 工作包](../../specs/001-stage1-speckit-extension/spec.md)、[研究](../../specs/001-stage1-speckit-extension/research.md)：包含先前範圍與試驗，正在同步本次交付邊界，不優先於使用者的新指示。
+- [擴充原始碼](../../tooling/speckit/extension/)、[安裝器](../../tooling/speckit/install.mjs)：目前實作，不代表全部設計已定案。
+- [操作指引](../developer-guide/speckit-workflow.md)、[遷移狀態](../migration-status.md)：仍在收尾同步；正式交付時需與驗證紀錄一致。
 
 核對紀錄：Codex 已依目前原始碼、001、Policy 與既有驗收範圍整理；Claude 於 2026-10-07 核對並提出七項現況修正、六項實作格式限制，本稿已補入。**這是雙方目前設計與差異的整理，使用者尚未確認；不等於程式交付驗收完成。** 本稿暫不採納、封存或提交為已批准需求。
 

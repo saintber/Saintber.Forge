@@ -41,7 +41,7 @@ forge-explorer 在 workspace 內開發，繼承 Hub 的下列 Policy（Hub 憲�
 
 | 位置 | 原文寫的 | 現況 |
 |---|---|---|
-| `implementation-definition-of-done.md`（Verification Record 位置） | 原位置 `docs/plan/verification/<change-id>.verify.md` | **已修訂**為 `specs/<NNN-name>/verification.md`，正文已有路徑修訂註記（見 Hub 的 POL-DOD-001 R7）；2026-10-13 依 Hub ADR-0003 補上直接開發的位置（`docs/architecture/proposals/`），規則不變 |
+| `implementation-definition-of-done.md`（Verification Record 位置） | 原位置 `docs/plan/verification/<change-id>.verify.md` | **已修訂**為 `specs/<NNN-name>/verification.md`，正文已有路徑修訂註記（見 Hub 的 POL-DOD-001 R7）；2026-10-13 依 Hub ADR-0003 補上直接開發的位置（原位置 `docs/architecture/proposals/`，2026-10-14 依 Hub ADR-0005 改為 `docs/proposals/`），規則不變 |
 | `testing-governance.md`（「所有 Forge 專案…皆須遵循」） | 適用所有 Forge 專案與子項目 | 只適用 forge-explorer；通用原則由 Hub 的 POL-TEST-001 涵蓋 |
 | `testing-governance.md`（Decision 文件位置） | `docs/intent/<intent-id>-<intent-name>/` | 現在是 `docs/intent/<NNN-name>/decision.md`（小寫檔名）；封存後在 `archive/changes/<NNN-name>/inputs/` |
 | `testing-governance.md`（兩處 `:contentReference[...]`） | 無意義的殘留標記 | 是舊文件產生時留下的雜訊，可在修訂時移除 |

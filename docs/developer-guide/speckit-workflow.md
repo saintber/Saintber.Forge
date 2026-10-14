@@ -5,7 +5,7 @@
 >
 > **重要**：「已知限制」與「尚未完成」列出的項目目前**還不存在或尚未驗收**，不要假設可以使用。
 >
-> **不是所有工作都要走 Spec Kit**：先依 [開發流程：三種顆粒度](development-workflows.md) 選擇流程（ADR-0003）。本文只說明**選擇使用 Spec Kit 時**（流程 B，以及 C 拆出來的 change）的做法。直接開發的設計與驗證紀錄放在 `docs/architecture/proposals/`；影響有效規格時依 POL-SPEC-001 R9a 手動採納。
+> **不是所有工作都要走 Spec Kit**：先依 [開發流程：三種顆粒度](development-workflows.md) 選擇流程（ADR-0003）。本文只說明**選擇使用 Spec Kit 時**（流程 B，以及 C 拆出來的 change）的做法。直接開發的設計與驗證紀錄放在 `docs/proposals/`；影響有效規格時依 POL-SPEC-001 R9a 手動採納。
 
 本文說明 Hub 與各專案如何使用 Spec Kit 與 SDD（規格驅動開發）文件，不定義任何業務規則或技術決策。
 
@@ -15,25 +15,29 @@
 |---|---|---|
 | **Constitution** | `.specify/memory/constitution.md` | 不可退讓的治理原則。所有文件與實作都不得違反。正本只有這一份，不保留副本 |
 | **Policy** | `docs/governance/policy/` | 長期且通用的規範。具約束力；違反需要 owner 核准的例外。見該目錄的 `README.md` |
-| **設計提案** | `docs/architecture/proposals/<topic>.md` | specify 之前未編號的探索、候選方案、待決事項；**不是**需求或現況。確定要做時整理成 Intent |
-| **Intent** | `docs/intent/<NNN-name>/intent.md` | 為什麼要做這次變更。保存人類對問題的理解及其演進，不描述實作方式 |
-| **Decision** | `docs/intent/<NNN-name>/decision.md` | 在特定 Intent 前提下的實作約束或取捨。只適用該 Intent；若演變成長期通用規則，要升級為 Policy |
-| **工作包** | `specs/<NNN-name>/` | 進行中的變更提案：spec、plan、tasks、驗證等。由 Spec Kit 依 Intent / Decision / Policy 產生 |
+| **提案** | `docs/proposals/<topic>.md`（或 `<topic>/intent.md`、`<topic>/design.md`） | specify 之前未編號的需求分析與方案探索；**不是**現況。確定要做時可直接作為 specify 的來源，**不強制**整理成正式 Intent |
+| **正式 Intent**（選用） | `docs/intent/<NNN-name>/intent.md` | 為什麼要做這次變更。保存人類對問題的理解及其演進，不描述實作方式。沒有正式 Intent 時，以記錄的探索稿／使用者指示作為來源，並寫明範圍與驗收 |
+| **Decision**（選用） | `docs/intent/<NNN-name>/decision.md` | 在特定輸入前提下的實作約束或取捨。只適用該 change；若演變成長期通用規則，要升級為 Policy |
+| **工作包** | `specs/<NNN-name>/` | 進行中的變更提案：spec、plan、tasks、驗證等。由 Spec Kit 依**已記錄的需求來源**（正式 Intent／Decision、探索稿或使用者指示）與**適用的治理**產生，不要求一定有 Intent 與 Decision 兩個輸入檔 |
 | **有效規格** | `docs/specifications/<capability>/spec.md` | 已驗證並採納、代表「現在」行為的規格。每個 capability 只有一份 |
 | **封存** | `archive/changes/<NNN-name>/` | 已完成、取消或被取代的工作包與其輸入，唯讀歷史 |
 | **架構** | `docs/architecture/` | 現在系統怎麼運作。ADR 在 `decisions/` |
 
-**Intent** 是需求的來源（為什麼要做）。**工作包的 `spec.md`** 是可驗收的需求規格，但在驗證並採納（adopt）之前，它是**候選與實作基準，仍是 pending**，不是現況。**有效規格**才是「現在」的行為。Plan、Tasks、Verification 屬於實作與交付層。
+**需求的來源**可以是正式 Intent、topic 的早期 `intent.md`、探索稿，或使用者的明確指示（需記錄來源、範圍與驗收）；其中正式 Intent 是選用的（為什麼要做）。**工作包的 `spec.md`** 是可驗收的需求規格，但在驗證並採納（adopt）之前，它是**候選與實作基準，仍是 pending**，不是現況。**有效規格**才是「現在」的行為。Plan、Tasks、Verification 屬於實作與交付層。
 
-## 2. Intent 的規則
+## 2. 正式 Intent 的規則
+
+> **適用範圍**：本節只適用於**有建立**正式 change Intent（`docs/intent/<NNN-name>/`）的情況；正式 Intent 是選用的（ADR-0005）。
+>
+> topic 下的**早期 `intent.md`**（需求分析，在 `docs/proposals/`）**不適用**本節：它**不強制**有 Intent Version Index 或 Current Effective Intent，也不一定要依下方大綱撰寫；規則見 [開發流程 §10.1](development-workflows.md#101-六個階段)。正式 Intent 若從早期 `intent.md` 整理，要明確指定單一來源並凍結被承接的範圍。
 
 ### 定位
 Intent 記錄：原始利害關係人需求、問題定義與動機、功能意圖的演進。
 
 Intent **不是**規格書、實作說明或 Release Note。進入 specify 前，它只整理本次問題、情境、範圍與非目標、已確立的限制、未決事項、驗收方向與來源連結；不先寫與 spec 重複的完整規格，也不把探索中的所有候選方案當成需求（[開發流程 §5.2](development-workflows.md#52-從探索到-change)）。
 
-### 單檔、多版本
-- 每個 Intent 只有**一份** `intent.md`，用文件內的 **Intent Version Index** 記錄意圖的演進。
+### 單檔、多版本（有建立正式 Intent 時）
+- 每個正式 Intent 只有**一份** `intent.md`，用文件內的 **Intent Version Index** 記錄意圖的演進。
 - 版本代表「人類理解與需求認知的演進」，**不是**實作版本或交付版本。
 - 只有 **Current Effective Intent** 之後的內容是目前有效的意圖。歷史版本**不得**被推導成現行需求。
 
@@ -89,6 +93,8 @@ Intent **不是**規格書、實作說明或 Release Note。進入 specify 前�
 取消或被取代：直接 archive（cancelled / superseded），不 adopt
 ```
 
+對應的工作階段：specify、clarify 是需求規格；plan、tasks、analyze 是技術設計；implement、verify 是實作與驗證；adopt、archive 是採納與封存（[開發流程 §10](development-workflows.md#10-工作階段與溝通用詞)）。
+
 完整規則（驗證關卡、基線衝突、套用失敗的處理、不覆蓋與可重試）見 [`採納時的設計（快照）`](../architecture/decisions/0001-attachments/design-2026-10-adopted.md) §12。
 
 ### 指令現況
@@ -142,9 +148,10 @@ Intent **不是**規格書、實作說明或 Release Note。進入 specify 前�
 目標專案：<project-id>
 
 Inputs:
-- docs/intent/<NNN-name>/intent.md
-- docs/intent/<NNN-name>/decision.md
-- （選用）docs/architecture/proposals/<topic>.md：只作背景，需求以 intent 為準
+- 實際存在的 docs/intent/<NNN-name>/intent.md 與 decision.md（正式輸入，選用）
+- 沒有正式輸入時：記錄的來源（docs/proposals/<topic>.md 或 <topic>/intent.md、design.md，或使用者指示），並寫明範圍與驗收
+- 早期 intent 與正式 Intent 同時存在時：**有正式 Intent，就以它的 Current Effective Intent 作為本次輸入**；早期稿中被承接的範圍已凍結，只作來源追溯，不當成現行輸入；未被承接的範圍仍可繼續討論
+- 沒有正式 Intent 時：明確指定實際的需求來源（上一項），不猜測
 
 Policies（依專案而定，位置見各專案的 docs/governance/policy/README.md）:
 - .specify/memory/constitution.md
@@ -152,7 +159,7 @@ Policies（依專案而定，位置見各專案的 docs/governance/policy/README
 - 專案：docs/governance/policy/
 
 Instruction:
-- 僅使用 Current Effective Intent 作為需求基準
+- 有正式 Intent 時，僅使用其 Current Effective Intent 作為本次需求基準；早期稿被承接的範圍只作追溯
 - 不得從歷史 Intent Version 推導需求
 - 先讀 docs/specifications/README.md，判斷影響哪些 capability
 ```
@@ -160,5 +167,5 @@ Instruction:
 ## 6. 維護原則
 - Intent 可以隨理解演進補充版本紀錄。
 - Decision 可以被更新、撤銷或升級為 Policy。
-- 完成、取消或被取代的工作包與輸入，整體移到 `archive/changes/`，不留在 `specs/` 與 `docs/intent/`。
+- 完成、取消或被取代的工作包與**實際存在的**正式輸入，整體移到 `archive/changes/`，不留在 `specs/` 與 `docs/intent/`。
 - 文件保持單一責任，避免跨類型混寫。

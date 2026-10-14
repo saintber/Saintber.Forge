@@ -32,7 +32,7 @@ docs/
 ├─ intent/                    Spec Kit 的人類輸入（進行中的變更）
 ├─ user-guide/                使用手冊入口已建立；產品操作內容待實作
 ├─ architecture/              現行架構概觀與 ADR（CLI 架構待實作後補）
-│  └─ proposals/              設計提案與探索（草稿，不是現況或規格）
+├─ proposals/                 設計提案：需求分析與方案探索（草稿，不是現況或規格）
 └─ specifications/            有效規格索引已建立；Hub 尚無已採納 capability
 ```
 
@@ -41,7 +41,7 @@ docs/
 | 使用手冊 | 怎麼安裝、設定、執行？ | [`user-guide/`](user-guide/README.md)（產品內容待實作） |
 | 開發者手冊 | 怎麼開發、發佈、遷出？ | [`developer-guide/`](developer-guide/) |
 | 架構 | 系統**現在**怎麼運作？為什麼這樣選？ | [`architecture/`](architecture/README.md)（已有概觀與 ADR） |
-| 設計提案 | 想怎麼做？還在討論什麼？ | [`architecture/proposals/`](architecture/proposals/README.md)（草稿；不是現況、Policy 或有效規格） |
+| 設計提案 | 需求分析與方案探索：想怎麼做？還在討論什麼？ | [`proposals/`](proposals/README.md)（草稿；不是現況、Policy 或有效規格） |
 | Policy | **必須**遵守什麼？ | [`governance/policy/`](governance/policy/README.md) |
 | Intent | **為什麼**要做這次變更？ | `intent/` |
 | 有效規格 | 系統**應該**有什麼行為（現行）？ | [`specifications/`](specifications/README.md)（Hub 目前沒有已採納條款） |

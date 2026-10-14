@@ -44,7 +44,7 @@
 
 `001-stage1-speckit-extension` 留在 `specs/`，**整個工作包 Not Done，未 adopt、未 archive**。已驗證的程式與安全修正可保存提交，不等於完整設計、嚴格 Delta／Snapshot／Manifest 格式已經由使用者確認。
 
-完整構想與新增格式限制保存在 [待審設計稿](architecture/proposals/speckit-extension-design.md)。這項審閱不阻擋本次遷移，也不阻擋其他 worktree 直接開發小型 skill。
+完整構想與新增格式限制保存在 [待審設計稿](proposals/speckit-extension-design.md)。這項審閱不阻擋本次遷移，也不阻擋其他 worktree 直接開發小型 skill。
 
 | 保留事項 | 狀態 |
 |---|---|
