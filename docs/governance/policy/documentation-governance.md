@@ -28,7 +28,7 @@ source: 採納時的設計 §3.2、§10、§11、§12.2；憲章原則 IV、VI�
 | ADR | **為什麼**這樣選 | `docs/architecture/decisions/` |
 | 有效規格 | 系統**應該**有什麼行為（現行） | `docs/specifications/<capability>/` |
 | 工作包 | 這次要改什麼、怎麼做（pending） | `specs/<NNN-name>/` |
-| Intent / Decision | 為什麼要做這次變更 | `docs/intent/<NNN-name>/` |
+| Intent / Decision | 為什麼要做這次變更（正式輸入，選用；管理見 [Intent 管理](../../developer-guide/intent-workflow.md)，ADR-0006） | `docs/intent/<NNN-name>/` |
 | 使用手冊 | 怎麼安裝、設定、執行 | `docs/user-guide/` |
 | 開發者手冊 | 怎麼開發、發佈、遷出 | `docs/developer-guide/` |
 | 封存 | 歷史 | `archive/changes/`、`archive/governance/` |
@@ -86,4 +86,6 @@ Hub 與每個工具的 `docs/` 結構相同：`README.md`、`user-guide/`、`dev
 
 ## Proposed（超出已採納設計的條文，待 owner 裁決）
 
-目前**沒有**。
+### P1 Intent 管理擴充（ADR-0006 Proposed）
+
+新增的修訂摘要、語意版本、明確現行邊界、多來源承接及快照管理，詳見 [Intent 管理草稿](../../developer-guide/intent-workflow.md)。本提案待 owner 採納，尚未修訂 R5 或成為具約束力的新規則。

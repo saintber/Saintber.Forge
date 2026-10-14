@@ -68,6 +68,10 @@ Intent **不是**規格書、實作說明或 Release Note。進入 specify 前�
 - 每個 Intent 最多一份 `decision.md`。
 - 記錄該 Intent 下的實作約束與取捨，只適用於該 Intent。
 
+### 管理擴充提案（待採納）
+
+修訂摘要、語意版本、明確現行邊界、多來源承接與快照的候選格式見 [Intent 管理草稿](intent-workflow.md)（ADR-0006 Proposed）。它們尚未取代上方既有規則；新範本僅提供候選示例。
+
 ## 3. 規格的唯一性
 
 唯一的是**同一 capability 與 requirement ID 的有效定義**，不是整個 repo 只能有一個 `spec.md`。

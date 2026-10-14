@@ -15,11 +15,11 @@ Hub 憲章已於 2026-10-06 由使用者批准（**Active v1.0.0**），其原�
 | **A. 已核准或治理方向的展開** | ① 提煉自舊 Forge Policy 的原有規則（使用者先前已核准）；② 本索引所列現行 Policy 對已核准治理方向與 ADR 決策的展開，每條標示出處；③ 使用者已明確指示的規則（例如「禁止實作違背文件，先改設計再實作」）。快照中尚未討論的功能細節不因此成為完整需求或實作授權（ADR-0002） | **適用的治理規則具約束力；功能需求仍由本次 change 確立** |
 | **B. 超出已採納設計的新增條文（Proposed）** | 設計與 ADR 中**沒有出處**的新規範 | **不因 `status: active` 就自動生效**，在 owner 裁決前是提案。見下方「待裁決」 |
 
-目前沒有待裁決的 B 類條文；已列出的規範條文均屬 A 類。未制定規則的範圍另列為缺口，不算 Proposed 條文。
+Intent 管理擴充（ADR-0006 Proposed、POL-DOC-001 P1）待 owner 採納；其餘已列出的現行規範維持 A 類。未制定規則的範圍另列為缺口，不算 Proposed 條文。
 
 ### 待裁決（B 類，Proposed）
 
-**目前沒有**需要 owner 裁決的新規範條文。五份新撰寫的 Policy（`POL-STRUCT-001`、`POL-DOC-001`、`POL-SPEC-001`、`POL-SPECKIT-001`、`POL-INVOKE-001`）每條都標示設計或憲章的出處，**文末的「Proposed」一節皆為「目前沒有」**。
+待採納：POL-DOC-001 P1 的 Intent 管理擴充，見 [ADR-0006](../../architecture/decisions/0006-intent-management-strategy.md) 與 [設計稿](../../proposals/intent-management/design.md)。R5 的既有規則未因本次文件設計變更。
 
 > 若審閱發現某條**其實沒有出處**，請指出：該條應降為 B 類（Proposed），或補上出處。
 
@@ -43,7 +43,7 @@ POL-SEC-001 的「尚未涵蓋」列出 Hub 自身的安全責任（bootstrap �
 | ID | 檔案 | scope | applies-to | 備註 |
 |---|---|---|---|---|
 | POL-STRUCT-001 | [project-structure.md](project-structure.md) | workspace | specify, plan, tasks, analyze, implement | 設計 §1.3、§3–§6、§14 的展開；R3 `.specify/` 時機依 ADR-0003 |
-| POL-DOC-001 | [documentation-governance.md](documentation-governance.md) | workspace | specify – adopt | 設計 §10、§12.2；憲章 IV、VI、VII；`proposals/` 與 R10 依 ADR-0003；R11 轉換紀錄依 ADR-0004 |
+| POL-DOC-001 | [documentation-governance.md](documentation-governance.md) | workspace | specify – adopt | 設計 §10、§12.2；憲章 IV、VI、VII；`proposals/` 與 R10 依 ADR-0003；R11 轉換紀錄依 ADR-0004；Intent 管理擴充列為 P1（ADR-0006 Proposed），R5 現行規則保持不變 |
 | POL-SPEC-001 | [specification-lifecycle.md](specification-lifecycle.md) | workspace | specify – adopt | 設計 §12 的展開；R9a 直接開發的採納依 ADR-0003 |
 | POL-SPECKIT-001 | [speckit-workflow.md](speckit-workflow.md) | workspace | 全部階段（選擇使用 Spec Kit 的工作） | 設計 §13；ADR-0001 決策 9；適用範圍與初始化時機依 ADR-0002、0003 |
 | POL-INVOKE-001 | [invocation-contract.md](invocation-contract.md) | distribution | specify – implement | 設計 §7、§8；**CLI 尚未實作，這是待實作去遵守的契約** |

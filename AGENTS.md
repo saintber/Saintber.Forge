@@ -33,3 +33,10 @@
 - `speckit-hub-adopt`／`speckit-hub-archive` 已有實作，但完整設計與格式仍待確認，見 [`擴充設計稿`](docs/proposals/speckit-extension-design.md)。使用這些腳本時，被拒絕就照錯誤處理，**不要手動改有效規格來繞過**；它們只處理 `specs/<NNN-name>/` 工作包；直接開發影響有效規格時，依 POL-SPEC-001 R9a 手動採納並留下紀錄。
 - 這些指令都**不會自行** stage 或 commit；提交由另外取得使用者授權的提交流程處理。
 - 已知限制（plan 的 Policy Check、編號掃描）見 `docs/developer-guide/speckit-workflow.md` 的「已知限制」。
+
+## Herdr 代理協作
+
+- 使用者允許有需要時在其指定的 Space／Tab 新增 Claude 支援；本次為 Personal／Saintber Forge - 重定義。保持目前工作目錄與使用者焦點，不動既有視窗的未送出草稿。
+- 開啟新 pane 時，先設定能辨識工作目的與模型的標題，例如「Intent 文件審閱（Sonnet）」。
+- 委派時明確要求代理完成後主動回報主代理，附摘要、結果位置與待決事項；只給任務及回報所需的工具權限。沒有通知工具時使用等待工具接收完成狀態，避免頻繁讀取畫面；超時或疑似停滯時才主動檢查。
+- 自行開啟的 pane，在收到結果且不再需要時關閉；若審閱未通過、仍需沿用 session 記憶複審，可保留到收尾。不要關閉使用者原有的 pane。

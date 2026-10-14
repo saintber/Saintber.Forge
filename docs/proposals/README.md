@@ -19,6 +19,8 @@
 
 **同一角色一份主稿**：`intent.md`（需求分析）與 `design.md`（方案探索）是不同責任，不是互相競爭的主稿；一個 topic 的同一角色只有一份。早期 `intent.md` 不是正式 change 的 Intent（`docs/intent/<NNN-name>/`，選用）。
 
+需求（Intent）的重要修訂才記錄（日期、改了什麼、為什麼、真實依據；來源不明標 pending），不用 v1／v2 副本；需要保留全文時可選用 `docs/proposals/<topic>/history/intent-<id>.md`（`<id>` 唯一，不覆寫） 唯讀快照。詳見 [Intent 管理](../developer-guide/intent-workflow.md)。
+
 ## 每份提案開頭要寫
 
 ```markdown
@@ -41,6 +43,7 @@
 |---|---|---|
 | [`speckit-extension-design.md`](speckit-extension-design.md) | 待使用者確認 | Spec Kit 擴充的完整構想、目前實作與未完成部分 |
 | [`task-team-design.md`](task-team-design.md) | 待釐清，尚未實作 | 按任務啟動 AI 團隊；目錄歸屬待決，設定草稿見 [`task-team-config.example.json`](task-team-config.example.json) |
+| [`intent-management/design.md`](intent-management/design.md) | 草案（管理規則待採納） | 文件交付與校閱已完成，見 [驗證紀錄](intent-management/verification.md)；技能尚未實作 |
 | [`development-workflow-granularity/verification.md`](development-workflow-granularity/verification.md) | 已完成（結案） | 本次流程文件更新的驗證紀錄；設計見 ADR-0003 |
 | [`development-phase-terminology/verification.md`](development-phase-terminology/verification.md) | 已完成（結案） | 四個工作階段與溝通用詞的整合紀錄 |
 | [`exploration-conversion-tracking/verification.md`](exploration-conversion-tracking/verification.md) | 已完成（結案） | 轉換追蹤流程與 Claude 隔離代理驗證；決策見 ADR-0004 |
