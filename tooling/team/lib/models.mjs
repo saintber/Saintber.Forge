@@ -15,7 +15,7 @@ export function remainingFromWindows(windows) {
   for (const w of windows) {
     const remaining = typeof w.remainingPercent === 'number' ? w.remainingPercent
       : typeof w.usedPercent === 'number' ? 100 - w.usedPercent : null;
-    if (remaining === null || !Number.isFinite(remaining)) return null;
+    if (remaining === null || !Number.isFinite(remaining) || remaining < 0 || remaining > 100) return null;
     min = Math.min(min, remaining);
   }
   return Math.max(0, min);
@@ -27,7 +27,9 @@ export function normalise(observation, { now = Date.now(), maxAgeMs = 120000 } =
   const signal = observation.signal ?? null;
   const fresh = observation.at === undefined || now - Date.parse(observation.at) <= maxAgeMs;
   let remaining = typeof observation.remaining === 'number' ? observation.remaining : remainingFromWindows(observation.windows);
-  const known = observation.reliable === true && fresh && remaining !== null && Number.isFinite(remaining);
+  // Percent values outside 0..100 are corrupt data: unknown, never a recovery or exhaustion proof.
+  const valid = remaining !== null && Number.isFinite(remaining) && remaining >= 0 && remaining <= 100;
+  const known = observation.reliable === true && fresh && valid;
   if (!known) remaining = null;
   const limit = signal === 'quota-exhausted' || (observation.reliable === true && fresh && (observation.hardLimit === true || remaining === 0));
   return { known, remaining, limit, signal };

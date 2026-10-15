@@ -5,7 +5,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { writeNew, assertInside } from './store.mjs';
 
-export const EVENT_TYPES = new Set(['ack', 'progress', 'heartbeat', 'milestone', 'blocked', 'decision-needed', 'completed', 'handoff', 'waiting-for-quota', 'message']);
+export const EVENT_TYPES = new Set(['ack', 'progress', 'heartbeat', 'checkpoint', 'milestone', 'blocked', 'decision-needed', 'completed', 'handoff', 'waiting-for-quota', 'message']);
 // Never coalesced away; each is delivered on its own.
 export const IMPORTANT = new Set(['blocked', 'decision-needed', 'completed', 'handoff', 'waiting-for-quota', 'message']);
 const ID = /^[A-Za-z0-9_-]{6,80}$/;
@@ -28,6 +28,7 @@ export function validateEvent(event, { teamId, memberId, eventId, members }) {
   if (typeof event.summary !== 'string' || !event.summary.trim() || event.summary.length > 2000) return 'EVENT_SUMMARY_INVALID';
   if (event.paths !== undefined && (!Array.isArray(event.paths) || event.paths.some(p => typeof p !== 'string'))) return 'EVENT_PATHS_INVALID';
   if (event.type === 'message' && (typeof event.to !== 'string' || !members[event.to])) return 'EVENT_TARGET_INVALID';
+  if (event.type === 'checkpoint' && (!Array.isArray(event.paths) || event.paths.length !== 1 || !event.paths[0].trim())) return 'EVENT_CHECKPOINT_PATH_REQUIRED';
   if (!members[memberId]) return 'EVENT_MEMBER_UNKNOWN';
   return null;
 }
@@ -36,8 +37,14 @@ export function validateEvent(event, { teamId, memberId, eventId, members }) {
 // the JSON file with their own file tool; the controller reads either the same way.
 export function writeEvent(teamDir, teamId, memberId, fields) {
   const eventId = fields.eventId ?? newEventId();
-  const event = { schemaVersion: 1, teamId, memberId, eventId, createdAt: new Date().toISOString(), ...fields };
-  writeNew(path.join(outboxDir(teamDir, memberId), `${eventId}.json`), JSON.stringify(event, null, 2) + '\n');
+  if (typeof eventId !== 'string' || !ID.test(eventId)) throw new Error(`INVALID_EVENT_ID: ${eventId}`);
+  for (const key of ['teamId', 'memberId', 'schemaVersion', 'createdAt']) {
+    if (key in fields) throw new Error(`EVENT_IDENTITY_OVERRIDE: ${key}`);
+  }
+  // Identity is fixed by the caller's own member and applied last.
+  const event = { ...fields, schemaVersion: 1, teamId, memberId, eventId, createdAt: new Date().toISOString() };
+  const dir = outboxDir(teamDir, memberId);
+  writeNew(assertInside(dir, path.join(dir, `${eventId}.json`)), JSON.stringify(event, null, 2) + '\n');
   return event;
 }
 

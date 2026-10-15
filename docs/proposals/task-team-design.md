@@ -1,15 +1,15 @@
 # 按任務啟動 AI 團隊：設計草稿
 
 - 類型：合併稿（需求分析＋方案探索，單檔 `<topic>.md`）
-- 狀態：**實作中**（A 直接開發；設計經使用者同意作為實作基準，2026-10-14）
+- 狀態：**已實作並已採納（結案，待提交）**（A 直接開發；設計經使用者同意作為實作基準，2026-10-14）。驗證範圍與限制見第四輪 Verification Record；有效規格為 [`docs/specifications/task-team/spec.md`](../specifications/task-team/spec.md)。提交由 Codex 依使用者授權處理
 - Owner：Hub（本次實作落地為 repo 開發工具 `tooling/team/`＋`tooling/skills/task-team/`，見 §2；不建立 project、不做 npm 產品化）
 - 使用者來源：2026-10-07 初稿需求；2026-10-14 使用者對模型組態、餘額門檻、PM 對口、主動回報、回報權限與流程中立的修正，以及同日追加的「角色可擴充」需求（經 Codex 協調轉述，見「需求修訂紀錄」）
 - 本次修訂基線：HEAD `0656d61`。本次整體設計修訂最初開始時 Git 乾淨；角色擴充修訂開始時，前輪對本稿、JSON 附件與 README 三份文件的修訂**尚未提交**，予以保留。前幾輪（模型、回報、角色擴充）只修訂設計文件與 JSON 附件；實作輪（2026-10-14 起）依 §11 新增 `tooling/team/` 與 `tooling/skills/task-team/`
 - 目前決策：只有 §9「已裁決事項」的八項行為是使用者已裁決（2026-10-14 指示）；其他介面、欄位名稱、數值與流程細節仍是探索中的草案。Q1 已於實作授權內落地為 Hub 開發工具（§2）
 - 本次範圍：實作 §11 技術方案（team CLI、核心模組、測試、task-team skill 三入口）、Pane／Space／Tab 規則（§3.4）；以及已同意的可配置角色與擴充、模型組態與門檻語意、PM 對口、主動回報與逾期診斷、回報權限、流程中立的任務流程
-- 尚未實作：實作進行中，完成範圍與限制見 §11 與驗證紀錄；`quotaRemainingPercent` 以外的 metric 不在本次範圍
+- 尚未實作／未驗證：Gemini 實機與用量 adapter、Claude 公司 Azure 的數字額度、三個 CLI 對技能的端對端載入與遵循、`quotaRemainingPercent` 以外的 metric；實機證據只涵蓋第四輪列出的範圍
 
-這份文件不是 Policy 或有效規格。初始角色／模型組態見 [task-team-config.example.json](task-team-config.example.json)，它是可編輯的示例組態，不是已可執行的工具，其中數值都是初始示例。
+這份文件是設計與驗證歷史，不是 Policy 或有效規格（有效規格見上）。初始角色／模型組態見 [task-team-config.example.json](task-team-config.example.json)，它是可供 `tooling/team` 的 CLI 載入的示例組態（複製後修改；欄位名稱仍可能調整，數值只是初始例）。
 
 ## 1. 建議交付形式
 
@@ -201,13 +201,13 @@ flowchart TB
 每個條目都是完整物件，不引用共享 profile：
 
 ```json
-{ "provider": "claude", "model": "azuer_ai/sonnet-5-5[1m]", "enabled": true,
+{ "provider": "claude", "model": "azure_ai/claude-sonnet-5-5[1m]", "enabled": true,
   "remainingThreshold": { "metric": "quotaRemainingPercent", "value": 0 } }
 ```
 
 - 門檻屬於**條目**，不在角色或 provider 之間共享。同一 provider／model 出現在 SA1 與 SA2 時，可以設不同 `value`。
 - 示例 `metric` 為 `quotaRemainingPercent`；其他單位與各 provider adapter 的支援範圍留待技術設計，本稿不把此單位定為唯一定案。
-- 示例組態中的數值只是可編輯的初始值，逐條可改，不是公司／個人的全域門檻：示例中 Claude 條目多為 `0`，Codex 條目為 `50` 或 `70`（SA1 與 SA2 的同一個 `gpt-6.1-sol` 條目分別為 `50`、`70`，示範門檻不共享）；Gemini provider 與其條目停用。Claude model 字串保留使用者提供的 `azuer_ai/...` 原字串；GPT／Gemini 型號只是討論用候選，不保證帳號可用。演算法沒有公司或品牌偏好，順序完全依清單。
+- 示例組態中的數值只是可編輯的初始值，逐條可改，不是公司／個人的全域門檻：示例中 Claude 條目多為 `0`，Codex 條目為 `50` 或 `70`（SA1 與 SA2 的同一個 `gpt-6.1-sol` 條目分別為 `50`、`70`，示範門檻不共享）；Gemini provider 與其條目停用。Claude model 識別碼用公司 API 實際接受的技術 id（`azure_ai/claude-*`，保留家族、順序、門檻與 `[1m]` 後綴）；初稿曾寫成 `azuer_ai/...`，經真實 API 回覆的允許清單核對後更正，這是**技術識別碼的修正，不是模型政策翻案**，執行期沒有內建 alias 或 fallback。演算法沒有公司或品牌偏好，順序完全依清單。
 - 負門檻例：`"remainingThreshold": { "metric": "quotaRemainingPercent", "value": -1 }`。意思**不是**「接近上限就暫停」：低餘額或未知時照常工作，只有收到真上限訊號才進入 `waiting-for-quota`，且不換到下一個條目（§6.4）。
 - `metric`、`value` 的實際欄位與單位支援尚未實作；除 `quotaRemainingPercent` 示例外，其他單位與 adapter 對照留待技術設計。
 
@@ -424,55 +424,56 @@ PM 派工時為該任務設定回報期限（示例，全部可改）：
 34. **instructions 不覆寫共通規則**：角色 `instructions` 寫了「直接問使用者」或「換用其他模型」時，仍以 PM 唯一對口與組態模型清單為準，並回報 PM。
 35. **永久寫回需明示**：任務內批准只存入團隊有效組態與決策快照；未明示允許時不寫回共用組態，允許時也只新增已批准內容。
 
-## 11. 本次技術方案（A 直接開發）
+## 11. 技術方案與實作現況（A 直接開發）
 
-實作依據：本稿 §3–§10 與 [JSON 示例](task-team-config.example.json)。不建立 Spec Kit 工作包；產出的團隊也不預設 Spec Kit（§4.1）。
+實作依據：本稿 §3–§10 與 [JSON 示例](task-team-config.example.json)。不建立 Spec Kit 工作包；產出的團隊也不預設 Spec Kit（§4.1）。下面是**實際完成的 API**（2026-10-15），早稿中沒有實作的模組名（`deadlines.mjs`、`diagnose.mjs`、`providers/*.mjs`、`--state-dir`、`add-member`、`notify` 子命令）已移除。
 
-### 11.1 模組
+### 11.1 模組（`tooling/team/`）
 
-| 檔案（`tooling/team/`） | 責任 |
+| 檔案 | 責任 |
 |---|---|
-| `lib/config.mjs` | 載入與驗證組態：開放 `roles`、`pmRoleId`、有效模型清單（§6.2）、角色欄位 |
+| `lib/config.mjs` | 載入與驗證組態：開放 `roles`、`pmRoleId`、有效模型清單（§6.2）、只接受 `quotaRemainingPercent`、用 `Object.hasOwn` 判定角色與 provider |
 | `lib/models.mjs` | 門檻判定（§6.4）、條目選擇與 cursor（§6.3）、pool、待遷移與恢復證據（§6.6） |
-| `lib/store.mjs` | 團隊目錄、原子寫入（暫存檔＋rename）、目錄鎖 |
-| `lib/team.mjs` | 團隊狀態：成員、logical PM、擴充提案與批准（§3.3）、派工、交接與寫入權 |
-| `lib/outbox.mjs` | 角色 outbox 事件（eventId 去重、只寫自己的 outbox） |
-| `lib/sender.mjs` | 投遞：logical PM 解析、queued／sent／received、PM 忙排隊、progress 合併、有界重試 |
-| `lib/deadlines.mjs` | ack／progress／hard 期限，heartbeat 不刷新 hard |
-| `lib/diagnose.mjs` | 一次有界診斷（herdr agent get／pane read）分類 |
-| `lib/herdr.mjs` | Herdr adapter：Space／Tab 解析、tab 建立、透過 grid.cjs 新增 pane、agent start／prompt |
-| `lib/providers/*.mjs` | Claude／Codex／Gemini：launch argv（明確 model）、不啟用 CLI fallback、認證前檢、用量 adapter |
-| `lib/proc.mjs` | 子程序：argv 陣列、不經 shell、逾時與 Windows 隱藏視窗 |
-| `cli.mjs` | `team` 命令入口 |
-| `notify.mjs` | 固定路徑的回報 wrapper：只接受本團隊、自己 outbox 中已存在的事件 ID |
+| `lib/selection.mjs` | 把真實認證前檢與用量觀測接到條目選擇；停用 provider 不探測；持久化的耗盡 pool 與 `entry.quotaPool` |
+| `lib/providers.mjs` | 啟動參數（明確 model、不傳 `--fallback-model`）、認證前檢（只取模式）、Codex 唯讀 `account/rateLimits/read` |
+| `lib/limitsignal.mjs` | 從 pane 末端的 provider 錯誤畫面識別 quota 上限；預算類、模型被閘道拒絕（403）、429／529、認證、網路、context 另分類 |
+| `lib/team.mjs` | 團隊狀態：成員、擴充提案與批准（§3.3）、派工與期限、遷移、寫入權、checkpoint |
+| `lib/controller.mjs` | Herdr 放置與啟動恢復、watcher tick、可重放事件、立即 blocked 診斷、通知、交接、用量套用、單一 watcher owner |
+| `lib/lease.mjs` | launch／handoff 的 operation lease：短鎖登記 owner＋nonce，不跨網路持鎖；死 owner 依 journal 恢復 |
+| `lib/sender.mjs` | 投遞 journal：`queued → sending → sent → received`，`uncertain` 不盲目重送 |
+| `lib/outbox.mjs` | 角色 outbox 與事件驗證（含 `checkpoint` 事件） |
+| `lib/herdr.mjs` | Herdr adapter；所有 pane 經 `tooling/herdr/grid.cjs` 新增；agent name 以 team＋member＋hash 產生 |
+| `lib/permissions.mjs`、`lib/commandline.mjs` | 最小回報權限（`Edit(//…)`＋固定 notify）與同源的命令列引用 |
+| `lib/store.mjs`、`lib/proc.mjs` | 原子寫入與鎖、路徑守衛；argv／無 shell 的子程序與 npm shim 解析 |
+| `cli.mjs`、`notify.mjs` | 命令入口；給角色的固定回報入口 |
 
 ### 11.2 狀態與持久化
 
-- 團隊目錄預設 `<cwd>/.team/<teamId>/`（可用 `--state-dir` 指定；不提交，已加入 ignore）：`state.json`（團隊、成員、提案、批准、派工、期限、模型 cursor）、`outbox/<memberId>/<eventId>.json`、`delivery.json`（投遞狀態）、`usage/`（觀測記錄）、`log.jsonl`。
-- 寫入一律暫存檔＋rename；修改 `state.json` 前取得目錄鎖並比對 revision，衝突就停止。
+- 團隊目錄預設 `<cwd>/.team/<teamId>/`（`--team-dir` 可指定；本機狀態，不提交）：`state.json`、`outbox/<memberId>/<eventId>.json`、`delivery.json`、`operations.json`、`sessions/`、`watcher.json`、`log.jsonl`。
+- 寫入一律暫存檔＋rename；狀態變更在短鎖內同步完成，外呼 Herdr／CLI 不持鎖；跨 await 的 launch／handoff 以 operation lease 保證同一時間只有一個存活 owner。
+- 狀態中的重要記錄：`members.<id>.launch`（逐步恢復的步驟與 `startIntent`）、`members.<id>.model`（cursor、`pending`、`waiting-for-quota`）、`members.<id>.checkpoint`、`quotaPools`（持久化的耗盡 pool）、`handoffs`／`handoffHistory`、`appliedEvents`、`approvals`。
 
 ### 11.3 命令
 
-`start`、`status`、`propose`、`decide`（approve／reject，需提案版本）、`add-member`、`assign`、`notify`（角色送事件）、`ack`（PM 確認接收）、`tick`（一次 watcher 週期：投遞、期限、診斷、用量）、`watch`（本機定時呼叫 tick，不叫 AI）、`usage`（手動或 adapter 觀測）、`handoff`、`check-transport`。
+`start`（預設啟動唯一 PM 與一個背景 watcher；`--no-watch`、`--dry-run`）、`status`（含 `attention` 與 watcher 狀態）、`members`／`form-done`、`launch`、`propose`／`decide`／`persist`、`assign`／`extend`／`accept`、`event`、`ack`、`resolve`、`tick`、`watch`／`stop-watch`、`usage`、`handoff`、`adopt-tab`、`claim`、`auth`、`check-transport`。完整選項見 `node tooling/team/cli.mjs help` 與 [README](../../tooling/team/README.md)。
 
 ### 11.4 Provider adapter
 
-- **Codex**：`codex -m <model>`；認證前檢 `codex login status` 只取模式（ChatGPT／API key），組態要求訂閱時拒絕 API key 模式；用量以 `codex app-server` 的 `account/rateLimits/read` 讀取（不推論），取確實約束的視窗中最少 remaining。
-- **Claude**：`claude --model <model>`；不傳 `--fallback-model`；Azure 公司部署沒有可靠配額數值時為 unknown；可接受 status line 或人工輸入的觀測，但 context／USD 不當配額。
-- **Gemini**：`gemini -m <model>`，與其他 provider 同一套派工／回報／未知配額規則。provider 停用或 CLI 未安裝時不呼叫；不因環境有 API key 而改變計費方式。本次沒有實機 Gemini，只做 mock 與格式驗證。
-- 所有探測使用 Node 子程序、argv、15–30 秒逾時，不輸出帳號、email 或 token。
+- **Codex**：`codex -m <model>`；`login status` 只取模式，組態要求訂閱時拒絕 API key 模式；用量以 `codex app-server` 的 `account/rateLimits/read` 取確實約束視窗中剩餘最少者。
+- **Claude**：`claude --model <model> [--settings <檔>]`，不傳 `--fallback-model`；公司 Azure 沒有數字額度 adapter，缺值為 unknown；真上限由 `limitsignal.mjs` 讀 pane 末端的官方錯誤畫面識別（必須仍是記錄的 session 與 agent 種類）。模型識別碼是公司 API 接受的技術 id（見修訂紀錄 2026-10-15）。
+- **Gemini**：`gemini -m <model>`，與其他 provider 同一套規則；停用或未安裝時不探測、不呼叫。**沒有實機、沒有用量 adapter**。
+- 所有探測使用 Node 子程序、argv、逾時，不輸出帳號、email 或 token。Herdr 的 agent 資訊沒有 model 欄位，啟動後的 model 記為「未確認」。
 
-### 11.5 回報權限落地
+### 11.5 回報與權限落地
 
-- 角色以檔案寫入工具把事件 JSON 存入自己的 `outbox/<memberId>/`，再執行 `node <固定路徑>/notify.mjs --team-dir <dir> --member <id> --event <eventId>`。
-- Claude 角色啟動時以 `--settings` 增補最小 allow：寫入自己 outbox 目錄、執行上述固定 notify 命令；不使用 bypass、不全面允許 Bash 或 herdr。實際規則字串由真 CLI smoke 確認，未確認前標為未驗證。
-- 本機 watcher 由使用者或 PM 在背景執行；不另開未批准的 pane，Windows 以隱藏視窗啟動。
+- 角色先把事件 JSON 寫入自己的 `outbox/<memberId>/`，再執行固定 notify 提交已存在的事件 id；事件格式與最小有效範例在 SKILL。
+- Claude 角色啟動時以 `--settings` 增補最小 allow：`Edit(//…/outbox/<member>/**)`（官方文件指出路徑規則只認 `Edit`／`Read`，`Write(...)` 不會被採用；Windows 先正規為 `/c/…`，絕對路徑用 `//`）與固定 notify 的 Bash 規則（只有 event id 為萬用字元）；不使用 bypass、不全面允許 Bash 或 `herdr *`。規則與命令由同一個格式化函式產生。
+- 通知：逾期診斷、立即 blocked 診斷、自動交接受阻、預算停止、模型被閘道拒絕，都以 `notice` 進同一 delivery journal 排給 logical PM（成因 id 去重、PM 忙排隊、不宣稱已回報）；PM 本身無法接收時只列在 `attention`。
+- watcher 由 `start` 確保唯一一個（隱藏、不開 pane，唯一 owner 以短鎖登記）；`--probe-usage` 與 `--scan-limits` 不呼叫 AI。
 
 ### 11.6 驗證
 
-- `node --test tooling/team`：以注入的假 Herdr／CLI 做行為、重試、並行、非零 exit、不覆蓋他人檔案測試；不為測試大量啟動 AI。
-- 少量、有界的真實 smoke（Herdr 測試 tab 以 grid 與 `--no-focus` 建立，只清自己建的；Codex rateLimits 唯讀；Claude 啟動 smoke），結果與限制記在驗證紀錄。
-- 通過後依 POL-SPEC-001 R9a 手動採納為有效規格。
+見第四輪 Verification Record（Gate A、有限 Gate B、未驗證範圍）。已依 POL-SPEC-001 R9a 手動採納為有效規格（見「採納紀錄」）。
 
 ## 需求修訂紀錄
 
@@ -486,6 +487,7 @@ PM 派工時為該任務設定回報期限（示例，全部可改）：
 | 2026-10-14 | 舊 Q2、Q3 標為已裁決；Q1 仍待決 | 已由上列指示涵蓋 | 同上 |
 | 2026-10-14 | 精確化：負門檻只在真上限才等待、首次選擇不因配額跳過；非配額錯誤不直接繼續；所有切換遵守安全邊界與再核對；cursor 只往後；多視窗取最少；金額上限不換模型；不啟用不一致的 CLI fallback；outbox 兩段式寫入、logical PM 投遞、重要事件不被合併 | Codex 第一輪核對指出的一致性缺口，屬既定需求的精確化 | Codex 核對意見，經使用者授權的協作流程轉述 |
 | 2026-10-14 | 新增 §3「可配置角色與擴充」：角色為開放組態定義（含職責內容）、`pmRoleId`、角色定義與成員分開、擴充提案與批准流程、重試安全、未定義／停用角色不可 fallback；JSON 補齊角色內容、加入停用的 QA 示例與擴充政策 | 使用者追加需求：「角色可以擴充，角色內容錄入組態檔內，以保持角色彈性；PM 若覺得現有角色不夠用時會主動向使用者提出，由使用者同意後增加 pane / 角色」 | 使用者 2026-10-14 原文，經 Codex 轉述；設計細節由 Codex 提供 |
+| 2026-10-15 | 5 個 Claude 模型識別碼由 `azuer_ai/<家族>` 更正為 `azure_ai/claude-<家族>`（家族、順序、門檻、`[1m]` 不變；不加 alias／fallback） | 真實 Claude session 在第一個推論前被公司 API 以 403 拒絕，回覆的允許清單是 `azure_ai/claude-haiku-4-5`、`claude-opus-5`、`claude-sonnet-5`、`claude-opus-5-5`、`claude-sonnet-5-5`，而請求的是 `azuer_ai/sonnet-5-5` | Codex 的真 CLI 權限 smoke 回覆（證據在其測試 TEMP，未提交）；初稿原拼法先保留到實機核對，核對後更正 |
 | 2026-10-14 | 新增 §3.4 Pane／Space／Tab 規則；Q1 於實作授權內落地為 Hub 開發工具；新增 §11 技術方案；狀態改實作中 | 使用者同意設計並要求實作 skill／Scripts，追加 pane 須呼叫 grid.cjs 與 Space／Tab／Pane 命名規則 | 使用者 2026-10-14 實作授權與追加需求，經 Codex 轉述；Q1 落地為 Codex 判斷 |
 
 ## 承接核對
@@ -496,9 +498,9 @@ PM 派工時為該任務設定回報期限（示例，全部可改）：
 
 尚無轉換。
 
-## 本次文件核對
+## 本次文件核對與驗證紀錄
 
-只核對文件，**不是**執行工具的驗收，也**不是**真 CLI 權限驗收。
+前三輪只核對文件，**不是**執行工具的驗收，也**不是**真 CLI 權限驗收；第四輪起是含程式測試與有限實機的 Verification Record，範圍見該輪。
 
 ### 第一、二輪（模型與回報修訂，2026-10-14；第一輪開始時 Git 乾淨，第二輪起已有未提交修訂）
 
@@ -507,7 +509,7 @@ PM 派工時為該任務設定回報期限（示例，全部可改）：
 | 項目 | 方法 | 結果 |
 |---|---|---|
 | JSON 解析 | `node` 以 `JSON.parse` 讀取附件 | 通過 |
-| 條目檢查 | 逐一檢查 `defaultModel` 與各角色 13 個條目都有 `provider`／`model`／`enabled`／`remainingThreshold.metric`／數值 `value`，且 provider 存在；停用的 Gemini provider 下沒有啟用條目；舊鍵 `profiles`／`priority`／`advancedPriority`／`simplePriority`／全域個人保留／未知配額暫停均不存在 | 通過；5 個 Claude 模型保留 `azuer_ai/...` 原字串；SA1／SA2 的 `gpt-6.1-sol` 門檻分別為 50／70；SD2 為 `[]` |
+| 條目檢查 | 逐一檢查 `defaultModel` 與各角色 13 個條目都有 `provider`／`model`／`enabled`／`remainingThreshold.metric`／數值 `value`，且 provider 存在；停用的 Gemini provider 下沒有啟用條目；舊鍵 `profiles`／`priority`／`advancedPriority`／`simplePriority`／全域個人保留／未知配額暫停均不存在 | 通過；當輪的 5 個 Claude 模型寫作 `azuer_ai/...`（後來依真 API 回覆更正為 `azure_ai/claude-*`，見 2026-10-15 修訂紀錄）；SA1／SA2 的 `gpt-6.1-sol` 門檻分別為 50／70；SD2 為 `[]` |
 | 本地連結 | 檢查本稿與 `docs/proposals/README.md` 的相對連結是否指向存在的檔案 | 本稿 3 個、README 18 個，皆存在 |
 | fence 配對 | 計算 ```` ``` ```` 行數 | 本稿 10（5 對，不含本表）、README 2，皆成對 |
 | 人工一致性 | 對照 §4、§6.3–§6.6 流程圖、§7、§8、§9、§10 與 JSON：負門檻只在真上限等待、等號不切、未知等真上限、非配額錯誤不直接繼續、兩段式 outbox、流程中立用語 | 已修正發現的不一致；Mermaid 未實際渲染 |
@@ -528,3 +530,62 @@ PM 派工時為該任務設定回報期限（示例，全部可改）：
 | 驗收編號 | 檢查 §10 連號 | 35 項連號 |
 | `git diff --check` | 執行 | 通過（只有 LF／CRLF 提示） |
 | 人工一致性 | 對照 §3、§4 圖、§5、§6.2、§8、§9、§10 與 JSON；Spec Kit 只在 §4.1、§9 第 7 項、驗收與修訂紀錄中以選用身分出現 | 已修正；Mermaid 未實際渲染 |
+
+### 第四輪（實作與驗證，2026-10-15）— Verification Record（POL-DOD-001 R7）
+
+**變更 ID 與範圍**：`task-team`（流程 A，直接開發）：`tooling/team/`（執行程式與測試）、`tooling/skills/task-team/`（技能正本與安裝器）、`docs/specifications/task-team/`（本次採納）、本稿與示例組態。受影響專案：Hub（開發輔助工具）。
+
+**基線**：設計 baseline 為 `0656d61`（本稿原設計修訂開始時）；恢復基線為 `f4ffe3f`（「實作 team work，尚未完成」，由使用者提交，保留未回滾）。本輪修訂與驗證時 HEAD 為 `f4ffe3f`，相關變更**尚未提交**。
+
+**Environment**
+- Runner：本機（Codex 與本人各自執行；兩人的結果分別標示）。
+- 作業系統：Windows 11（10.0.26200）；Runtime：Node.js v24.19.0。
+- Notes：Herdr 為本機實際安裝；Claude Code 2.1.300、codex-cli 0.162.1；Gemini CLI 未安裝。
+
+**Gate A — Automated**
+
+| 項目 | 命令 | 結果 |
+|---|---|---|
+| Restore | （無）——本工具零外部依賴，沒有 `npm install`／`npm ci`；只需 Node 24 | 不適用；沒有可還原的相依，**不是略過** |
+| Build | `node --check` 逐一檢查 `tooling/team/**`（`lib/`、`cli.mjs`、`notify.mjs`、測試）與 `tooling/skills/task-team/*.mjs` 共 36 個 `.mjs` | 36／36 通過（Codex 獨立）；本人在凍結前逐檔檢查亦通過 |
+| Test（核心） | `node --test "tooling/team/test/*.test.mjs"`：15 個測試檔 | 本人 147／147 通過（凍結前最後一次） |
+| Test（安裝器） | `node --test tooling/skills/task-team/install.test.mjs` | 12／12 通過 |
+| Test（整套，獨立） | Codex 獨立重跑整套 | **159／159 通過，fail 0、skip 0，約 169.6 秒**（159 ＝ 147 ＋ 12；log 在其 `%TEMP%/saintber-team-codex-final-tests.txt`，未提交）；前後 hash 比對：程式與測試**變動 0** |
+| 技能與入口 | 三入口最終重裝與再次安裝；技能格式驗證器；Gemini 入口以標準 TOML 解析 | 重裝 unchanged；驗證器通過；TOML 可解析、`{{args}}` 恰一個、無殘留占位符（皆 Codex 獨立） |
+| 空白檢查 | `git diff --check` | 通過（只有 LF／CRLF 提示） |
+
+過程中曾有一次整套失敗：`integration.test.mjs` 的 quota 測試因 fixture 缺注入 `observeFn` 讀到真實用量來源，已修正 fixture（程式未動）；Codex 在修正前讀到舊檔造成同一次失敗，修正後獨立重跑通過。**這是已解決的修正歷程，不是未解缺口。**
+
+**Gate B — Manual（有限實機，Codex 獨立；證據在其 `%TEMP%`，未提交）**
+
+| 步驟 | Expected | Actual |
+|---|---|---|
+| 1. Herdr 生命週期：`tab create --no-focus` 建 Tab 與其自帶 anchor，再以 `grid.cjs split` 建測試 pane，只關自建 pane，關到最後一個 pane | 最後一個 pane 關閉後 Tab 消失；未啟動 AI | Pass；資源已清乾淨 |
+| 2. 真 Claude 最小權限（2.1.300，`--permission-mode dontAsk`，非 bypass）：allow／明示 `Edit` deny／ask 三種情境 | allow：原生 Write 與固定 notify 成功、事件 `queued`；deny 優先、無事件；ask：Bash 在 dontAsk 下被拒 | Pass（原生工具結果以 `native-tools.json` 為證）。**範圍僅到 `queued`，不含送達活 PM 的 `sent`／`received`** |
+| 3. 單 PM 自建 Tab 交接，第一輪：Tab／pane／角色切換，使用組態的下一條 `azure_ai/claude-sonnet-5[1m]` | 接手 session 能推論 | **Fail（環境）**：公司 proxy 回 403「Model is blocked」；舊 pane 已關、successor 在原 Tab、state 為 `successor-launched`，但**不能列為完整接手 PASS**；原因未查明（API 允許清單列有 Sonnet 5），不是額度，未自動換個人 Codex、未 login、未改 key |
+| 4. 單 PM 交接，第二輪：隔離 fixture（Sonnet 5.5 → Opus 5.5，門檻 50＋合成剩餘量 1，由外部程序呼叫 handoff） | 11 項檢查全真：原本唯一 PM pane → 預留 grid pane → 舊 pane 消失 → 同 Tab 的 logical PM／cursor／checkpoint 轉移 → 新 session 實際回覆 marker | Pass；接手 session 的原生日誌 model 為 `claude-opus-5-5`，原生 Read 精確命中 checkpoint 且 tool_result 非 error。**不是**真耗盡、**不含**跨 provider、**不是** PM 自己在其 pane 內呼叫 |
+| 5. Codex 唯讀用量 `account/rateLimits/read` | 取得視窗百分比，不讀帳號內容 | Pass（兩次）；**不代表所有 model 都適用該視窗** |
+
+**Docs Consistency（POL-DOD-001 R6a）**：本稿、示例組態、有效規格 `docs/specifications/task-team/spec.md`、`docs/specifications/README.md`、`docs/proposals/README.md`、`tooling/team/README.md`、`tooling/skills/task-team/README.md`、`tooling/README.md` 的狀態、範圍與限制用語一致；本地連結與程式碼區塊配對檢查通過（本人）；有效規格每條 requirement 都有證據等級，未驗證項目標「—」。
+
+**未驗證、不得擴大解讀**：三個 CLI 對技能的發現、載入與遵循（端對端）；Gemini 的任何實機與用量 adapter；Codex 與 Gemini 角色的原生工具權限與沙箱；Claude 公司 Azure 的數字額度；`quotaRemainingPercent` 以外的單位；啟動後 model 的確認（Herdr 的 agent 資訊沒有 model 欄位）；§10 的 35 項情境以自動測試為主要證據，沒有逐項對應的實機證據。
+
+**最終狀態（限於上列記錄的範圍）**：**Done**。Gate A 通過；Gate B 的有限實機步驟已執行並記錄（含一項環境造成的 Fail，如實列出）；此狀態**不**表示上面「未驗證」各項已驗證。
+
+## 採納紀錄（POL-SPEC-001 R9a）
+
+- **流程**：A 直接開發，不使用 Spec Kit，不建立工作包；採納是**手動**，沒有使用 `speckit-hub-adopt`（它只處理 `specs/<NNN-name>/`）。
+- **baseline**：設計 baseline `0656d61`；恢復基線 `f4ffe3f`（由使用者提交，保留未回滾）。受影響的 capability：`task-team`（新建，owner `hub`）。獨立檢查（Codex）：自 `0656d61` 到 HEAD，目標 capability 也沒有變更。
+- **暫存產生與驗證（R7 原則：先在系統暫存位置產生並檢查，再套用）**，真實時間與位置（2026-10-15，+08:00）：
+  1. 11:33:00　在系統 TEMP（`%TEMP%/task-team-adopt-<隨機>`）建立暫存區，把候選的 `spec.md` 與索引 `README.md` 複製進去。
+  2. 11:33:45 與 11:34:31　在暫存區檢查候選：frontmatter 四欄齊全；29 條 requirement ID 唯一且格式為 `REQ-TT-NNN`；每條都有證據行；Change Log 列存在且 Archive 欄為本稿路徑；Change Log 的 ID 範圍涵蓋全部 29 條（**第一次檢查因檢查腳本讀錯欄位而失敗，修正腳本後重跑通過，候選檔本身未改**）；索引列的 capability、owner、連結正確；相對連結可解析。
+  3. 11:34:51　**套用前再檢查一次基線**（掃描目標 capability 與索引）：自 baseline 起已提交的變更 0；已暫存 0；未暫存的變更只有索引 `README.md`；未追蹤的只有 `docs/specifications/task-team/spec.md`；**除了這兩個檔案（都是本次自己的候選）沒有其他變更**；其他 capability 與專案規格沒有被觸及。通過。
+  4. 11:35:17–11:35:18　先把兩個目標檔備份到暫存區，再把暫存區的候選套用到 `docs/specifications/`；套用後逐檔比對：與暫存區的候選位元相同。**因為候選在套用前就已放在這兩個位置，套用的內容與原本相同**（沒有實質變更，也沒有檔案需要「回復」）；套用後再檢查一次，通過。
+  - 暫存檢查的結果檔在該 TEMP 目錄（`staging-result.json`、`preapply-result.json`、`postapply-result.json`），**未提交**。這些步驟是本次收尾時**實際做的**，不是倒填成先前做過。
+- **驗證依據**：見上方第四輪的 Verification Record（Gate A 的 36 檔語法、159／159、hash 變動 0；Gate B 的有限實機）。
+- **變更的 requirement ID**：新增 REQ-TT-001 – 003、010 – 016、020 – 022、030 – 032、040 – 044、050 – 052、060 – 063、070（共 29 條，ID 唯一、不重用；沒有刪除）。
+- **Change Log 列**：`docs/specifications/task-team/spec.md` 的 2026-10-15 列，Archive 欄為本稿路徑。
+- **索引**：`docs/specifications/README.md` 已加入 `task-team`。
+- **不是採納的內容**：本稿 §3–§10 的設計**只有**在 spec 中有對應 requirement 且標了證據的部分才成為現況；其餘（例如 Gemini 的實際支援、`quotaRemainingPercent` 以外的單位）仍是設計，不是現況。
+- 本稿留在原處作為歷史，不移到 `archive/changes/`（R9a）。
+- **提交**：本次採納尚未 stage 或 commit，提交由 Codex 依使用者授權處理。提交後要找到本次提交，用 `git log -- docs/specifications/task-team/spec.md`；本紀錄不填寫包含它自身的 commit hash。

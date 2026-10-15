@@ -42,7 +42,7 @@
 | 文件 | 狀態 | 備註 |
 |---|---|---|
 | [`speckit-extension-design.md`](speckit-extension-design.md) | 待使用者確認 | Spec Kit 擴充的完整構想、目前實作與未完成部分 |
-| [`task-team-design.md`](task-team-design.md) | 草稿（本次設計修訂完成，尚未實作） | 按任務啟動 AI 團隊；模型組態、門檻、回報規則與可擴充角色已依使用者 2026-10-14 指示修訂，歸屬（Q1）待決；示例組態見 [`task-team-config.example.json`](task-team-config.example.json) |
+| [`task-team-design.md`](task-team-design.md) | 已實作並已採納（結案，待提交） | 按任務啟動 AI 團隊；模型組態、門檻、回報規則與可擴充角色已依使用者 2026-10-14 指示修訂，已落地為 Hub 開發工具 [`tooling/team/`](../../tooling/team/README.md) 與 [`tooling/skills/task-team/`](../../tooling/skills/task-team/README.md)（歸屬為 Codex 在實作授權內的判斷）；有效規格見 [`task-team`](../specifications/task-team/spec.md)；示例組態見 [`task-team-config.example.json`](task-team-config.example.json) |
 | [`intent-management/design.md`](intent-management/design.md) | 草案（管理規則待採納） | 文件交付與校閱已完成，見 [驗證紀錄](intent-management/verification.md)；`saintber-intent` 技能已另行實作（見該設計稿「現況」），規則仍待採納 |
 | [`saintber-intent-delivery/verification.md`](saintber-intent-delivery/verification.md) | 已完成（結案） | 需求分析技能的三代理入口、隔離行為驗證、文件校閱及實際驗證範圍 |
 | [`development-workflow-granularity/verification.md`](development-workflow-granularity/verification.md) | 已完成（結案） | 本次流程文件更新的驗證紀錄；設計見 ADR-0003 |

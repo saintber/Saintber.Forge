@@ -22,7 +22,7 @@ export function createTeamState(config, { teamId = `team-${randomUUID().slice(0,
     placement: null, pm: { memberId: null }, members: {}, proposals: {}, approvals: {},
     assignments: {}, writeOwners: {}, seq: 0,
   };
-  const pm = addMember(state, pmRoleId, { origin: 'initial' });
+  const pm = addMember(state, pmRoleId, { origin: 'pm' });
   state.pm.memberId = pm.memberId;
   return state;
 }
@@ -32,7 +32,9 @@ function nextMemberId(state, roleId) {
   for (let n = 1; ; n++) { const id = `${roleId}-${n}`; if (!used.has(id)) return id; }
 }
 
+// Exactly one PM: only createTeamState (origin 'pm') and migration may create a PM-role member.
 function addMember(state, roleId, { origin, cursor = 0, predecessor = null }) {
+  if (roleId === state.config.coordination.pmRoleId && origin !== 'pm' && !String(origin).startsWith('migration:')) throw new TeamError('PM_ROLE_NOT_ADDABLE', roleId);
   const models = effectiveModels(state.config, roleId); // throws for undefined or disabled roles
   if (cursor >= models.length) throw new TeamError('NO_NEXT_MODEL_ENTRY', roleId);
   const memberId = nextMemberId(state, roleId);
@@ -55,6 +57,11 @@ export function addInitialMembers(state, roleIds) {
 
 export function closeForming(state) { state.forming = false; }
 
+// Everything a proposal depends on; any change invalidates a pending approval.
+export const configFingerprint = state => hashJson({ roles: state.config.roles, defaultModel: state.config.defaultModel, providers: state.config.providers, pmRoleId: state.config.coordination.pmRoleId });
+
+export const activePmCount = state => Object.values(state.members).filter(m => m.roleId === state.config.coordination.pmRoleId && m.status !== 'retired').length;
+
 // --- Expansion: proposal -> user decision -> validated apply (§3.3) ---------------------
 
 const REQUIRED_PROPOSAL_TEXT = ['gap', 'whyNotExisting', 'expectedUsage', 'scheduleImpact'];
@@ -69,16 +76,18 @@ export function propose(state, input, { clock } = {}) {
   }
   for (const m of members) {
     if (!Number.isInteger(m.count) || m.count < 1) throw new TeamError('PROPOSAL_COUNT_INVALID', m.roleId);
+    if (m.roleId === state.config.coordination.pmRoleId) throw new TeamError('PM_ROLE_NOT_ADDABLE', m.roleId);
     if (!Object.hasOwn(newRoles, m.roleId) && !roleDefined(state.config, m.roleId)) throw new TeamError('ROLE_NOT_DEFINED', m.roleId);
   }
   const requestId = input.requestId ?? `req-${++state.seq}`;
   const previous = state.proposals[requestId];
   if (previous && previous.status !== 'pending') throw new TeamError('PROPOSAL_CLOSED', requestId);
-  const scope = { newRoles, members, permissions: input.permissions ?? null, persistToShared: input.persistToShared === true };
+  // Frozen copy: later edits to caller objects cannot change what is approved.
+  const scope = structuredClone({ newRoles, members, permissions: input.permissions ?? null, persistToShared: input.persistToShared === true });
   state.proposals[requestId] = {
     requestId, version: previous ? previous.version + 1 : 1, status: 'pending', proposedAt: nowIso(clock),
     text: Object.fromEntries(REQUIRED_PROPOSAL_TEXT.map(f => [f, input[f]])), scope,
-    scopeHash: hashJson(scope), configHash: hashJson(state.config.roles),
+    scopeHash: hashJson(scope), configHash: configFingerprint(state),
   };
   return state.proposals[requestId];
 }
@@ -97,7 +106,7 @@ export function decide(state, requestId, decision, { clock } = {}) {
     return null;
   }
   if (decision.decision !== 'approve') throw new TeamError('DECISION_INVALID', decision.decision);
-  if (hashJson(state.config.roles) !== proposal.configHash) throw new TeamError('CONFIG_CHANGED_SINCE_PROPOSAL', requestId);
+  if (configFingerprint(state) !== proposal.configHash) throw new TeamError('CONFIG_CHANGED_SINCE_PROPOSAL', requestId);
   for (const [roleId, role] of Object.entries(proposal.scope.newRoles)) {
     const existing = roleDefined(state.config, roleId) ? state.config.roles[roleId] : null;
     if (existing && hashJson(existing) !== hashJson(role)) throw new TeamError('ROLE_ID_CONFLICT', roleId);
@@ -113,7 +122,7 @@ export function decide(state, requestId, decision, { clock } = {}) {
   proposal.status = 'approved'; proposal.decidedAt = nowIso(clock); proposal.source = decision.source;
   state.approvals[requestId] = {
     requestId, version: proposal.version, scopeHash: proposal.scopeHash, source: decision.source, decidedAt: proposal.decidedAt,
-    approvedRoles: Object.keys(proposal.scope.newRoles), approvedMembers: proposal.scope.members,
+    approvedRoles: Object.keys(proposal.scope.newRoles), approvedRoleDefinitions: structuredClone(proposal.scope.newRoles), approvedRolesHash: hashJson(proposal.scope.newRoles), approvedMembers: proposal.scope.members,
     persistToShared: decision.persistToShared === true && proposal.scope.persistToShared === true, memberIds: added,
   };
   return state.approvals[requestId];
@@ -127,8 +136,10 @@ export function persistApprovedRoles(sharedConfig, state, requestId) {
   if (!approval.persistToShared) throw new TeamError('PERSIST_NOT_APPROVED', requestId);
   const next = structuredClone(sharedConfig);
   const added = [];
+  if (hashJson(approval.approvedRoleDefinitions) !== approval.approvedRolesHash) throw new TeamError('APPROVAL_SNAPSHOT_TAMPERED', requestId);
+  // Only the frozen approved snapshot is written, never the mutable live config.
   for (const roleId of approval.approvedRoles) {
-    const role = state.config.roles[roleId];
+    const role = approval.approvedRoleDefinitions[roleId];
     const existing = Object.hasOwn(next.roles, roleId) ? next.roles[roleId] : null;
     if (existing && hashJson(existing) !== hashJson(role)) throw new TeamError('ROLE_ID_CONFLICT', roleId);
     if (!existing) { next.roles[roleId] = structuredClone(role); added.push(roleId); }
@@ -157,13 +168,15 @@ export function assign(state, { memberId, summary, taskId, deadlines, clock }) {
   return state.assignments[id];
 }
 
-const SUBSTANTIVE = new Set(['progress', 'milestone', 'blocked', 'decision-needed', 'completed', 'handoff', 'waiting-for-quota']);
+const SUBSTANTIVE = new Set(['progress', 'checkpoint', 'milestone', 'blocked', 'decision-needed', 'completed', 'handoff', 'waiting-for-quota']);
 
 // Applies a verified role event at its controller receipt time (not when PM gets to it).
 export function applyEvent(state, event, receivedAt) {
   const a = event.taskId ? state.assignments[event.taskId] : null;
   if (a && a.memberId !== event.memberId) throw new TeamError('EVENT_TASK_MEMBER_MISMATCH', event.eventId);
   const member = state.members[event.memberId];
+  // A checkpoint is the file a successor reads; the controller validated the path before applying.
+  if (event.type === 'checkpoint' && member) member.checkpoint = { path: event.paths[0], at: receivedAt, eventId: event.eventId };
   if (event.type === 'waiting-for-quota' && member) member.model.status = 'waiting-for-quota';
   if (!a) return;
   if (event.type === 'heartbeat') return; // never refreshes the hard deadline
@@ -211,13 +224,15 @@ export function claimWrite(state, scope, memberId) {
 
 // Moves a member to the next model entry: revoke the predecessor's write and dispatch rights,
 // create a successor at the next cursor, transfer ownership and (for PM) the logical PM.
-export function migrateMember(state, memberId, { checkpoint = null, clock } = {}) {
+export function migrateMember(state, memberId, { checkpoint = null, cursor: requested, clock } = {}) {
   const from = state.members[memberId];
   if (!from) throw new TeamError('MEMBER_NOT_FOUND', memberId);
   if (from.status === 'retired') throw new TeamError('MEMBER_ALREADY_RETIRED', memberId);
   const entries = effectiveModels(state.config, from.roleId);
   if (from.model.status === 'waiting-for-quota' && entries[from.model.cursor].remainingThreshold.value < 0) throw new TeamError('NEGATIVE_THRESHOLD_WAITS', memberId);
-  const cursor = from.model.cursor + 1;
+  // The controller may pass a later cursor (skipping disabled/unlaunchable entries); never backwards.
+  const cursor = requested === undefined ? from.model.cursor + 1 : requested;
+  if (cursor <= from.model.cursor) throw new TeamError('CURSOR_MUST_MOVE_FORWARD', memberId);
   if (cursor >= entries.length) { from.model.status = 'no-next-entry'; throw new TeamError('NO_NEXT_MODEL_ENTRY', memberId); }
   const scopes = Object.entries(state.writeOwners).filter(([, owner]) => owner === memberId).map(([scope]) => scope);
   for (const scope of scopes) delete state.writeOwners[scope];

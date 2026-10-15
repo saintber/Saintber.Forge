@@ -6,19 +6,21 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { loadConfig } from './lib/config.mjs';
 import { TeamStore, readJson, writeAtomic } from './lib/store.mjs';
-import { createTeamState, addInitialMembers, propose, decide, assign, extendDeadline, acceptCompletion, persistApprovedRoles, currentPm, claimWrite } from './lib/team.mjs';
+import { createTeamState, addInitialMembers, propose, decide, assign, extendDeadline, acceptCompletion, persistApprovedRoles, claimWrite, closeForming, modelEntry } from './lib/team.mjs';
 import { createHerdr } from './lib/herdr.mjs';
-import { ensurePlacement, launchMember, tick, migrate } from './lib/controller.mjs';
-import { acknowledge, loadDelivery } from './lib/sender.mjs';
+import { ensurePlacement, launchMember, tick, handoff, adoptTab, watcherStatus, applyObservation, claimWatcher, requestWatcherStop, stillOwner, attention } from './lib/controller.mjs';
+import { randomUUID } from 'node:crypto';
+import { acknowledge, loadDelivery, resolveUncertain } from './lib/sender.mjs';
+import { createProviderState } from './lib/selection.mjs';
 import { writeEvent } from './lib/outbox.mjs';
 import { checkAuth, observe } from './lib/providers.mjs';
 import { checkTransport } from './lib/permissions.mjs';
-import { evaluate, markPending, recheckAtBoundary } from './lib/models.mjs';
 
 const HELP = `用法：node tooling/team/cli.mjs <命令> [選項]
-  start     --config <組態> --task <任務名> [--task-file <檔>] [--cwd <目錄>] [--space <id|名稱>] [--tab <id|名稱>] [--team-dir <目錄>] [--dry-run]
+  start     --config <組態> --task <任務名> [--task-file <檔>] [--cwd <目錄>] [--space <id|名稱>] [--tab <id|名稱>] [--team-dir <目錄>] [--no-watch] [--dry-run]
   status    --team-dir <目錄>
-  members   --team-dir <目錄> --roles <R1,R2>            初始組隊（僅組隊期間，PM 從已啟用角色選）
+  members   --team-dir <目錄> --roles <R1,R2>            初始組隊（僅組隊期間，PM 從已啟用角色選；不可含 PM 角色）
+  form-done --team-dir <目錄>                             結束組隊期間；之後增員一律走 propose/decide
   launch    --team-dir <目錄> --member <memberId>         建 pane（grid.cjs）並啟動；可重跑恢復
   propose   --team-dir <目錄> --file <提案.json>          擴充提案（新角色或增派成員）
   decide    --team-dir <目錄> --request <id> --version <n> --decision approve|reject --source <來源> [--persist-shared]
@@ -29,12 +31,15 @@ const HELP = `用法：node tooling/team/cli.mjs <命令> [選項]
   event     --team-dir <目錄> --member <id> --type <類型> --summary <文字> [--task-id <id>] [--to <memberId>] [--paths a,b]
   ack       --team-dir <目錄> --events <id ...>           PM 確認收到事件
   tick      --team-dir <目錄>                             一次 watcher 週期
-  watch     --team-dir <目錄> [--interval <秒>] [--background]
+  watch     --team-dir <目錄> [--interval <秒>] [--background] [--probe-usage] [--scan-limits]   唯一 watcher；已有存活 watcher 時拒絕
   usage     --team-dir <目錄> --member <id> (--remaining <n> | --signal <s> | --probe) [--reliable]
-  boundary  --team-dir <目錄> --member <id> [--checkpoint <檔>]   安全邊界：再核對並必要時遷移
+  handoff   --team-dir <目錄> --member <id> --checkpoint <檔> [--probe]   安全邊界交接（PM/任一角色）：預留接手 pane→真實邊界重新觀測用量（必做）→驗證舊 pane 已停止→轉權→啟動接手者；可重跑恢復
+  resolve   --team-dir <目錄> --id <項目id> --decision resend|drop     PM 處置「不確定是否送達」的項目
+  adopt-tab --team-dir <目錄> --tab <tabId> --space <workspaceId>     核對後承接崩潰時可能已建立的 tab
+  stop-watch --team-dir <目錄>                            停止背景 watcher
   claim     --team-dir <目錄> --member <id> --scope <範圍>
   auth      --config <組態>                               provider 認證前檢（只回報模式）
-  check-transport --team-dir <目錄> --member <id>`;
+  check-transport --team-dir <目錄> --member <id>                   只檢查本機 outbox 可寫與 notify 存在，不是 Claude 權限驗證`;
 
 function parse(argv) {
   const out = { _: [] };
@@ -52,6 +57,28 @@ function parse(argv) {
 const need = (o, ...keys) => { for (const k of keys) if (o[k] === undefined || o[k] === true) throw new Error(`MISSING_OPTION: --${k}`); };
 const storeOf = o => { need(o, 'team-dir'); return new TeamStore(o['team-dir']); };
 
+// Starts the single hidden background watcher for a team and waits until it owns watcher.json.
+// If one is already running it is reused (never a second one). Returns { background, pid, reused }.
+export async function ensureBackgroundWatcher(teamDir, { interval = 60, probeUsage = true, scanLimits = true } = {}) {
+  const existing = watcherStatus(teamDir);
+  if (existing.running) return { background: true, pid: existing.pid, reused: true };
+  const args = ['watch', '--team-dir', teamDir, '--interval', String(interval), ...(probeUsage ? ['--probe-usage'] : []), ...(scanLimits ? ['--scan-limits'] : [])];
+  // Hidden, detached, no extra pane. The caller waits until the child owns watcher.json or fails.
+  const child = spawn(process.execPath, [fileURLToPath(import.meta.url), ...args], { detached: true, stdio: ['ignore', 'ignore', 'pipe'], windowsHide: true });
+  let stderr = ''; child.stderr.on('data', d => { stderr += d; });
+  const exited = new Promise(r => child.once('exit', code => r({ exited: true, code })));
+  const confirmed = (async () => { for (let i = 0; i < 100; i++) { const w = watcherStatus(teamDir); if (w.running && w.pid === child.pid) return { owner: true }; await new Promise(r => setTimeout(r, 50)); } return { owner: false }; })();
+  const first = await Promise.race([exited, confirmed]);
+  if (first.exited || !first.owner) {
+    // Another process may have won the race: that is fine, it is the owner.
+    const now = watcherStatus(teamDir);
+    if (now.running) return { background: true, pid: now.pid, reused: true };
+    throw new Error('WATCHER_START_FAILED: ' + (stderr.trim() || 'exit ' + first.code));
+  }
+  child.stderr.destroy(); child.unref();
+  return { background: true, pid: child.pid, reused: false };
+}
+
 export async function main(argv, deps = {}) {
   const [command, ...rest] = argv;
   const o = parse(rest);
@@ -68,23 +95,26 @@ export async function main(argv, deps = {}) {
       const store = new TeamStore(teamDir);
       store.create(state);
       await ensurePlacement(store, herdr, { space: o.space, tab: o.tab, env });
-      const pm = await launchMember(store, herdr, state.pm.memberId, { teamDir, providersCheck: deps.providersCheck });
-      return { teamDir, teamId: state.teamId, placement: store.read().placement, pm: { memberId: pm.memberId, paneId: pm.paneId, step: pm.launch.step } };
+      const pm = await launchMember(store, herdr, state.pm.memberId, { teamDir, providerState: deps.providerState ?? createProviderState({ config, authDeps: deps.authDeps, observeDeps: deps.observeDeps }) });
+      // Without a running watcher nothing monitors deadlines, delivery or a failing PM: start it by default.
+      const watcher = o['no-watch'] === true ? { background: false, skipped: 'no-watch' } : await ensureBackgroundWatcher(teamDir, { interval: Math.max(5, Number(o.interval ?? config.usage?.pollIntervalSeconds ?? 60)) });
+      return { teamDir, teamId: state.teamId, placement: store.read().placement, pm: { memberId: pm.memberId, paneId: pm.paneId, step: pm.launch.step }, watcher };
     }
     case 'status': {
       const s = storeOf(o).read();
       const delivery = loadDelivery(o['team-dir']).records;
       return { teamId: s.teamId, task: s.task, placement: s.placement, pm: s.pm.memberId, forming: s.forming,
         members: Object.values(s.members).map(m => ({ memberId: m.memberId, roleId: m.roleId, status: m.status, paneId: m.paneId, step: m.launch.step, model: m.model })),
-        proposals: s.proposals, assignments: s.assignments,
+        proposals: s.proposals, assignments: s.assignments, attention: attention(s, o['team-dir']), watcher: watcherStatus(path.resolve(o['team-dir'])),
         delivery: Object.values(delivery).reduce((acc, r) => { acc[r.state] = (acc[r.state] ?? 0) + 1; return acc; }, {}) };
     }
     case 'members': { need(o, 'roles'); return storeOf(o).update(s => ({ value: addInitialMembers(s, o.roles.split(',')) })); }
+    case 'form-done': { storeOf(o).update(s => { closeForming(s); }); return { forming: false }; }
     case 'launch': {
       need(o, 'member'); const store = storeOf(o);
       const s = store.read();
       if (!s.placement) throw new Error('PLACEMENT_REQUIRED');
-      const m = await launchMember(store, herdr, o.member, { teamDir: store.dir, providersCheck: deps.providersCheck });
+      const m = await launchMember(store, herdr, o.member, { teamDir: store.dir, providerState: deps.providerState ?? createProviderState({ config: s.config, authDeps: deps.authDeps, observeDeps: deps.observeDeps }) });
       return { memberId: m.memberId, paneId: m.paneId, step: m.launch.step };
     }
     case 'propose': { need(o, 'file'); const input = readJson(o.file); if (!input) throw new Error('PROPOSAL_FILE_NOT_FOUND'); return storeOf(o).update(s => ({ value: propose(s, input) })); }
@@ -103,11 +133,10 @@ export async function main(argv, deps = {}) {
       need(o, 'member', 'summary'); const store = storeOf(o);
       const deadlines = {}; if (o.ack) deadlines.ackSeconds = Number(o.ack); if (o.progress) deadlines.progressSeconds = Number(o.progress); if (o.hard) deadlines.hardNoReportSeconds = Number(o.hard);
       const a = store.update(s => ({ value: assign(s, { memberId: o.member, summary: o.summary, taskId: o['task-id'], deadlines }) }));
-      const member = store.read().members[o.member];
-      if (!member.paneId) return { ...a, sent: false, reason: 'MEMBER_NOT_LAUNCHED' };
-      const r = await herdr.prompt(member.paneId, `[task-team 派工 ${a.taskId}] ${o.summary}\n請先送 ack 事件（taskId=${a.taskId}），完成時送 completed。`);
-      store.update(s => { if (r.outcome === 'sent') { s.assignments[a.taskId].sentAt = new Date().toISOString(); s.assignments[a.taskId].status = 'sent'; } else s.assignments[a.taskId].sendError = r.outcome; });
-      return { taskId: a.taskId, outcome: r.outcome };
+      // Delivery goes through the journal; the deadline clock starts only when it records sent.
+      const r = await tick({ teamDir: store.dir, herdr, diagnose: false });
+      const rec = loadDelivery(store.dir).records['assign-' + a.taskId];
+      return { taskId: a.taskId, delivery: rec?.state ?? 'queued', detail: r.delivery.results.find(x => x.id === 'assign-' + a.taskId) ?? null };
     }
     case 'extend': { need(o, 'task-id', 'until'); return storeOf(o).update(s => { extendDeadline(s, o['task-id'], new Date(o.until).toISOString()); }).assignments[o['task-id']]; }
     case 'accept': { need(o, 'task-id'); return storeOf(o).update(s => { acceptCompletion(s, o['task-id']); }).assignments[o['task-id']]; }
@@ -116,49 +145,45 @@ export async function main(argv, deps = {}) {
       return writeEvent(store.dir, s.teamId, o.member, { type: o.type, summary: o.summary, taskId: o['task-id'], to: o.to, paths: o.paths ? o.paths.split(',') : undefined });
     }
     case 'ack': { need(o, 'team-dir'); if (!o.events?.length) throw new Error('MISSING_OPTION: --events'); return acknowledge(path.resolve(o['team-dir']), o.events, new Date().toISOString()); }
-    case 'tick': { const store = storeOf(o); return tick({ teamDir: store.dir, herdr }); }
+    case 'tick': { const store = storeOf(o); return tick({ teamDir: store.dir, herdr, probeUsage: o['probe-usage'] === true, scanLimits: o['scan-limits'] === true }); }
     case 'watch': {
       const store = storeOf(o); const interval = Math.max(5, Number(o.interval ?? store.read().config.usage?.pollIntervalSeconds ?? 60));
-      if (o.background) {
-        // Detached and hidden: no extra Herdr pane is opened for the watcher.
-        const child = spawn(process.execPath, [fileURLToPath(import.meta.url), 'watch', '--team-dir', store.dir, '--interval', String(interval)], { detached: true, stdio: 'ignore', windowsHide: true });
-        child.unref();
-        writeAtomic(path.join(store.dir, 'watcher.json'), JSON.stringify({ pid: child.pid, interval, startedAt: new Date().toISOString() }) + '\n');
-        return { background: true, pid: child.pid };
+      const args = ['watch', '--team-dir', store.dir, '--interval', String(interval), ...(o['probe-usage'] ? ['--probe-usage'] : []), ...(o['scan-limits'] ? ['--scan-limits'] : [])];
+      if (o.background) return { ...(await ensureBackgroundWatcher(store.dir, { interval, probeUsage: o['probe-usage'] === true, scanLimits: o['scan-limits'] === true })), note: 'stop with stop-watch' };
+      const nonce = randomUUID();
+      const claim = claimWatcher(store.dir, { nonce, interval });
+      if (!claim.claimed) throw new Error('WATCHER_ALREADY_RUNNING: pid ' + claim.owner.pid);
+      while (stillOwner(store.dir, nonce)) {
+        try {
+          const providerState = createProviderState({ config: store.read().config, authDeps: deps.authDeps, observeDeps: deps.observeDeps });
+          const r = await tick({ teamDir: store.dir, herdr, probeUsage: o['probe-usage'] === true, scanLimits: o['scan-limits'] === true, providerState });
+          store.log({ kind: 'tick', events: r.events, late: r.late.length });
+        } catch (e) { store.log({ kind: 'tick-error', error: e.message }); }
+        await new Promise(r => setTimeout(r, (deps.watchIntervalMs ?? interval * 1000)));
+        if (deps.watchMaxCycles !== undefined && --deps.watchMaxCycles <= 0) break;
       }
-      for (;;) {
-        try { const r = await tick({ teamDir: store.dir, herdr }); store.log({ kind: 'tick', newEvents: r.newEvents, late: r.late.length }); } catch (e) { store.log({ kind: 'tick-error', error: e.message }); }
-        await new Promise(r => setTimeout(r, interval * 1000));
-      }
+      return { stopped: true };
     }
+    case 'stop-watch': { const store = storeOf(o); return requestWatcherStop(store.dir); }
     case 'usage': {
-      need(o, 'member'); const store = storeOf(o); const s = store.read(); const m = s.members[o.member];
-      if (!m) throw new Error(`MEMBER_NOT_FOUND: ${o.member}`);
-      const entry = (await import('./lib/team.mjs')).modelEntry(s, m);
+      need(o, 'member'); const store = storeOf(o); const st = store.read(); const m = st.members[o.member];
+      if (!m) throw new Error('MEMBER_NOT_FOUND: ' + o.member);
+      const entry = modelEntry(st, m);
       let obs;
-      if (o.probe) obs = await observe(s.config.providers[entry.provider], deps.observeDeps);
+      if (o.probe) obs = await observe(st.config.providers[entry.provider], deps.observeDeps);
       else obs = { at: new Date().toISOString(), reliable: o.reliable === true, remaining: o.remaining !== undefined ? Number(o.remaining) : undefined, signal: o.signal ?? null, source: 'manual' };
-      const verdict = evaluate(entry, obs);
-      return store.update(st => {
-        const mm = st.members[o.member];
-        mm.model.lastObservation = obs;
-        if (verdict === 'wait') mm.model.status = 'waiting-for-quota';
-        if (verdict === 'switch') mm.model = markPending(mm.model, verdict, obs);
-        if (verdict === 'continue' && mm.model.status === 'waiting-for-quota' && obs.reliable) mm.model.status = 'active';
-        if (verdict === 'non-quota-error') mm.model.lastNonQuotaError = obs.signal;
-        return { value: { verdict, model: mm.model } };
-      });
+      const verdict = applyObservation(store, o.member, entry, obs);
+      return { verdict, model: store.read().members[o.member].model };
     }
-    case 'boundary': {
-      need(o, 'member'); const store = storeOf(o); const s = store.read(); const m = s.members[o.member];
-      const entry = (await import('./lib/team.mjs')).modelEntry(s, m);
-      const latest = o.probe ? await observe(s.config.providers[entry.provider], deps.observeDeps) : m.model.lastObservation;
-      const check = recheckAtBoundary(entry, m.model, latest);
-      if (!check.migrate) { store.update(st => { st.members[o.member].model = check.state; }); return { migrated: false, cancelled: Boolean(check.cancelled) }; }
-      const checkpoint = o.checkpoint ? path.resolve(o.checkpoint) : null;
-      const to = migrate(store, o.member, checkpoint);
-      return { migrated: true, from: o.member, to: to.memberId, cursor: to.model.cursor, note: '以 launch 啟動接手者；原 pane 不自動關閉' };
+    case 'handoff': {
+      need(o, 'member', 'checkpoint'); const store = storeOf(o); const st = store.read();
+      const providerState = deps.providerState ?? createProviderState({ config: st.config, authDeps: deps.authDeps, observeDeps: deps.observeDeps });
+      const entry = modelEntry(st, st.members[o.member]);
+      const boundaryObservation = o.probe ? await providerState.observation(entry.provider) : null;
+      return handoff({ store, herdr, teamDir: store.dir, memberId: o.member, checkpoint: o.checkpoint, providerState, boundaryObservation });
     }
+    case 'resolve': { need(o, 'id', 'decision'); return { id: o.id, state: resolveUncertain(path.resolve(o['team-dir']), o.id, o.decision) }; }
+    case 'adopt-tab': { need(o, 'tab', 'space'); return adoptTab(storeOf(o), { tabId: o.tab, workspaceId: o.space }); }
     case 'claim': { need(o, 'member', 'scope'); storeOf(o).update(s => { claimWrite(s, o.scope, o.member); }); return { scope: o.scope, owner: o.member }; }
     case 'auth': {
       need(o, 'config'); const config = loadConfig(o.config); const out = {};

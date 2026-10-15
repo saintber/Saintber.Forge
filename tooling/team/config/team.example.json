@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "status": "example-config",
-  "note": "Editable example for tooling/team. Copy to your own config file; values are initial examples. Role IDs are open; field names follow docs/proposals/task-team-design.md.",
+  "note": "Editable example for tooling/team. Copy to your own config file; values are initial examples. Role IDs are open; field names follow docs/proposals/task-team-design.md. Claude model ids are the technical ids the company API accepts (azure_ai/claude-*, [1m] suffix kept); no alias or fallback is built in.",
   "coordination": {
     "pmRoleId": "PM",
     "userContact": "pm-only",
@@ -85,7 +85,7 @@
   },
   "defaultModel": {
     "provider": "claude",
-    "model": "azuer_ai/sonnet-5-5[1m]",
+    "model": "azure_ai/claude-sonnet-5-5[1m]",
     "enabled": true,
     "remainingThreshold": {
       "metric": "quotaRemainingPercent",
@@ -113,7 +113,7 @@
       "models": [
         {
           "provider": "claude",
-          "model": "azuer_ai/sonnet-5-5[1m]",
+          "model": "azure_ai/claude-sonnet-5-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -122,7 +122,7 @@
         },
         {
           "provider": "claude",
-          "model": "azuer_ai/sonnet-5[1m]",
+          "model": "azure_ai/claude-sonnet-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -156,7 +156,7 @@
       "models": [
         {
           "provider": "claude",
-          "model": "azuer_ai/opus-5-5[1m]",
+          "model": "azure_ai/claude-opus-5-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -165,7 +165,7 @@
         },
         {
           "provider": "claude",
-          "model": "azuer_ai/opus-5[1m]",
+          "model": "azure_ai/claude-opus-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -208,7 +208,7 @@
       "models": [
         {
           "provider": "claude",
-          "model": "azuer_ai/opus-5-5[1m]",
+          "model": "azure_ai/claude-opus-5-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -241,7 +241,7 @@
       "models": [
         {
           "provider": "claude",
-          "model": "azuer_ai/sonnet-5-5[1m]",
+          "model": "azure_ai/claude-sonnet-5-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -289,7 +289,7 @@
       "models": [
         {
           "provider": "claude",
-          "model": "azuer_ai/sonnet-5-5[1m]",
+          "model": "azure_ai/claude-sonnet-5-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -298,7 +298,7 @@
         },
         {
           "provider": "claude",
-          "model": "azuer_ai/haiku-4-5",
+          "model": "azure_ai/claude-haiku-4-5",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",

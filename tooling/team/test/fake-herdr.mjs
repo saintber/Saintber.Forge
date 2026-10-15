@@ -9,12 +9,13 @@ export function fakeHerdrWorld() {
     tabs: [{ tab_id: 'w3:t1', label: 'Existing', workspace_id: 'w3' }],
     panes: [{ pane_id: 'w3:p1', tab_id: 'w3:t1', label: 'user', agent: 'claude', agent_status: 'idle' }],
     prompts: [], gridCalls: [], closed: [], started: [], seq: 10,
-    failGridOnce: false, gridCreatesThenFails: false, promptOutcome: () => 'sent',
+    failGridOnce: false, gridCreatesThenFails: false, promptOutcome: () => 'sent', onPrompt: null, processes: {}, sessionDelayReads: 0, failAfterStart: false, gridDelayMs: 0, startDelayMs: 0,
   };
   const ok = result => ({ code: 0, stdout: JSON.stringify({ result }), stderr: '' });
   const exec = async (file, args) => {
     if (args[0] === GRID_SCRIPT || (file === process.execPath && path.basename(args[0] ?? '') === 'grid.cjs')) {
       world.gridCalls.push(args.slice(1));
+      if (world.gridDelayMs) await new Promise(r => setTimeout(r, world.gridDelayMs));
       if (world.failGridOnce) { world.failGridOnce = false; return { code: 1, stdout: '', stderr: 'boom' }; }
       const tab = args[args.indexOf('--tab') + 1];
       const name = args[args.indexOf('--name') + 1];
@@ -36,23 +37,35 @@ export function fakeHerdrWorld() {
       return ok({ tab, root_pane: root });
     }
     if (key === 'pane list') return ok({ panes: world.panes });
+    const tickSession = id => { const q = world.panes.find(x => x.pane_id === id); if (q?.pendingSession && --q.pendingSession.reads <= 0) { q.agent_session = { value: q.pendingSession.value }; delete q.pendingSession; } };
+    if (key === 'pane get') { tickSession(rest[0]); }
     if (key === 'pane get') { const p = world.panes.find(x => x.pane_id === rest[0]); return p ? ok({ pane: p }) : { code: 1, stdout: '', stderr: 'pane not found' }; }
     if (key === 'pane read') return { code: 0, stdout: world.panes.find(x => x.pane_id === rest[0])?.screen ?? '', stderr: '' };
-    if (key === 'pane close') { world.closed.push(rest[0]); world.panes = world.panes.filter(p => p.pane_id !== rest[0]); return ok({}); }
+    if (key === 'pane process-info') { const id = rest[rest.indexOf('--pane') + 1]; return ok({ process_info: { pane_id: id, foreground_processes: world.processes[id] ?? [] } }); }
+    if (key === 'pane close') { const closing = world.panes.find(p => p.pane_id === rest[0]); world.closed.push(rest[0]); world.panes = world.panes.filter(p => p.pane_id !== rest[0]);
+      if (closing && !world.panes.some(p => p.tab_id === closing.tab_id)) { world.tabs = world.tabs.filter(t => t.tab_id !== closing.tab_id); world.closedTabs = [...(world.closedTabs ?? []), closing.tab_id]; }
+      return ok({}); }
     if (key === 'agent start') {
+      if (world.startDelayMs) await new Promise(r => setTimeout(r, world.startDelayMs));
       const pane = world.panes.find(p => p.pane_id === rest[rest.indexOf('--pane') + 1]);
       const kind = rest[rest.indexOf('--kind') + 1];
-      world.started.push({ pane: pane.pane_id, kind, args: rest.slice(rest.indexOf('--') + 1) });
-      pane.agent = kind; pane.agent_status = 'idle'; pane.agent_session = { value: `sess-${pane.pane_id}` };
+      world.started.push({ pane: pane.pane_id, kind, name: rest[0], args: rest.slice(rest.indexOf('--') + 1) });
+      pane.agent_name = rest[0];
+      pane.agent = kind; pane.agent_status = 'idle';
+      pane.pendingSession = { value: `sess-${pane.pane_id}`, reads: world.sessionDelayReads };
+      if (!pane.pendingSession.reads) { pane.agent_session = pane.pendingSession; delete pane.pendingSession; }
+      if (world.failAfterStart) { world.failAfterStart = false; return { code: null, stdout: '', stderr: '', timedOut: true }; } // started, but the call was interrupted
       return ok({ agent: { pane_id: pane.pane_id } });
     }
-    if (key === 'agent get') { const p = world.panes.find(x => x.pane_id === rest[0]); return p ? ok({ agent: { agent_status: p.agent_status, agent: p.agent } }) : { code: 1, stdout: '', stderr: 'not found' }; }
+    if (key === 'agent get') { tickSession(rest[0]); }
+    if (key === 'agent get') { const p = world.panes.find(x => x.pane_id === rest[0]); return p ? ok({ agent: { pane_id: p.pane_id, agent_status: p.agent_status, agent: p.agent, agent_session: p.agent_session, ...(p.agent_name ? { name: p.agent_name } : {}) } }) : { code: 1, stdout: '', stderr: 'not found' }; }
     if (key === 'agent prompt') {
       const outcome = world.promptOutcome(rest[0], rest[1]);
       if (outcome === 'timeout') return { code: null, stdout: '', stderr: '', timedOut: true };
       if (outcome === 'blocked') return { code: 1, stdout: '', stderr: 'agent_blocked' };
       if (outcome === 'failed') return { code: 1, stdout: '', stderr: 'boom' };
       world.prompts.push({ target: rest[0], text: rest[1] });
+      if (world.onPrompt) world.onPrompt(rest[0], rest[1]);
       return ok({ type: 'agent_prompted' });
     }
     return { code: 2, stdout: '', stderr: `fake: unsupported ${key}` };

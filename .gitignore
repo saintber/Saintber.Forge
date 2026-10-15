@@ -132,3 +132,9 @@ coverage/
 .npmrc
 # adopt / archive 的暫存區（設計 §12.5：先在暫存區產生並驗證，不提交）
 **/.specify/tmp/
+
+# task-team 技能的本機部署產物：installer 會展開本機來源 root 的絕對路徑，不可提交（正本在 tooling/skills/task-team/）。
+# 每個新 checkout／worktree 要自行執行 node tooling/skills/task-team/install.mjs --project-dir <目錄>。
+.agents/skills/task-team/
+.claude/skills/task-team/
+.gemini/commands/task-team.toml

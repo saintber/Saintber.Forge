@@ -3,8 +3,26 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Resolve an npm-style CLI on Windows without invoking cmd.exe: prefer the package's
-// node launcher next to the .cmd shim, otherwise the .exe. Elsewhere use PATH lookup.
+// Static npm .cmd shims launch a path quoted relative to the shim directory, for example:
+//   "%dp0%\node_modules\pkg\bin\tool.exe"   %*            (native executable)
+//   "%_prog%"  "%dp0%\node_modules\pkg\bin\tool.js" %*    (node script)
+// The shim is only READ as text and never executed. The target must stay under the shim's own
+// directory, exist, and have an allowed extension, so a crafted shim cannot redirect a launch.
+const SHIM_TARGET = /"%(?:~dp0|dp0%?)[\\/]?([^"%\r\n]+\.(exe|js|cjs|mjs))"/gi;
+
+export function parseShim(text, dir) {
+  const matches = [...text.matchAll(SHIM_TARGET)];
+  if (!matches.length) return null;
+  const [, relative, extension] = matches[matches.length - 1]; // the last static path is the launched target
+  const root = path.resolve(dir);
+  const full = path.resolve(root, relative.split(/[\\/]+/).join(path.sep));
+  const inside = path.relative(root, full);
+  if (!inside || inside.startsWith('..') || path.isAbsolute(inside) || !fs.existsSync(full)) return null;
+  return extension.toLowerCase() === 'exe' ? { file: full, prefix: [] } : { file: process.execPath, prefix: [full] };
+}
+
+// Resolves a CLI by name without a shell. Windows: .exe on PATH, else a static npm .cmd shim.
+// Elsewhere: PATH lookup. Returns { file, prefix } or null.
 export function resolveCommand(name, env = process.env) {
   const dirs = (env.PATH || env.Path || '').split(path.delimiter).filter(Boolean);
   if (process.platform !== 'win32') {
@@ -16,12 +34,8 @@ export function resolveCommand(name, env = process.env) {
     if (fs.existsSync(exe)) return { file: exe, prefix: [] };
     const cmd = path.join(dir, `${name}.cmd`);
     if (fs.existsSync(cmd)) {
-      const text = fs.readFileSync(cmd, 'utf8');
-      const match = text.match(/"%(?:~dp0|dp0%)\\?([^"%]+\.(?:js|cjs|mjs))"/i);
-      if (match) {
-        const script = path.join(dir, match[1].replace(/^\\/, ''));
-        if (fs.existsSync(script)) return { file: process.execPath, prefix: [script] };
-      }
+      const found = parseShim(fs.readFileSync(cmd, 'utf8'), dir);
+      if (found) return found;
     }
   }
   return null;

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "status": "draft-not-executable",
-  "note": "All numeric values are editable initial examples. GPT/Gemini model names are discussion candidates, not account availability guarantees. Claude model strings keep the user-provided azuer_ai/... spelling. Thresholds belong to each entry: the same model in SA1 and SA2 may use different values (SA1 gpt-6.1-sol 50, SA2 gpt-6.1-sol 70; editable examples, not global company/personal thresholds). SD2 is enabled with models [] to show defaultModel use; QA is a disabled, editable expansion example (not an approved team member) and cannot start via defaultModel. Role IDs are open: PM/SA1/SA2/SD1/SD2/PG are initial examples, not an allowed list. Field names are draft and do not imply a runtime exists. A negative value (e.g. -1) means keep working when low or unknown and wait for quota only on a real limit signal, never switching. metric/value support beyond this example is not implemented and is left to technical design.",
+  "note": "All numeric values are editable initial examples. GPT/Gemini model names are discussion candidates, not account availability guarantees. Claude model identifiers are the technical ids accepted by the company API (azure_ai/claude-*, with the [1m] suffix kept); an earlier draft spelled the prefix azuer_ai/ and was corrected after the real API replied with the allowed list. No alias or fallback is built in. Thresholds belong to each entry: the same model in SA1 and SA2 may use different values (SA1 gpt-6.1-sol 50, SA2 gpt-6.1-sol 70; editable examples, not global company/personal thresholds). SD2 is enabled with models [] to show defaultModel use; QA is a disabled, editable expansion example (not an approved team member) and cannot start via defaultModel. Role IDs are open: PM/SA1/SA2/SD1/SD2/PG are initial examples, not an allowed list. Field names are draft and do not imply a runtime exists. A negative value (e.g. -1) means keep working when low or unknown and wait for quota only on a real limit signal, never switching. metric/value support beyond this example is not implemented and is left to technical design.",
   "decisions": {
     "ownership": "pending-user-decision"
   },
@@ -88,7 +88,7 @@
   },
   "defaultModel": {
     "provider": "claude",
-    "model": "azuer_ai/sonnet-5-5[1m]",
+    "model": "azure_ai/claude-sonnet-5-5[1m]",
     "enabled": true,
     "remainingThreshold": {
       "metric": "quotaRemainingPercent",
@@ -116,7 +116,7 @@
       "models": [
         {
           "provider": "claude",
-          "model": "azuer_ai/sonnet-5-5[1m]",
+          "model": "azure_ai/claude-sonnet-5-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -125,7 +125,7 @@
         },
         {
           "provider": "claude",
-          "model": "azuer_ai/sonnet-5[1m]",
+          "model": "azure_ai/claude-sonnet-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -159,7 +159,7 @@
       "models": [
         {
           "provider": "claude",
-          "model": "azuer_ai/opus-5-5[1m]",
+          "model": "azure_ai/claude-opus-5-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -168,7 +168,7 @@
         },
         {
           "provider": "claude",
-          "model": "azuer_ai/opus-5[1m]",
+          "model": "azure_ai/claude-opus-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -211,7 +211,7 @@
       "models": [
         {
           "provider": "claude",
-          "model": "azuer_ai/opus-5-5[1m]",
+          "model": "azure_ai/claude-opus-5-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -244,7 +244,7 @@
       "models": [
         {
           "provider": "claude",
-          "model": "azuer_ai/sonnet-5-5[1m]",
+          "model": "azure_ai/claude-sonnet-5-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -292,7 +292,7 @@
       "models": [
         {
           "provider": "claude",
-          "model": "azuer_ai/sonnet-5-5[1m]",
+          "model": "azure_ai/claude-sonnet-5-5[1m]",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
@@ -301,7 +301,7 @@
         },
         {
           "provider": "claude",
-          "model": "azuer_ai/haiku-4-5",
+          "model": "azure_ai/claude-haiku-4-5",
           "enabled": true,
           "remainingThreshold": {
             "metric": "quotaRemainingPercent",
